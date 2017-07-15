@@ -10,7 +10,7 @@ void OrderManagement::initUI()
     this->setObjectName("ordermanagement");
 
     QStringList order_header;
-    order_header << tr("订单单号") << tr("录入日期") << tr("业务员") << tr("客户名称")
+    order_header << tr("订单单号") << tr("录入日期") << tr("业务经理") << tr("客户名称")
                  << tr("订单数量") << tr("评审单号") << tr("要求发货日期") << tr("订单状态");
     m_show = new StandardItemModel();
     m_show->setHorizontalHeaderLabels(order_header);
@@ -78,7 +78,7 @@ void OrderManagement::initUI()
     extLayout->addStretch();
 
     QStringList add_items;
-    add_items << tr("订单单号") << tr("录入日期") << tr("业务员") << tr("客户名称")
+    add_items << tr("订单单号") << tr("录入日期") << tr("业务经理") << tr("客户名称")
               << tr("订单数量") << tr("评审单号") << tr("要求发货日期");
     QStringList add_header;
     add_header << tr("项目") << tr("参数");
@@ -194,7 +194,7 @@ void OrderManagement::initData()
         int id   = obj.value("erp_orderscid").toInt();//ID
         QString ordernumber = obj.value("erp_ordernumber").toString();//订单单号
         QString orderdate = obj.value("erp_orderdate").toString();//订单日期
-        QString ordersale = obj.value("erp_ordersale").toString();//业务员
+        QString ordersale = obj.value("erp_ordersale").toString();//业务经理
         QString customer = obj.value("erp_ordercustomer").toString();//客户名称
         int orderquantity = obj.value("erp_orderquantity").toInt();//订单数量
         QString orderreview = obj.value("erp_orderreview").toString();//评审单号

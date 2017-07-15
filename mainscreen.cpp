@@ -64,7 +64,7 @@ void MainScreen::initUI()
     min->setFocusPolicy(Qt::NoFocus);
     min->setIconSize(QSize(25,25));
     min->resize(25,25);
-    connect(min,SIGNAL(clicked(bool)),this,SLOT(hide()));
+    connect(min,SIGNAL(clicked(bool)),this,SLOT(showMinimized()));
 
     QHBoxLayout *title = new QHBoxLayout;
     title->addWidget(icon);
@@ -87,6 +87,8 @@ void MainScreen::initUI()
     title_users->setObjectName("usermanagerment");
     title_roles->setObjectName("rolemanagerment");
     title_order->setObjectName("ordermanagement");
+    title_product->setObjectName("productionmanagement");
+    title_purchase->setObjectName("lackmanagement");
 
     initToolButton(title_order);
     initToolButton(title_product);
@@ -150,6 +152,16 @@ void MainScreen::initUI()
     connect(order,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
     connect(this,SIGNAL(sendMsg(QUrl)),order,SLOT(recvSocket(QUrl)));
     stack->addWidget(order);
+
+    prod = new ProductionManagement(this);
+    connect(prod,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),prod,SLOT(recvSocket(QUrl)));
+    stack->addWidget(prod);
+
+    lack = new LackManagement(this);
+    connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
+    stack->addWidget(lack);
 }
 
 void MainScreen::initUdp()
@@ -228,8 +240,14 @@ void MainScreen::recvSocket(QUrl url)
     } else if (cmd == "orderinfo") {
         url.setUserName("ordermanagement");
         emit sendMsg(url);
-    } else if (cmd == "saleinfo" || cmd == "customerinfo" || cmd == "pmstayinfo") {
+    } else if (cmd == "saleinfo" || cmd == "customerinfo") {
         url.setUserName("ordermanagement");
+        emit sendMsg(url);
+    } else if (cmd == "pdprepinfo" || cmd == "pdplaninfo") {
+        url.setUserName("productionmanagement");
+        emit sendMsg(url);
+    } else if (cmd == "lackinfo") {
+        url.setUserName("lackmanagement");
         emit sendMsg(url);
     } else {
         qDebug() << "recv others" << url.toString();

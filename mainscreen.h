@@ -15,6 +15,8 @@
 #include "usermanagerment.h"
 #include "rolemanagerment.h"
 #include "ordermanagement.h"
+#include "productionmanagement.h"
+#include "lackmanagement.h"
 
 class MainScreen : public QMainWindow
 {
@@ -51,6 +53,8 @@ private:
     UserManagerment *user;
     RoleManagerment *role;
     OrderManagement *order;
+    ProductionManagement *prod;
+    LackManagement *lack;
     int preindex;
 };
 

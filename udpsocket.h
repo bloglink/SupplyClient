@@ -13,6 +13,8 @@
 #include <QUuid>
 #include <QObject>
 #include <QUdpSocket>
+#include <QElapsedTimer>
+#include <QApplication>
 #include <QNetworkInterface>
 
 #define LOCAL_PORT 10000
@@ -35,6 +37,7 @@ private slots:
     void readSocket(void);
     QString getLocalHostIP();
     QString getUid();
+    void Delay(int ms);
 private:
     QHostAddress addr;
     QUrl userinfo;

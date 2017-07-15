@@ -55,6 +55,9 @@ void UdpSocket::sendSocket(QUrl url)
     url.setPath(QString("/%1").arg(getUid()));
     QByteArray msg = url.toString().toUtf8();
     this->writeDatagram(msg, host, port);
+    this->waitForBytesWritten(1000);
+    Delay(100);
+
     qDebug() << "send" << url.toString();
 }
 
@@ -78,5 +81,13 @@ QString UdpSocket::getLocalHostIP()
 QString UdpSocket::getUid()
 {
     return QUuid::createUuid().toString().mid(1,6);
+}
+
+void UdpSocket::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while (t.elapsed() < ms)
+        QCoreApplication::processEvents();
 }
 /*********************************END OF FILE**********************************/

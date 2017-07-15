@@ -36,12 +36,10 @@ QMenu::item{height:35px;padding:0px 25px 0px 20px;
 background:qlineargradient(x1:-1,y1:0,x2:1 y2:0,stop:0 #00D3C5,stop:1 #005270);}
 QMenu::item:selected{background-color:#005270; border-left: 5px solid #00D3C5}
 /*QHeaderView*************************************************************************************/
-QHeaderView::section:checked { background-color: #112233; }
-QHeaderView::section:checked { background-color: white; }
-QHeaderView{ background-color: #005270; }
-QHeaderView::section {background-color: #005270;
-border:none;color:white;font-size:16px;min-height:25px;padding-left:4px;
-border-left:1px solid white;border-bottom:1px solid white;border-top:1px solid white; }
+QHeaderView{color:white;background-color: #005270; }
+QHeaderView::section{background-color: #005270;}
+QHeaderView::section:checked{background-color:#112233;}
+QTableCornerButton::section{background-color:#005270;}
 /*QTreeWidget*************************************************************************************/
 QTreeWidget{border:1px solid #485260;color:white;background-color:#1B7696;}
 QTreeWidget::branch:closed:has-children:!has-siblings,

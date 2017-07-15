@@ -16,7 +16,7 @@ void AboutUsScreen::initUI()
     QLabel *label_info = new QLabel(tr("Faster Easier Stronger Prettier"));
     QLabel *label_author = new QLabel(tr("Author:Zhaonanlin Zhanghongjian"));
     QLabel *label_version = new QLabel(tr("Version:0.0.0.1"), this);
-    QLabel *label_lincence = new QLabel(tr("Lincence: LGPL v3"), this);
+    QLabel *label_lincense = new QLabel(tr("Lincense: LGPL v3"), this);
     QLabel *label_copyright = new QLabel(tr("Copyright 2017-2018 AIP. All rights reserved"), this);
 
     QVBoxLayout *text_layout = new QVBoxLayout;
@@ -25,7 +25,7 @@ void AboutUsScreen::initUI()
     text_layout->addWidget(label_info);
     text_layout->addWidget(label_author);
     text_layout->addWidget(label_version);
-    text_layout->addWidget(label_lincence);
+    text_layout->addWidget(label_lincense);
     text_layout->addWidget(label_copyright);
     text_layout->addStretch();
     text_layout->setSpacing(20);
@@ -39,7 +39,6 @@ void AboutUsScreen::initUI()
 
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->addWidget(about);
-    main_layout->setMargin(0);
 
     this->setLayout(main_layout);
 }
