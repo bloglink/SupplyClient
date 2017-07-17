@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml
+QT       += core gui network xml sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     rolemanagerment.cpp \
     ordermanagement.cpp \
     productionmanagement.cpp \
-    lackmanagement.cpp
+    lackmanagement.cpp \
+    purchasemanagement.cpp
 
 HEADERS  += mainscreen.h \
     loginscreen.h \
@@ -32,7 +33,8 @@ HEADERS  += mainscreen.h \
     rolemanagerment.h \
     ordermanagement.h \
     productionmanagement.h \
-    lackmanagement.h
+    lackmanagement.h \
+    purchasemanagement.h
 
 RESOURCES += \
     source.qrc

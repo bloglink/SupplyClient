@@ -88,7 +88,7 @@ void MainScreen::initUI()
     title_roles->setObjectName("rolemanagerment");
     title_order->setObjectName("ordermanagement");
     title_product->setObjectName("productionmanagement");
-    title_purchase->setObjectName("lackmanagement");
+    title_purchase->setObjectName("purchasemanagement");
 
     initToolButton(title_order);
     initToolButton(title_product);
@@ -162,6 +162,11 @@ void MainScreen::initUI()
     connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
     connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
     stack->addWidget(lack);
+
+    purchase = new PurchaseManagement(this);
+    connect(purchase,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),purchase,SLOT(recvSocket(QUrl)));
+    stack->addWidget(purchase);
 }
 
 void MainScreen::initUdp()
@@ -248,6 +253,9 @@ void MainScreen::recvSocket(QUrl url)
         emit sendMsg(url);
     } else if (cmd == "lackinfo") {
         url.setUserName("lackmanagement");
+        emit sendMsg(url);
+    } else if (cmd == "buyinfo") {
+        url.setUserName("purchasemanagement");
         emit sendMsg(url);
     } else {
         qDebug() << "recv others" << url.toString();

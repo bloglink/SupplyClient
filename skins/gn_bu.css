@@ -91,10 +91,10 @@ QDateEdit::down-arrow{image:url(:/icons/downarrow.png);}
 QScrollBar:vertical {
     width: 10px;
     margin: 0px 0px 0px 0px;
-    background: white;
+    background: rgb(70,97,102);
 }
 QScrollBar::handle:vertical {
-    background: rgb(70,97,102);
+    background: white;
     min-height: 1px;
 }
 

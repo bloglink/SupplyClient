@@ -8,6 +8,7 @@
 #include <QSystemTrayIcon>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
+#include <QSqlTableModel>
 
 #include "udpsocket.h"
 #include "loginscreen.h"
@@ -17,6 +18,7 @@
 #include "ordermanagement.h"
 #include "productionmanagement.h"
 #include "lackmanagement.h"
+#include "purchasemanagement.h"
 
 class MainScreen : public QMainWindow
 {
@@ -55,6 +57,7 @@ private:
     OrderManagement *order;
     ProductionManagement *prod;
     LackManagement *lack;
+    PurchaseManagement *purchase;
     int preindex;
 };
 
