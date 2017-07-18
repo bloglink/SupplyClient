@@ -12,13 +12,15 @@
 
 #include "udpsocket.h"
 #include "loginscreen.h"
-#include "aboutusscreen.h"
-#include "usermanagerment.h"
-#include "rolemanagerment.h"
+#include "AboutPage.h"
+
 #include "ordermanagement.h"
 #include "productionmanagement.h"
 #include "lackmanagement.h"
 #include "purchasemanagement.h"
+
+#include "HumanPage.h"
+#include "erpsql.h"
 
 class MainScreen : public QMainWindow
 {
@@ -52,13 +54,12 @@ private:
     QPoint dragPosition;
     QStackedWidget *stack;
     UdpSocket udp;
-    UserManagerment *user;
-    RoleManagerment *role;
     OrderManagement *order;
     ProductionManagement *prod;
     LackManagement *lack;
     PurchaseManagement *purchase;
     int preindex;
+    HumanPage *human;
 };
 
 #endif // MAINSCREEN_H

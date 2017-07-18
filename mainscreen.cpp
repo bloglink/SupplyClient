@@ -3,6 +3,8 @@
 MainScreen::MainScreen(QWidget *parent)
     : QMainWindow(parent)
 {
+    ErpSql sql;
+    sql.initSql();
     initUI();
     initUdp();
     preindex = 0;
@@ -79,13 +81,11 @@ void MainScreen::initUI()
     QToolButton *title_order = new QToolButton(this);
     QToolButton *title_product = new QToolButton(this);
     QToolButton *title_purchase = new QToolButton(this);
-    QToolButton *title_users = new QToolButton(this);
-    QToolButton *title_roles = new QToolButton(this);
+    QToolButton *title_human = new QToolButton(this);
     QToolButton *title_action = new QToolButton(this);
     QToolButton *title_about = new QToolButton(this);
-    title_about->setObjectName("aboutusscreen");
-    title_users->setObjectName("usermanagerment");
-    title_roles->setObjectName("rolemanagerment");
+    title_about->setObjectName("aboutpage");
+    title_human->setObjectName("humanpage");
     title_order->setObjectName("ordermanagement");
     title_product->setObjectName("productionmanagement");
     title_purchase->setObjectName("purchasemanagement");
@@ -93,8 +93,7 @@ void MainScreen::initUI()
     initToolButton(title_order);
     initToolButton(title_product);
     initToolButton(title_purchase);
-    initToolButton(title_users);
-    initToolButton(title_roles);
+    initToolButton(title_human);
     initToolButton(title_action);
     initToolButton(title_about);
 
@@ -104,10 +103,8 @@ void MainScreen::initUI()
     title_product->setText(tr("生产管理"));
     title_purchase->setIcon(QIcon(":/icons/dollar.png"));
     title_purchase->setText(tr("采购管理"));
-    title_users->setIcon(QIcon(":/icons/user.png"));
-    title_users->setText(tr("用户管理"));
-    title_roles->setIcon(QIcon(":/icons/man.png"));
-    title_roles->setText(tr("角色管理"));
+    title_human->setIcon(QIcon(":/icons/user.png"));
+    title_human->setText(tr("人员管理"));
     title_action->setIcon(QIcon(":/icons/stop.png"));
     title_action->setText(tr("权限管理"));
     title_about->setIcon(QIcon(":/icons/link.ico"));
@@ -117,15 +114,14 @@ void MainScreen::initUI()
     layout->addWidget(title_order);
     layout->addWidget(title_product);
     layout->addWidget(title_purchase);
-    layout->addWidget(title_users);
-    layout->addWidget(title_roles);
+    layout->addWidget(title_human);
     layout->addWidget(title_action);
     layout->addWidget(title_about);
     layout->addStretch();
     layout->setMargin(0);
 
     stack = new QStackedWidget(this);
-    stack->addWidget(new AboutUsScreen(this));
+    stack->addWidget(new AboutPage(this));
 
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->addLayout(title);
@@ -138,15 +134,10 @@ void MainScreen::initUI()
     setCentralWidget(desktop);
     this->resize(1280,900);
 
-    user = new UserManagerment(this);
-    connect(user,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),user,SLOT(recvSocket(QUrl)));
-    stack->addWidget(user);
-
-    role = new RoleManagerment(this);
-    connect(role,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),role,SLOT(recvSocket(QUrl)));
-    stack->addWidget(role);
+    human = new HumanPage(this);
+    connect(human,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),human,SLOT(recvSocket(QUrl)));
+    stack->addWidget(human);
 
     order = new OrderManagement(this);
     connect(order,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));

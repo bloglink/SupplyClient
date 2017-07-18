@@ -1,13 +1,13 @@
-#include "aboutusscreen.h"
+#include "AboutPage.h"
 
-AboutUsScreen::AboutUsScreen(QWidget *parent) : QWidget(parent)
+AboutPage::AboutPage(QWidget *parent) : QWidget(parent)
 {
     initUI();
 }
 
-void AboutUsScreen::initUI()
+void AboutPage::initUI()
 {
-    this->setObjectName("aboutusscreen");
+    this->setObjectName("aboutpage");
     QString style = ".QFrame{border-image:url(:/images/bear.jpg)}";
     style += "QLabel{font:bold 14pt;color:rgb(0,82,112)}";
     this->setStyleSheet(style);

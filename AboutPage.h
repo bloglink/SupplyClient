@@ -6,11 +6,11 @@
 #include <QLayout>
 #include <QMargins>
 
-class AboutUsScreen : public QWidget
+class AboutPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AboutUsScreen(QWidget *parent = 0);
+    explicit AboutPage(QWidget *parent = 0);
 
 signals:
 

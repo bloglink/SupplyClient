@@ -11,6 +11,7 @@
 LoginScreen::LoginScreen(QWidget *parent) : QDialog(parent)
 {
     initUI();
+//    initSql();
     initData();
 }
 
@@ -102,6 +103,18 @@ void LoginScreen::initUI()
     this->setLayout(layout);
 
     this->resize(500,360);
+}
+
+void LoginScreen::initSql()
+{
+    QFile file("erp.db");
+    if (!file.exists()) {
+        file.open(QIODevice::ReadWrite);
+        file.close();
+    }
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("erp.db");
+    db.open();
 }
 
 void LoginScreen::initData()

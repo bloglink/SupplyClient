@@ -2,6 +2,7 @@
 #define CLOGIN_H
 
 #include <QUrl>
+#include <QFile>
 #include <QTimer>
 #include <QDebug>
 #include <QWidget>
@@ -21,6 +22,7 @@
 #include <QListView>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSqlDatabase>
 
 #define SAVE_MAX 5
 
@@ -34,12 +36,14 @@ signals:
     void sendSocket(QUrl url);
 private slots:
     void initUI();
+    void initSql();
     void initData();
     void saveData();
     void login();
     void loginError();
     void recvSocket(QUrl url);
 private:
+    QSqlDatabase db;
     QComboBox *svr;
     QComboBox *prt;
     QComboBox *usr;

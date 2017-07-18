@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QCalendarWidget>
+#include <QSqlTableModel>
 
 //编号列，只读委托
 class ReadOnlyDelegate : public QItemDelegate
@@ -47,6 +48,20 @@ public:
         if( Qt::TextAlignmentRole == role )
             return Qt::AlignCenter;
         return QStandardItemModel::data(index, role);
+    }
+};
+
+//代理类，把所有单元格中的字符居中显示
+class StandardSqlModel : public QSqlTableModel
+{
+    Q_OBJECT
+public:
+    StandardSqlModel(QObject *parent, QSqlDatabase db) : QSqlTableModel(parent,db) { }
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
+    {
+        if( Qt::TextAlignmentRole == role )
+            return Qt::AlignCenter;
+        return QSqlTableModel::data(index, role);
     }
 };
 
@@ -110,7 +125,7 @@ public:
         QDateEdit *editor = new QDateEdit(parent);
         editor->setCalendarPopup(true);
         editor->setDate(QDate::currentDate());
-        editor->setDisplayFormat("yyyyMMdd");
+        editor->setDisplayFormat("yyyy-MM-dd");
         return editor;
     }
     void setEditorData(QWidget *editor, const QModelIndex &index) const
