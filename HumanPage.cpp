@@ -204,7 +204,7 @@ void HumanPage::initUI()
 
 void HumanPage::initSql()
 {
-    db = QSqlDatabase::addDatabase("QSQLITE", "erp_users");
+    db = QSqlDatabase::addDatabase("QSQLITE", "erp_human");
     db.setDatabaseName("erp.db");
     db.open();
     sql_users = new StandardSqlModel(this,db);
@@ -365,10 +365,8 @@ void HumanPage::recvSocket(QUrl url)
 void HumanPage::showEvent(QShowEvent *e)
 {
     QUrl url;
-    url.setQuery("userinfo");
-    sendSocket(url);
+    url.setQuery("salesinfo");
+    emit sendSocket(url);
 
-    url.setQuery("roleinfo");
-    sendSocket(url);
     e->accept();
 }

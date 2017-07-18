@@ -20,6 +20,7 @@
 #include "purchasemanagement.h"
 
 #include "HumanPage.h"
+#include "SalesPage.h"
 #include "erpsql.h"
 
 class MainScreen : public QMainWindow
@@ -60,6 +61,7 @@ private:
     PurchaseManagement *purchase;
     int preindex;
     HumanPage *human;
+    SalesPage *sales;
 };
 
 #endif // MAINSCREEN_H

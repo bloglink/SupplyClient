@@ -182,7 +182,7 @@ void LoginScreen::login()
     emit sendSocket(url);
 
     QTimer *timer = new QTimer(this);
-    timer->singleShot(2000,this,SLOT(loginError()));
+    timer->singleShot(200,this,SLOT(loginError()));
 
     saveData();
 }

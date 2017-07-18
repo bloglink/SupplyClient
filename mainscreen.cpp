@@ -84,8 +84,10 @@ void MainScreen::initUI()
     QToolButton *title_human = new QToolButton(this);
     QToolButton *title_action = new QToolButton(this);
     QToolButton *title_about = new QToolButton(this);
+    QToolButton *title_sales = new QToolButton(this);
     title_about->setObjectName("aboutpage");
     title_human->setObjectName("humanpage");
+    title_sales->setObjectName("SalesPage");
     title_order->setObjectName("ordermanagement");
     title_product->setObjectName("productionmanagement");
     title_purchase->setObjectName("purchasemanagement");
@@ -96,6 +98,7 @@ void MainScreen::initUI()
     initToolButton(title_human);
     initToolButton(title_action);
     initToolButton(title_about);
+    initToolButton(title_sales);
 
     title_order->setIcon(QIcon(":/icons/note.png"));
     title_order->setText(tr("订单管理"));
@@ -109,12 +112,15 @@ void MainScreen::initUI()
     title_action->setText(tr("权限管理"));
     title_about->setIcon(QIcon(":/icons/link.ico"));
     title_about->setText(tr("关于软件"));
+    title_sales->setIcon(QIcon(":/icons/man.png"));
+    title_sales->setText(tr("销售管理"));
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(title_order);
     layout->addWidget(title_product);
     layout->addWidget(title_purchase);
     layout->addWidget(title_human);
+    layout->addWidget(title_sales);
     layout->addWidget(title_action);
     layout->addWidget(title_about);
     layout->addStretch();
@@ -138,6 +144,11 @@ void MainScreen::initUI()
     connect(human,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
     connect(this,SIGNAL(sendMsg(QUrl)),human,SLOT(recvSocket(QUrl)));
     stack->addWidget(human);
+
+    sales = new SalesPage(this);
+    connect(sales,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),sales,SLOT(recvSocket(QUrl)));
+    stack->addWidget(sales);
 
     order = new OrderManagement(this);
     connect(order,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));

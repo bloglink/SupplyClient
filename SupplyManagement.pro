@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     purchasemanagement.cpp \
     erpsql.cpp \
     HumanPage.cpp \
-    AboutPage.cpp
+    AboutPage.cpp \
+    SalesPage.cpp \
+    OrderPage.cpp
 
 HEADERS  += mainscreen.h \
     loginscreen.h \
@@ -34,7 +36,9 @@ HEADERS  += mainscreen.h \
     purchasemanagement.h \
     erpsql.h \
     HumanPage.h \
-    AboutPage.h
+    AboutPage.h \
+    SalesPage.h \
+    OrderPage.h
 
 RESOURCES += \
     source.qrc

@@ -30,5 +30,18 @@ void ErpSql::initSql()
     cmd += "role_name text,";
     cmd += "role_mark text)";
     query.exec(cmd);
+
+    cmd = "create table if not exists erp_customs(";
+    cmd += "custom_id integer primary key,";
+    cmd += "custom_name text,";
+    cmd += "custom_sale text,";
+    cmd += "custom_area text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_sales(";
+    cmd += "sale_id integer primary key,";
+    cmd += "sale_name text,";
+    cmd += "sale_area text)";
+    query.exec(cmd);
 }
 
