@@ -8,7 +8,7 @@ HumanPage::HumanPage(QWidget *parent) : QWidget(parent)
 
 void HumanPage::initUI()
 {
-    this->setObjectName("humanpage");
+    this->setObjectName("HumanPage");
     tab_users = new QTableView(this);
     tab_users->setItemDelegate(new ReadOnlyDelegate);
     tab_users->horizontalHeader()->setHighlightSections(false);

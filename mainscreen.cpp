@@ -86,9 +86,9 @@ void MainScreen::initUI()
     QToolButton *title_about = new QToolButton(this);
     QToolButton *title_sales = new QToolButton(this);
     title_about->setObjectName("aboutpage");
-    title_human->setObjectName("humanpage");
+    title_human->setObjectName("HumanPage");
     title_sales->setObjectName("SalesPage");
-    title_order->setObjectName("ordermanagement");
+    title_order->setObjectName("OrderPage");
     title_product->setObjectName("productionmanagement");
     title_purchase->setObjectName("purchasemanagement");
 
@@ -150,7 +150,7 @@ void MainScreen::initUI()
     connect(this,SIGNAL(sendMsg(QUrl)),sales,SLOT(recvSocket(QUrl)));
     stack->addWidget(sales);
 
-    order = new OrderManagement(this);
+    order = new OrderPage(this);
     connect(order,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
     connect(this,SIGNAL(sendMsg(QUrl)),order,SLOT(recvSocket(QUrl)));
     stack->addWidget(order);

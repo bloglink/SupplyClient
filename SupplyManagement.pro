@@ -16,7 +16,6 @@ SOURCES += main.cpp\
         mainscreen.cpp \
     loginscreen.cpp \
     udpsocket.cpp \
-    ordermanagement.cpp \
     productionmanagement.cpp \
     lackmanagement.cpp \
     purchasemanagement.cpp \
@@ -24,13 +23,13 @@ SOURCES += main.cpp\
     HumanPage.cpp \
     AboutPage.cpp \
     SalesPage.cpp \
-    OrderPage.cpp
+    OrderPage.cpp \
+    ProdPage.cpp
 
 HEADERS  += mainscreen.h \
     loginscreen.h \
     udpsocket.h \
     delegate.h \
-    ordermanagement.h \
     productionmanagement.h \
     lackmanagement.h \
     purchasemanagement.h \
@@ -38,7 +37,8 @@ HEADERS  += mainscreen.h \
     HumanPage.h \
     AboutPage.h \
     SalesPage.h \
-    OrderPage.h
+    OrderPage.h \
+    ProdPage.h
 
 RESOURCES += \
     source.qrc

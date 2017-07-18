@@ -15,6 +15,11 @@ LoginScreen::LoginScreen(QWidget *parent) : QDialog(parent)
     initData();
 }
 
+LoginScreen::~LoginScreen()
+{
+
+}
+
 void LoginScreen::initUI()
 {
     this->setObjectName("loginscreen");

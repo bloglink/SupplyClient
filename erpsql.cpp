@@ -12,7 +12,7 @@ void ErpSql::initSql()
         file.open(QIODevice::ReadWrite);
         file.close();
     }
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE","login");
     db.setDatabaseName("erp.db");
     db.open();
 
@@ -42,6 +42,20 @@ void ErpSql::initSql()
     cmd += "sale_id integer primary key,";
     cmd += "sale_name text,";
     cmd += "sale_area text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_orders(";
+    cmd += "order_id integer primary key,";
+    cmd += "order_number text,";
+    cmd += "order_custom text,";
+    cmd += "order_sale text,";
+    cmd += "order_area text,";
+    cmd += "order_quantity text,";
+    cmd += "order_date text,";
+    cmd += "order_stock text,";
+    cmd += "order_produce text,";
+    cmd += "order_lack text,";
+    cmd += "order_delivery text)";
     query.exec(cmd);
 }
 

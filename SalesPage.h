@@ -35,6 +35,7 @@ class SalesPage : public QWidget
     Q_OBJECT
 public:
     explicit SalesPage(QWidget *parent = 0);
+    ~SalesPage();
 
 signals:
     void sendSocket(QUrl url);

@@ -1,5 +1,5 @@
-#ifndef HRMPAGE_H
-#define HRMPAGE_H
+#ifndef HUMANPAGE_H
+#define HUMANPAGE_H
 
 #include <QDebug>
 #include <QLayout>
@@ -74,4 +74,4 @@ private:
     ComboBoxDelegate *role_delegate;
 };
 
-#endif // HRMPAGE_H
+#endif // HUMANPAGE_H

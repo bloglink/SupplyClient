@@ -31,6 +31,7 @@ class LoginScreen : public QDialog
     Q_OBJECT
 public:
     explicit LoginScreen(QWidget *parent = 0);
+    ~LoginScreen();
 
 signals:
     void sendSocket(QUrl url);

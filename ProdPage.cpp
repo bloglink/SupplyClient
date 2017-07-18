@@ -1,19 +1,20 @@
-#include "OrderPage.h"
+#include "ProdPage.h"
 
-OrderPage::OrderPage(QWidget *parent) : QWidget(parent)
+ProdPage::ProdPage(QWidget *parent) : QWidget(parent)
 {
     initUI();
     initSql();
 }
 
-OrderPage::~OrderPage()
+
+ProdPage::~ProdPage()
 {
     db.close();
 }
 
-void OrderPage::initUI()
+void ProdPage::initUI()
 {
-    this->setObjectName("OrderPage");
+    this->setObjectName("ProdPage");
 
     tab_order = new QTableView(this);
     tab_order->setItemDelegate(new ReadOnlyDelegate);
@@ -115,7 +116,7 @@ void OrderPage::initUI()
     this->setLayout(mainLayout);
 }
 
-void OrderPage::initSql()
+void ProdPage::initSql()
 {
     db = QSqlDatabase::addDatabase("QSQLITE", "erp_orders");
     db.setDatabaseName("erp.db");
@@ -151,7 +152,7 @@ void OrderPage::initSql()
     sql_sales->select();
 
 }
-void OrderPage::showTabOrder()
+void ProdPage::showTabOrder()
 {
     if (wiOrders->isHidden()) {
         wiOrders->show();
@@ -179,7 +180,7 @@ void OrderPage::showTabOrder()
     autoNumber();
 }
 
-void OrderPage::autoNumber()
+void ProdPage::autoNumber()
 {
     QString dat = QDate::currentDate().toString("yyyyMMdd");
     int max = 0;
@@ -195,12 +196,12 @@ void OrderPage::autoNumber()
     m_order->item(ORDER_NUMBER,1)->setText(odds);
 }
 
-void OrderPage::initData()
+void ProdPage::initData()
 {
 
 }
 
-void OrderPage::addOrder()
+void ProdPage::addOrder()
 {
     autoNumber();
     int row = sql_order->rowCount();
@@ -210,7 +211,7 @@ void OrderPage::addOrder()
     sql_order->submitAll();
 }
 
-void OrderPage::delOrder()
+void ProdPage::delOrder()
 {
     int row = tab_order->currentIndex().row();
     sql_order->removeRow(row);
@@ -218,7 +219,7 @@ void OrderPage::delOrder()
     sql_order->select();
 }
 
-void OrderPage::uptOrder()
+void ProdPage::uptOrder()
 {
     int row = tab_order->currentIndex().row();
     for (int i=1; i < m_order->rowCount(); i++)
@@ -226,12 +227,12 @@ void OrderPage::uptOrder()
     sql_order->submitAll();
 }
 
-void OrderPage::sndOrder()
+void ProdPage::sndOrder()
 {
     sql_order->select();
 }
 
-void OrderPage::tabSync(QModelIndex index)
+void ProdPage::tabSync(QModelIndex index)
 {
     int row = index.row();
     for (int i=0; i < m_order->rowCount(); i++) {
@@ -239,11 +240,11 @@ void OrderPage::tabSync(QModelIndex index)
     }
 }
 
-void OrderPage::recvSocket(QUrl url)
+void ProdPage::recvSocket(QUrl url)
 {
     QString cmd = url.query();
     QString usr = url.userName();
-    if (usr != "OrderPage")
+    if (usr != "ProdPage")
         return;
     QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
     if (cmd == "orderinfo") {
@@ -274,7 +275,7 @@ void OrderPage::recvSocket(QUrl url)
 
 
 
-void OrderPage::showSnd()
+void ProdPage::showSnd()
 {
     if (wiOrders->isHidden() && w_snd->isHidden()) {
         w_snd->show();
@@ -288,7 +289,7 @@ void OrderPage::showSnd()
     }
 }
 
-void OrderPage::refresh()
+void ProdPage::refresh()
 {
     m_show->setRowCount(0);
     QUrl url;
@@ -301,7 +302,7 @@ void OrderPage::refresh()
     emit sendSocket(url);
 }
 
-void OrderPage::showEvent(QShowEvent *e)
+void ProdPage::showEvent(QShowEvent *e)
 {
     //    refresh();
     e->accept();

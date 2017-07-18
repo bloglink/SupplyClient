@@ -1,5 +1,5 @@
-#ifndef ORDERPAGE_H
-#define ORDERPAGE_H
+#ifndef PRODPAGE_H
+#define PRODPAGE_H
 
 #include <QDate>
 #include <QDebug>
@@ -31,12 +31,12 @@
 #define ORDER_LACK 9
 #define ORDER_DELIVERY 10
 
-class OrderPage : public QWidget
+class ProdPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit OrderPage(QWidget *parent = 0);
-    ~OrderPage();
+    explicit ProdPage(QWidget *parent = 0);
+    ~ProdPage();
 
 signals:
     void sendSocket(QUrl url);
@@ -97,4 +97,4 @@ private:
     ComboBoxDelegate *customer;
 };
 
-#endif // ORDERPAGE_H
+#endif // PRODPAGE_H

@@ -6,6 +6,11 @@ SalesPage::SalesPage(QWidget *parent) : QWidget(parent)
     initSql();
 }
 
+SalesPage::~SalesPage()
+{
+    db.close();
+}
+
 
 void SalesPage::initUI()
 {
