@@ -7,7 +7,7 @@ AboutPage::AboutPage(QWidget *parent) : QWidget(parent)
 
 void AboutPage::initUI()
 {
-    this->setObjectName("aboutpage");
+    this->setObjectName("AboutPage");
     QString style = ".QFrame{border-image:url(:/images/bear.jpg)}";
     style += "QLabel{font:bold 14pt;color:rgb(0,82,112)}";
     this->setStyleSheet(style);

@@ -14,31 +14,27 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainscreen.cpp \
-    loginscreen.cpp \
     udpsocket.cpp \
     lackmanagement.cpp \
-    purchasemanagement.cpp \
-    erpsql.cpp \
     HumanPage.cpp \
     AboutPage.cpp \
     SalesPage.cpp \
     OrderPage.cpp \
     ProdsPage.cpp \
-    PurchPage.cpp
+    PurchPage.cpp \
+    LoginPage.cpp
 
 HEADERS  += mainscreen.h \
-    loginscreen.h \
     udpsocket.h \
     delegate.h \
     lackmanagement.h \
-    purchasemanagement.h \
-    erpsql.h \
     HumanPage.h \
     AboutPage.h \
     SalesPage.h \
     OrderPage.h \
     ProdsPage.h \
-    PurchPage.h
+    PurchPage.h \
+    LoginPage.h
 
 RESOURCES += \
     source.qrc

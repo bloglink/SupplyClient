@@ -6,23 +6,31 @@
  * author:      zhaonanlin
  * brief:       供应链管理系统登录界面
 *******************************************************************************/
-#include "loginscreen.h"
+#include "LoginPage.h"
 
-LoginScreen::LoginScreen(QWidget *parent) : QDialog(parent)
+LoginPage::LoginPage(QWidget *parent) : QDialog(parent)
 {
     initUI();
-//    initSql();
+    initSql();
     initData();
 }
 
-LoginScreen::~LoginScreen()
+LoginPage::~LoginPage()
 {
 
 }
 
-void LoginScreen::initUI()
+void LoginPage::initUI()
 {
-    this->setObjectName("loginscreen");
+    //设置界面风格
+    QFile file;
+    QString qss;
+    file.setFileName(":/skins/gn_bu.css");
+    file.open(QFile::ReadOnly);
+    qss = QLatin1String(file.readAll());
+    qApp->setStyleSheet(qss);
+
+    this->setObjectName("LoginPage");
     this->setWindowFlags(Qt::FramelessWindowHint);
 
     QLabel *icon  = new QLabel(this);
@@ -69,35 +77,35 @@ void LoginScreen::initUI()
     pwd->setMinimumHeight(35);
     pwd->setEchoMode(QLineEdit::Password);
 
-    QPushButton *lgn = new QPushButton(this);
-    lgn->setText(tr("登录"));
-    lgn->setMinimumHeight(35);
-    lgn->setFocusPolicy(Qt::NoFocus);
-    connect(lgn,SIGNAL(clicked(bool)),this,SLOT(login()));
+    QPushButton *btn_login = new QPushButton(this);
+    btn_login->setText(tr("登录"));
+    btn_login->setMinimumHeight(35);
+    btn_login->setFocusPolicy(Qt::NoFocus);
+    connect(btn_login,SIGNAL(clicked(bool)),this,SLOT(login()));
 
-    QPushButton *cls = new QPushButton(this);
-    cls->setText(tr("退出"));
-    cls->setMinimumHeight(35);
-    cls->setFocusPolicy(Qt::NoFocus);
-    connect(cls,SIGNAL(clicked(bool)),this,SLOT(close()));
+    QPushButton *btn_close = new QPushButton(this);
+    btn_close->setText(tr("退出"));
+    btn_close->setMinimumHeight(35);
+    btn_close->setFocusPolicy(Qt::NoFocus);
+    connect(btn_close,SIGNAL(clicked(bool)),this,SLOT(close()));
 
-    QGridLayout *btn = new QGridLayout;
-    btn->addWidget(new QLabel(tr("服务器:")),0,0);
-    btn->addWidget(new QLabel(tr("端  口:")),1,0);
-    btn->addWidget(new QLabel(tr("操作员:")),2,0);
-    btn->addWidget(new QLabel(tr("密  码:")),3,0);
-    btn->addWidget(svr,0,1);
-    btn->addWidget(prt,1,1);
-    btn->addWidget(usr,2,1);
-    btn->addWidget(pwd,3,1);
-    btn->addWidget(lgn,2,2);
-    btn->addWidget(cls,3,2);
-    btn->setColumnStretch(0,1);
-    btn->setColumnStretch(1,2);
-    btn->setColumnStretch(2,1);
+    QGridLayout *btnsLayout = new QGridLayout;
+    btnsLayout->addWidget(new QLabel(tr("服务器:")),0,0);
+    btnsLayout->addWidget(new QLabel(tr("端  口:")),1,0);
+    btnsLayout->addWidget(new QLabel(tr("操作员:")),2,0);
+    btnsLayout->addWidget(new QLabel(tr("密  码:")),3,0);
+    btnsLayout->addWidget(svr,0,1);
+    btnsLayout->addWidget(prt,1,1);
+    btnsLayout->addWidget(usr,2,1);
+    btnsLayout->addWidget(pwd,3,1);
+    btnsLayout->addWidget(btn_login,2,2);
+    btnsLayout->addWidget(btn_close,3,2);
+    btnsLayout->setColumnStretch(0,1);
+    btnsLayout->setColumnStretch(1,2);
+    btnsLayout->setColumnStretch(2,1);
 
     QGroupBox *group = new QGroupBox(this);
-    group->setLayout(btn);
+    group->setLayout(btnsLayout);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addLayout(title);
@@ -110,19 +118,99 @@ void LoginScreen::initUI()
     this->resize(500,360);
 }
 
-void LoginScreen::initSql()
+void LoginPage::initSql()
 {
     QFile file("erp.db");
     if (!file.exists()) {
         file.open(QIODevice::ReadWrite);
         file.close();
     }
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE","login");
     db.setDatabaseName("erp.db");
     db.open();
+
+    QSqlQuery query(db);
+    QString cmd = "create table if not exists erp_users(";
+    cmd += "user_id integer primary key,";
+    cmd += "user_name text,";
+    cmd += "user_password text,";
+    cmd += "user_role text,";
+    cmd += "user_date text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_roles(";
+    cmd += "role_id integer primary key,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_customs(";
+    cmd += "custom_id integer primary key,";
+    cmd += "custom_name text,";
+    cmd += "custom_sale text,";
+    cmd += "custom_area text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_sales(";
+    cmd += "sale_id integer primary key,";
+    cmd += "sale_name text,";
+    cmd += "sale_area text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_orders(";
+    cmd += "order_id integer primary key,";
+    cmd += "order_numb text,";
+    cmd += "order_date text,";
+    cmd += "order_view text,";
+    cmd += "order_cust text,";
+    cmd += "order_sale text,";
+    cmd += "order_area text,";
+    cmd += "order_dead text,";
+    cmd += "order_quan text,";
+    cmd += "order_stck text,";
+    cmd += "order_prod text,";
+    cmd += "order_lack text,";
+    cmd += "order_dnum text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_prods(";
+    cmd += "prod_id integer primary key,";
+    cmd += "prod_numb text,";
+    cmd += "prod_date text,";
+    cmd += "prod_view text,";
+    cmd += "prod_cust text,";
+    cmd += "prod_sale text,";
+    cmd += "prod_area text,";
+    cmd += "prod_dead text,";
+    cmd += "prod_need text,";
+    cmd += "prod_quan text,";
+    cmd += "prod_pnum text,";
+    cmd += "prod_type text,";
+    cmd += "prod_code text,";
+    cmd += "prod_name text,";
+    cmd += "prod_mode text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_purchs(";
+    cmd += "purch_id integer primary key,";
+    cmd += "purch_numb text,";
+    cmd += "purch_code text,";
+    cmd += "purch_name text,";
+    cmd += "purch_unit text,";
+    cmd += "purch_lack text,";
+    cmd += "purch_quan text,";
+    cmd += "purch_date text,";
+    cmd += "purch_bout text,";
+    cmd += "purch_expt text,";
+    cmd += "purch_real text,";
+    cmd += "purch_come text,";
+    cmd += "purch_oway text,";
+    cmd += "purch_ofix text,";
+    cmd += "purch_mark text)";
+    query.exec(cmd);
 }
 
-void LoginScreen::initData()
+void LoginPage::initData()
 {
     ini = new QSettings("conf.ini", QSettings::IniFormat);
     ini->setIniCodec("GB18030");
@@ -132,7 +220,7 @@ void LoginScreen::initData()
     QByteArray save_svr = ini->value("svr", byte_svr.toBase64()).toByteArray();
     QByteArray byte_prt = "10000";
     QByteArray save_prt = ini->value("prt", byte_prt.toBase64()).toByteArray();
-    QByteArray byte_usr = "root";
+    QByteArray byte_usr = "admin";
     QByteArray save_usr = ini->value("usr", byte_usr.toBase64()).toByteArray();
     items = QString(QByteArray::fromBase64(save_svr)).split("@");
     svr->addItems(items);
@@ -142,7 +230,7 @@ void LoginScreen::initData()
     usr->addItems(items);
 }
 
-void LoginScreen::saveData()
+void LoginPage::saveData()
 {
     QStringList items;
     for (int i=0; i < svr->count(); i++)
@@ -176,7 +264,7 @@ void LoginScreen::saveData()
     items.clear();
 }
 
-void LoginScreen::login()
+void LoginPage::login()
 {
     QUrl url;
     url.setUserName(usr->currentText());
@@ -192,14 +280,14 @@ void LoginScreen::login()
     saveData();
 }
 
-void LoginScreen::loginError()
+void LoginPage::loginError()
 {
     QMessageBox::warning(this,"",tr("登录超时"));
     QTimer *timer = new QTimer(this);
     timer->singleShot(100,this,SLOT(accept()));
 }
 
-void LoginScreen::recvSocket(QUrl url)
+void LoginPage::recvSocket(QUrl url)
 {
     QString cmd = url.query();
     QString usr = url.userName();

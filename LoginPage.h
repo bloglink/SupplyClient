@@ -5,33 +5,31 @@
 #include <QFile>
 #include <QTimer>
 #include <QDebug>
-#include <QWidget>
-#include <QDialog>
-#include <QMenu>
-#include <QWidget>
 #include <QLabel>
 #include <QLayout>
-#include <QToolButton>
-#include <QComboBox>
-#include <QPushButton>
-#include <QGroupBox>
-#include <QSizePolicy>
-
-#include <QLineEdit>
-#include <QAbstractItemView>
+#include <QWidget>
+#include <QDialog>
 #include <QListView>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QToolButton>
+#include <QPushButton>
 #include <QMessageBox>
-#include <QSettings>
+#include <QSizePolicy>
+#include <QApplication>
 #include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSettings>
 
 #define SAVE_MAX 5
 
-class LoginScreen : public QDialog
+class LoginPage : public QDialog
 {
     Q_OBJECT
 public:
-    explicit LoginScreen(QWidget *parent = 0);
-    ~LoginScreen();
+    explicit LoginPage(QWidget *parent = 0);
+    ~LoginPage();
 
 signals:
     void sendSocket(QUrl url);

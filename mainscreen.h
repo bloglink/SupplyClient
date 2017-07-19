@@ -11,18 +11,14 @@
 #include <QSqlTableModel>
 
 #include "udpsocket.h"
-#include "loginscreen.h"
+
+#include "LoginPage.h"
 #include "AboutPage.h"
-
-#include "lackmanagement.h"
-#include "purchasemanagement.h"
-
 #include "HumanPage.h"
 #include "SalesPage.h"
 #include "OrderPage.h"
 #include "ProdsPage.h"
 #include "PurchPage.h"
-#include "erpsql.h"
 
 class MainScreen : public QMainWindow
 {
@@ -56,7 +52,6 @@ private:
     QPoint dragPosition;
     QStackedWidget *stack;
     UdpSocket udp;
-    LackManagement *lack;
     int preindex;
     HumanPage *human;
     SalesPage *sales;

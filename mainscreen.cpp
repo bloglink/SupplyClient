@@ -3,10 +3,6 @@
 MainScreen::MainScreen(QWidget *parent)
     : QMainWindow(parent)
 {
-    ErpSql sql;
-    sql.initSql();
-    initUI();
-    initUdp();
     preindex = 0;
 }
 
@@ -17,23 +13,18 @@ MainScreen::~MainScreen()
 
 int MainScreen::login()
 {
-    LoginScreen w;
-    connect(&w,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),&w,SLOT(recvSocket(QUrl)));
-    return w.exec();
+    LoginPage login;
+    connect(&login,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),&login,SLOT(recvSocket(QUrl)));
+    initUdp();
+    int ret = login.exec();
+    initUI();
+    return ret;
 }
 
 void MainScreen::initUI()
 {
     this->setWindowFlags(Qt::FramelessWindowHint);
-
-    //设置界面风格
-    QFile file;
-    QString qss;
-    file.setFileName(":/skins/gn_bu.css");
-    file.open(QFile::ReadOnly);
-    qss = QLatin1String(file.readAll());
-    qApp->setStyleSheet(qss);
 
     QApplication::setOrganizationName("AIP");
     QApplication::setApplicationName("QFramer");
@@ -82,10 +73,10 @@ void MainScreen::initUI()
     QToolButton *title_prods = new QToolButton(this);
     QToolButton *title_purch = new QToolButton(this);
     QToolButton *title_human = new QToolButton(this);
-    QToolButton *title_action = new QToolButton(this);
     QToolButton *title_about = new QToolButton(this);
     QToolButton *title_sales = new QToolButton(this);
-    title_about->setObjectName("aboutpage");
+    QToolButton *title_action = new QToolButton(this);
+    title_about->setObjectName("AboutPage");
     title_human->setObjectName("HumanPage");
     title_sales->setObjectName("SalesPage");
     title_order->setObjectName("OrderPage");
@@ -160,10 +151,10 @@ void MainScreen::initUI()
     connect(this,SIGNAL(sendMsg(QUrl)),prods,SLOT(recvSocket(QUrl)));
     stack->addWidget(prods);
 
-    lack = new LackManagement(this);
-    connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
-    stack->addWidget(lack);
+//    lack = new LackManagement(this);
+//    connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+//    connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
+//    stack->addWidget(lack);
 
     purch = new PurchPage(this);
     connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
