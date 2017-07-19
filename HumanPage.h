@@ -36,6 +36,7 @@ class HumanPage : public QWidget
     Q_OBJECT
 public:
     explicit HumanPage(QWidget *parent = 0);
+    ~HumanPage();
 
 signals:
     void sendSocket(QUrl url);
@@ -47,14 +48,14 @@ private slots:
     void showTabRole();
     void tabUserSync(QModelIndex index);
     void tabRoleSync(QModelIndex index);
-    void addUser();
-    void delUser();
-    void uptUser();
-    void sndUser();
-    void addRole();
-    void delRole();
-    void uptRole();
-    void sndRole();
+    void appendUser();
+    void deleteUser();
+    void changeUser();
+    void updateUser();
+    void appendRole();
+    void deleteRole();
+    void changeRole();
+    void updateRole();
     void recvSocket(QUrl url);
     virtual void showEvent(QShowEvent *e);
 private:

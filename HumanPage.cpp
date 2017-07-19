@@ -6,6 +6,11 @@ HumanPage::HumanPage(QWidget *parent) : QWidget(parent)
     initSql();
 }
 
+HumanPage::~HumanPage()
+{
+    db.close();
+}
+
 void HumanPage::initUI()
 {
     this->setObjectName("HumanPage");
@@ -20,7 +25,7 @@ void HumanPage::initUI()
     user_snd->setMinimumSize(97,44);
     user_snd->setText(tr("刷新显示"));
     user_snd->setFocusPolicy(Qt::NoFocus);
-    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(sndUser()));
+    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(updateUser()));
 
     QGridLayout *susrLayout = new QGridLayout;
     susrLayout->addWidget(tab_users,0,0,1,2);
@@ -64,19 +69,19 @@ void HumanPage::initUI()
     user_add->setMinimumSize(97,44);
     user_add->setText(tr("添加用户"));
     user_add->setFocusPolicy(Qt::NoFocus);
-    connect(user_add,SIGNAL(clicked(bool)),this,SLOT(addUser()));
+    connect(user_add,SIGNAL(clicked(bool)),this,SLOT(appendUser()));
     QPushButton *user_del = new QPushButton(this);
     user_del->setFlat(true);
     user_del->setMinimumSize(97,44);
     user_del->setText(tr("删除用户"));
     user_del->setFocusPolicy(Qt::NoFocus);
-    connect(user_del,SIGNAL(clicked(bool)),this,SLOT(delUser()));
+    connect(user_del,SIGNAL(clicked(bool)),this,SLOT(deleteUser()));
     QPushButton *user_upt = new QPushButton(this);
     user_upt->setFlat(true);
     user_upt->setMinimumSize(97,44);
     user_upt->setText(tr("修改用户"));
     user_upt->setFocusPolicy(Qt::NoFocus);
-    connect(user_upt,SIGNAL(clicked(bool)),this,SLOT(uptUser()));
+    connect(user_upt,SIGNAL(clicked(bool)),this,SLOT(changeUser()));
 
     QGridLayout *iuserLayout = new QGridLayout;
     iuserLayout->addWidget(tab_iuser,0,0,1,4);
@@ -112,7 +117,7 @@ void HumanPage::initUI()
     role_snd->setMinimumSize(97,44);
     role_snd->setText(tr("刷新显示"));
     role_snd->setFocusPolicy(Qt::NoFocus);
-    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(sndRole()));
+    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(updateRole()));
 
     QGridLayout *sroleLayout = new QGridLayout;
     sroleLayout->addWidget(tab_roles,0,0,1,2);
@@ -151,19 +156,19 @@ void HumanPage::initUI()
     role_add->setMinimumSize(97,44);
     role_add->setText(tr("添加角色"));
     role_add->setFocusPolicy(Qt::NoFocus);
-    connect(role_add,SIGNAL(clicked(bool)),this,SLOT(addRole()));
+    connect(role_add,SIGNAL(clicked(bool)),this,SLOT(appendRole()));
     QPushButton *role_del = new QPushButton(this);
     role_del->setFlat(true);
     role_del->setMinimumSize(97,44);
     role_del->setText(tr("删除角色"));
     role_del->setFocusPolicy(Qt::NoFocus);
-    connect(role_del,SIGNAL(clicked(bool)),this,SLOT(delRole()));
+    connect(role_del,SIGNAL(clicked(bool)),this,SLOT(deleteRole()));
     QPushButton *role_upt = new QPushButton(this);
     role_upt->setFlat(true);
     role_upt->setMinimumSize(97,44);
     role_upt->setText(tr("修改角色"));
     role_upt->setFocusPolicy(Qt::NoFocus);
-    connect(role_upt,SIGNAL(clicked(bool)),this,SLOT(uptRole()));
+    connect(role_upt,SIGNAL(clicked(bool)),this,SLOT(changeRole()));
 
     QGridLayout *iroleLayout = new QGridLayout;
     iroleLayout->addWidget(tab_irole,0,0,1,4);
@@ -284,7 +289,7 @@ void HumanPage::tabRoleSync(QModelIndex index)
     }
 }
 
-void HumanPage::addUser()
+void HumanPage::appendUser()
 {
     int row = sql_users->rowCount();
     sql_users->insertRow(row);
@@ -293,7 +298,7 @@ void HumanPage::addUser()
     sql_users->submitAll();
 }
 
-void HumanPage::delUser()
+void HumanPage::deleteUser()
 {
     int row = tab_users->currentIndex().row();
     sql_users->removeRow(row);
@@ -301,7 +306,7 @@ void HumanPage::delUser()
     sql_users->select();
 }
 
-void HumanPage::uptUser()
+void HumanPage::changeUser()
 {
     int row = tab_users->currentIndex().row();
     for (int i=1; i < m_users->rowCount(); i++)
@@ -309,12 +314,12 @@ void HumanPage::uptUser()
     sql_users->submitAll();
 }
 
-void HumanPage::sndUser()
+void HumanPage::updateUser()
 {
     sql_users->select();
 }
 
-void HumanPage::addRole()
+void HumanPage::appendRole()
 {
     int row = sql_roles->rowCount();
     sql_roles->insertRow(row);
@@ -323,7 +328,7 @@ void HumanPage::addRole()
     sql_roles->submitAll();
 }
 
-void HumanPage::delRole()
+void HumanPage::deleteRole()
 {
     int row = tab_roles->currentIndex().row();
     sql_roles->removeRow(row);
@@ -331,7 +336,7 @@ void HumanPage::delRole()
     sql_roles->select();
 }
 
-void HumanPage::uptRole()
+void HumanPage::changeRole()
 {
     int row = tab_roles->currentIndex().row();
     for (int i=1; i < m_roles->rowCount(); i++)
@@ -339,7 +344,7 @@ void HumanPage::uptRole()
     sql_roles->submitAll();
 }
 
-void HumanPage::sndRole()
+void HumanPage::updateRole()
 {
     sql_roles->select();
 }
@@ -364,9 +369,5 @@ void HumanPage::recvSocket(QUrl url)
 
 void HumanPage::showEvent(QShowEvent *e)
 {
-    QUrl url;
-    url.setQuery("salesinfo");
-    emit sendSocket(url);
-
     e->accept();
 }

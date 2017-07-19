@@ -15,116 +15,116 @@ SalesPage::~SalesPage()
 void SalesPage::initUI()
 {
     this->setObjectName("SalesPage");
-    tab_customs = new QTableView(this);
-    tab_customs->setItemDelegate(new ReadOnlyDelegate);
-    tab_customs->horizontalHeader()->setHighlightSections(false);
-    tab_customs->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(tab_customs,SIGNAL(clicked(QModelIndex)),this,SLOT(tabUserSync(QModelIndex)));
 
-    QPushButton *user_snd = new QPushButton(this);
-    user_snd->setFlat(true);
-    user_snd->setMinimumSize(97,44);
-    user_snd->setText(tr("刷新显示"));
-    user_snd->setFocusPolicy(Qt::NoFocus);
-    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(sndUser()));
+    tab_custs = new QTableView(this);
+    tab_custs->setItemDelegate(new ReadOnlyDelegate);
+    tab_custs->horizontalHeader()->setHighlightSections(false);
+    tab_custs->setSelectionBehavior(QAbstractItemView::SelectRows);
+    connect(tab_custs,SIGNAL(clicked(QModelIndex)),this,SLOT(tabCustSync(QModelIndex)));
 
-    QGridLayout *susrLayout = new QGridLayout;
-    susrLayout->addWidget(tab_customs,0,0,1,2);
-    susrLayout->addWidget(user_snd,1,1);
-    susrLayout->setColumnStretch(0,1);
+    QPushButton *cust_update = new QPushButton(this);
+    cust_update->setFlat(true);
+    cust_update->setMinimumSize(97,44);
+    cust_update->setText(tr("刷新显示"));
+    cust_update->setFocusPolicy(Qt::NoFocus);
+    connect(cust_update,SIGNAL(clicked(bool)),this,SLOT(updateCust()));
 
-    btn_customs = new QToolButton(this);//显示订单
-    btn_customs->setIcon(QIcon(":/icons/left.png"));
-    btn_customs->setIconSize(QSize(30,30));
-    btn_customs->setFocusPolicy(Qt::NoFocus);
-    btn_customs->setText(tr("客\n户\n管\n理"));
-    btn_customs->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    connect(btn_customs,SIGNAL(clicked(bool)),this,SLOT(showTabUser()));
+    QGridLayout *scustLayout = new QGridLayout;
+    scustLayout->addWidget(tab_custs,0,0,1,2);
+    scustLayout->addWidget(cust_update,1,1);
+    scustLayout->setColumnStretch(0,1);
 
-    QVBoxLayout *ubtnLayout = new QVBoxLayout;
-    ubtnLayout->addWidget(btn_customs);
-    ubtnLayout->addStretch();
+    btn_custs = new QToolButton(this);
+    btn_custs->setIcon(QIcon(":/icons/left.png"));
+    btn_custs->setIconSize(QSize(30,30));
+    btn_custs->setFocusPolicy(Qt::NoFocus);
+    btn_custs->setText(tr("客\n户\n管\n理"));
+    btn_custs->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    connect(btn_custs,SIGNAL(clicked(bool)),this,SLOT(showTabCust()));
 
-    QStringList add_items;
-    add_items << tr("编号") << tr("名称") << tr("销售") << tr("区域");
-    m_customs = new StandardItemModel();
-    QStringList users_header;
-    users_header << tr("项目") << tr("参数");
-    m_customs->setHorizontalHeaderLabels(users_header);
-    for (int i=0; i < add_items.size(); i++) {
-        m_customs->setItem(i,0,new QStandardItem(add_items.at(i)));
-        m_customs->setItem(i,1,new QStandardItem(""));
+    QVBoxLayout *ubtnsLayout = new QVBoxLayout;
+    ubtnsLayout->addWidget(btn_custs);
+    ubtnsLayout->addStretch();
+
+    cust_items << tr("编号") << tr("名称") << tr("销售") << tr("区域");
+    m_custs = new StandardItemModel();
+    QStringList cust_header;
+    cust_header << tr("项目") << tr("参数");
+    m_custs->setHorizontalHeaderLabels(cust_header);
+    for (int i=0; i < cust_items.size(); i++) {
+        m_custs->setItem(i,0,new QStandardItem(cust_items.at(i)));
+        m_custs->setItem(i,1,new QStandardItem(""));
     }
     area_delegate = new ComboBoxDelegate(this);
     sale_delegate = new ComboBoxDelegate(this);
-    tab_icustom = new QTableView(this);
-    tab_icustom->setModel(m_customs);
-    tab_icustom->setColumnWidth(0,50);
-    tab_icustom->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    tab_icustom->setItemDelegateForColumn(0,new ReadOnlyDelegate);
-    tab_icustom->setItemDelegateForRow(CUSTOM_ID, new ReadOnlyDelegate);
-    tab_icustom->setItemDelegateForRow(CUSTOM_SALE, sale_delegate);
-    tab_icustom->setItemDelegateForRow(CUSTOM_AREA, area_delegate);
+    tab_icust = new QTableView(this);
+    tab_icust->setModel(m_custs);
+    tab_icust->setColumnWidth(0,50);
+    tab_icust->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    tab_icust->setItemDelegateForColumn(0,new ReadOnlyDelegate);
+    tab_icust->setItemDelegateForRow(CUSTOM_ID, new ReadOnlyDelegate);
+    tab_icust->setItemDelegateForRow(CUSTOM_SALE, sale_delegate);
+    tab_icust->setItemDelegateForRow(CUSTOM_AREA, area_delegate);
 
-    QPushButton *user_add = new QPushButton(this);
-    user_add->setFlat(true);
-    user_add->setMinimumSize(97,44);
-    user_add->setText(tr("添加客户"));
-    user_add->setFocusPolicy(Qt::NoFocus);
-    connect(user_add,SIGNAL(clicked(bool)),this,SLOT(addUser()));
-    QPushButton *user_del = new QPushButton(this);
-    user_del->setFlat(true);
-    user_del->setMinimumSize(97,44);
-    user_del->setText(tr("删除客户"));
-    user_del->setFocusPolicy(Qt::NoFocus);
-    connect(user_del,SIGNAL(clicked(bool)),this,SLOT(delUser()));
-    QPushButton *user_upt = new QPushButton(this);
-    user_upt->setFlat(true);
-    user_upt->setMinimumSize(97,44);
-    user_upt->setText(tr("修改客户"));
-    user_upt->setFocusPolicy(Qt::NoFocus);
-    connect(user_upt,SIGNAL(clicked(bool)),this,SLOT(uptUser()));
+    QPushButton *cust_append = new QPushButton(this);
+    cust_append->setFlat(true);
+    cust_append->setMinimumSize(97,44);
+    cust_append->setText(tr("添加客户"));
+    cust_append->setFocusPolicy(Qt::NoFocus);
+    connect(cust_append,SIGNAL(clicked(bool)),this,SLOT(appendCust()));
+    QPushButton *cust_delete = new QPushButton(this);
+    cust_delete->setFlat(true);
+    cust_delete->setMinimumSize(97,44);
+    cust_delete->setText(tr("删除客户"));
+    cust_delete->setFocusPolicy(Qt::NoFocus);
+    connect(cust_delete,SIGNAL(clicked(bool)),this,SLOT(deleteCust()));
+    QPushButton *cust_change = new QPushButton(this);
+    cust_change->setFlat(true);
+    cust_change->setMinimumSize(97,44);
+    cust_change->setText(tr("修改客户"));
+    cust_change->setFocusPolicy(Qt::NoFocus);
+    connect(cust_change,SIGNAL(clicked(bool)),this,SLOT(changeCust()));
 
-    QGridLayout *iuserLayout = new QGridLayout;
-    iuserLayout->addWidget(tab_icustom,0,0,1,4);
-    iuserLayout->addWidget(user_add,1,1);
-    iuserLayout->addWidget(user_del,1,2);
-    iuserLayout->addWidget(user_upt,1,3);
-    iuserLayout->setColumnStretch(0,1);
-    iuserLayout->setMargin(0);
+    QGridLayout *icustLayout = new QGridLayout;
+    icustLayout->addWidget(tab_icust,0,0,1,4);
+    icustLayout->addWidget(cust_append,1,1);
+    icustLayout->addWidget(cust_delete,1,2);
+    icustLayout->addWidget(cust_change,1,3);
+    icustLayout->setColumnStretch(0,1);
+    icustLayout->setMargin(0);
 
-    wiCustoms = new QWidget(this);
-    wiCustoms->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    wiCustoms->setLayout(iuserLayout);
-    wiCustoms->hide();
+    custWidget = new QWidget(this);
+    custWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    custWidget->setLayout(icustLayout);
+    custWidget->hide();
 
-    QHBoxLayout *userlayout = new QHBoxLayout;
-    userlayout->addLayout(susrLayout);
-    userlayout->addLayout(ubtnLayout);
-    userlayout->addWidget(wiCustoms);
-    userlayout->setStretch(0,1);
+    QHBoxLayout *custlayout = new QHBoxLayout;
+    custlayout->addLayout(scustLayout);
+    custlayout->addLayout(ubtnsLayout);
+    custlayout->addWidget(custWidget);
+    custlayout->setStretch(0,1);
 
-    QWidget *users = new QWidget(this);
-    users->setLayout(userlayout);
+    QWidget *custs = new QWidget(this);
+    custs->setLayout(custlayout);
 
     /**************************************************************************/
     tab_sales = new QTableView(this);
     tab_sales->setItemDelegate(new ReadOnlyDelegate);
     tab_sales->horizontalHeader()->setHighlightSections(false);
     tab_sales->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(tab_sales,SIGNAL(clicked(QModelIndex)),this,SLOT(tabRoleSync(QModelIndex)));
+    connect(tab_sales,SIGNAL(clicked(QModelIndex)),this,SLOT(tabSaleSync(QModelIndex)));
 
-    QPushButton *role_snd = new QPushButton(this);
-    role_snd->setFlat(true);
-    role_snd->setMinimumSize(97,44);
-    role_snd->setText(tr("刷新显示"));
-    role_snd->setFocusPolicy(Qt::NoFocus);
-    connect(user_snd,SIGNAL(clicked(bool)),this,SLOT(sndRole()));
+    QPushButton *sale_update = new QPushButton(this);
+    sale_update->setFlat(true);
+    sale_update->setMinimumSize(97,44);
+    sale_update->setText(tr("刷新显示"));
+    sale_update->setFocusPolicy(Qt::NoFocus);
+    connect(cust_update,SIGNAL(clicked(bool)),this,SLOT(updateSale()));
 
-    QGridLayout *sroleLayout = new QGridLayout;
-    sroleLayout->addWidget(tab_sales,0,0,1,2);
-    sroleLayout->addWidget(role_snd,1,1);
-    sroleLayout->setColumnStretch(0,1);
+    QGridLayout *ssaleLayout = new QGridLayout;
+    ssaleLayout->addWidget(tab_sales,0,0,1,2);
+    ssaleLayout->addWidget(sale_update,1,1);
+    ssaleLayout->setColumnStretch(0,1);
 
     btn_sales = new QToolButton(this);//显示订单
     btn_sales->setIcon(QIcon(":/icons/left.png"));
@@ -132,20 +132,19 @@ void SalesPage::initUI()
     btn_sales->setFocusPolicy(Qt::NoFocus);
     btn_sales->setText(tr("销\n售\n管\n理"));
     btn_sales->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    connect(btn_sales,SIGNAL(clicked(bool)),this,SLOT(showTabRole()));
+    connect(btn_sales,SIGNAL(clicked(bool)),this,SLOT(showTabSale()));
 
-    QVBoxLayout *rbtnsLayout = new QVBoxLayout;
-    rbtnsLayout->addWidget(btn_sales);
-    rbtnsLayout->addStretch();
+    QVBoxLayout *sbtnsLayout = new QVBoxLayout;
+    sbtnsLayout->addWidget(btn_sales);
+    sbtnsLayout->addStretch();
 
-    QStringList role_items;
-    role_items << tr("编号") << tr("姓名") << tr("区域");
+    sale_items << tr("编号") << tr("姓名") << tr("区域");
     m_sales = new StandardItemModel();
-    QStringList roles_header;
-    roles_header << tr("项目") << tr("参数");
-    m_sales->setHorizontalHeaderLabels(roles_header);
-    for (int i=0; i < role_items.size(); i++) {
-        m_sales->setItem(i,0,new QStandardItem(role_items.at(i)));
+    QStringList sale_header;
+    sale_header << tr("项目") << tr("参数");
+    m_sales->setHorizontalHeaderLabels(sale_header);
+    for (int i=0; i < sale_items.size(); i++) {
+        m_sales->setItem(i,0,new QStandardItem(sale_items.at(i)));
         m_sales->setItem(i,1,new QStandardItem(""));
     }
     tab_isale = new QTableView(this);
@@ -153,50 +152,50 @@ void SalesPage::initUI()
     tab_isale->setColumnWidth(0,50);
     tab_isale->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
 
-    QPushButton *role_add = new QPushButton(this);
-    role_add->setFlat(true);
-    role_add->setMinimumSize(97,44);
-    role_add->setText(tr("添加销售"));
-    role_add->setFocusPolicy(Qt::NoFocus);
-    connect(role_add,SIGNAL(clicked(bool)),this,SLOT(addRole()));
-    QPushButton *role_del = new QPushButton(this);
-    role_del->setFlat(true);
-    role_del->setMinimumSize(97,44);
-    role_del->setText(tr("删除销售"));
-    role_del->setFocusPolicy(Qt::NoFocus);
-    connect(role_del,SIGNAL(clicked(bool)),this,SLOT(delRole()));
-    QPushButton *role_upt = new QPushButton(this);
-    role_upt->setFlat(true);
-    role_upt->setMinimumSize(97,44);
-    role_upt->setText(tr("修改销售"));
-    role_upt->setFocusPolicy(Qt::NoFocus);
-    connect(role_upt,SIGNAL(clicked(bool)),this,SLOT(uptRole()));
+    QPushButton *sale_append = new QPushButton(this);
+    sale_append->setFlat(true);
+    sale_append->setMinimumSize(97,44);
+    sale_append->setText(tr("添加销售"));
+    sale_append->setFocusPolicy(Qt::NoFocus);
+    connect(sale_append,SIGNAL(clicked(bool)),this,SLOT(appendSale()));
+    QPushButton *sale_delete = new QPushButton(this);
+    sale_delete->setFlat(true);
+    sale_delete->setMinimumSize(97,44);
+    sale_delete->setText(tr("删除销售"));
+    sale_delete->setFocusPolicy(Qt::NoFocus);
+    connect(sale_delete,SIGNAL(clicked(bool)),this,SLOT(deleteSale()));
+    QPushButton *sale_change = new QPushButton(this);
+    sale_change->setFlat(true);
+    sale_change->setMinimumSize(97,44);
+    sale_change->setText(tr("修改销售"));
+    sale_change->setFocusPolicy(Qt::NoFocus);
+    connect(sale_change,SIGNAL(clicked(bool)),this,SLOT(changeSale()));
 
-    QGridLayout *iroleLayout = new QGridLayout;
-    iroleLayout->addWidget(tab_isale,0,0,1,4);
-    iroleLayout->addWidget(role_add,1,1);
-    iroleLayout->addWidget(role_del,1,2);
-    iroleLayout->addWidget(role_upt,1,3);
-    iroleLayout->setColumnStretch(0,1);
-    iroleLayout->setMargin(0);
+    QGridLayout *isaleLayout = new QGridLayout;
+    isaleLayout->addWidget(tab_isale,0,0,1,4);
+    isaleLayout->addWidget(sale_append,1,1);
+    isaleLayout->addWidget(sale_delete,1,2);
+    isaleLayout->addWidget(sale_change,1,3);
+    isaleLayout->setColumnStretch(0,1);
+    isaleLayout->setMargin(0);
 
-    wiSales = new QWidget(this);
-    wiSales->setLayout(iroleLayout);
-    wiSales->hide();
+    saleWidget = new QWidget(this);
+    saleWidget->setLayout(isaleLayout);
+    saleWidget->hide();
 
-    QHBoxLayout *rolelayout = new QHBoxLayout;
-    rolelayout->addLayout(sroleLayout);
-    rolelayout->addLayout(rbtnsLayout);
-    rolelayout->addWidget(wiSales);
-    rolelayout->setStretch(0,1);
+    QHBoxLayout *salelayout = new QHBoxLayout;
+    salelayout->addLayout(ssaleLayout);
+    salelayout->addLayout(sbtnsLayout);
+    salelayout->addWidget(saleWidget);
+    salelayout->setStretch(0,1);
 
-    QWidget *roles = new QWidget(this);
-    roles->setLayout(rolelayout);
+    QWidget *sales = new QWidget(this);
+    sales->setLayout(salelayout);
 
     /**************************************************************************/
     QSplitter *pSplitter = new QSplitter(this);
-    pSplitter->addWidget(users);
-    pSplitter->addWidget(roles);
+    pSplitter->addWidget(custs);
+    pSplitter->addWidget(sales);
 
     QVBoxLayout *splitter = new QVBoxLayout;
     splitter->addWidget(pSplitter);
@@ -214,26 +213,25 @@ void SalesPage::initSql()
     db = QSqlDatabase::addDatabase("QSQLITE", "erp_sales");
     db.setDatabaseName("erp.db");
     db.open();
-    sql_customs = new StandardSqlModel(this,db);
-    sql_customs->setTable("erp_customs");
-    sql_customs->select();
-    QStringList add_items;
-    add_items << tr("编号") << tr("名称") << tr("销售") << tr("区域");
-    for (int i=0; i < add_items.size(); i++)
-        sql_customs->setHeaderData(i, Qt::Horizontal, add_items.at(i));
-    tab_customs->setModel(sql_customs);
-    tab_customs->setColumnWidth(CUSTOM_ID,50);
-    tab_customs->horizontalHeader()->setSectionResizeMode(CUSTOM_NAME,QHeaderView::Stretch);
-    tab_customs->horizontalHeader()->setSectionResizeMode(CUSTOM_SALE,QHeaderView::Stretch);
-    tab_customs->horizontalHeader()->setSectionResizeMode(CUSTOM_AREA,QHeaderView::Stretch);
+
+    sql_custs = new StandardSqlModel(this,db);
+    sql_custs->setTable("erp_customs");
+    sql_custs->select();
+
+    for (int i=0; i < cust_items.size(); i++)
+        sql_custs->setHeaderData(i, Qt::Horizontal, cust_items.at(i));
+    tab_custs->setModel(sql_custs);
+    tab_custs->setColumnWidth(CUSTOM_ID,50);
+    tab_custs->horizontalHeader()->setSectionResizeMode(CUSTOM_NAME,QHeaderView::Stretch);
+    tab_custs->horizontalHeader()->setSectionResizeMode(CUSTOM_SALE,QHeaderView::Stretch);
+    tab_custs->horizontalHeader()->setSectionResizeMode(CUSTOM_AREA,QHeaderView::Stretch);
 
     sql_sales = new StandardSqlModel(this,db);
     sql_sales->setTable("erp_sales");
     sql_sales->select();
-    QStringList role_items;
-    role_items << tr("编号") << tr("姓名") << tr("区域");
-    for (int i=0; i < role_items.size(); i++)
-        sql_sales->setHeaderData(i, Qt::Horizontal, role_items.at(i));
+
+    for (int i=0; i < sale_items.size(); i++)
+        sql_sales->setHeaderData(i, Qt::Horizontal, sale_items.at(i));
     tab_sales->setModel(sql_sales);
     tab_sales->setColumnWidth(SALE_ID,50);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_NAME,QHeaderView::Stretch);
@@ -242,18 +240,18 @@ void SalesPage::initSql()
 
 void SalesPage::initData()
 {
-    sql_customs->select();
+    sql_custs->select();
     sql_sales->select();
 }
 
-void SalesPage::showTabUser()
+void SalesPage::showTabCust()
 {
-    if (wiCustoms->isHidden()) {
-        wiCustoms->show();
-        btn_customs->setIcon(QIcon(":/icons/right.png"));
+    if (custWidget->isHidden()) {
+        custWidget->show();
+        btn_custs->setIcon(QIcon(":/icons/right.png"));
     } else {
-        wiCustoms->hide();
-        btn_customs->setIcon(QIcon(":/icons/left.png"));
+        custWidget->hide();
+        btn_custs->setIcon(QIcon(":/icons/left.png"));
     }
     QStringList sales_head;
     for (int i=0; i < sql_sales->rowCount(); i++)
@@ -266,26 +264,26 @@ void SalesPage::showTabUser()
     area_delegate->setItemHeaders(areas_head);
 }
 
-void SalesPage::showTabRole()
+void SalesPage::showTabSale()
 {
-    if (wiSales->isHidden()) {
-        wiSales->show();
+    if (saleWidget->isHidden()) {
+        saleWidget->show();
         btn_sales->setIcon(QIcon(":/icons/right.png"));
     } else {
-        wiSales->hide();
+        saleWidget->hide();
         btn_sales->setIcon(QIcon(":/icons/left.png"));
     }
 }
 
-void SalesPage::tabUserSync(QModelIndex index)
+void SalesPage::tabCustSync(QModelIndex index)
 {
     int row = index.row();
-    for (int i=0; i < m_customs->rowCount(); i++) {
-        m_customs->item(i,1)->setText(sql_customs->index(row,i).data().toString());
+    for (int i=0; i < m_custs->rowCount(); i++) {
+        m_custs->item(i,1)->setText(sql_custs->index(row,i).data().toString());
     }
 }
 
-void SalesPage::tabRoleSync(QModelIndex index)
+void SalesPage::tabSaleSync(QModelIndex index)
 {
     int row = index.row();
     for (int i=0; i < m_sales->rowCount(); i++) {
@@ -293,46 +291,46 @@ void SalesPage::tabRoleSync(QModelIndex index)
     }
 }
 
-void SalesPage::addUser()
+void SalesPage::appendCust()
 {
-    int row = sql_customs->rowCount();
-    sql_customs->insertRow(row);
+    int row = sql_custs->rowCount();
+    sql_custs->insertRow(row);
     QString area;
-    QString name = m_customs->item(CUSTOM_SALE,1)->text();
+    QString name = m_custs->item(CUSTOM_SALE,1)->text();
     for (int i=0; i < sql_sales->rowCount(); i++) {
         if (name == sql_sales->index(i,SALE_NAME).data().toString()) {
             area = sql_sales->index(i,SALE_AREA).data().toString();
             break;
         }
     }
-    m_customs->item(CUSTOM_AREA,1)->setText(area);
-    for (int i=1; i < m_customs->rowCount(); i++)
-        sql_customs->setData(sql_customs->index(row,i),m_customs->item(i,1)->text());
-    sql_customs->submitAll();
+    m_custs->item(CUSTOM_AREA,1)->setText(area);
+    for (int i=1; i < m_custs->rowCount(); i++)
+        sql_custs->setData(sql_custs->index(row,i),m_custs->item(i,1)->text());
+    sql_custs->submitAll();
 }
 
-void SalesPage::delUser()
+void SalesPage::deleteCust()
 {
-    int row = tab_customs->currentIndex().row();
-    sql_customs->removeRow(row);
-    sql_customs->submitAll();
-    sql_customs->select();
+    int row = tab_custs->currentIndex().row();
+    sql_custs->removeRow(row);
+    sql_custs->submitAll();
+    sql_custs->select();
 }
 
-void SalesPage::uptUser()
+void SalesPage::changeCust()
 {
-    int row = tab_customs->currentIndex().row();
-    for (int i=1; i < m_customs->rowCount(); i++)
-        sql_customs->setData(sql_customs->index(row,i),m_customs->item(i,1)->text());
-    sql_customs->submitAll();
+    int row = tab_custs->currentIndex().row();
+    for (int i=1; i < m_custs->rowCount(); i++)
+        sql_custs->setData(sql_custs->index(row,i),m_custs->item(i,1)->text());
+    sql_custs->submitAll();
 }
 
-void SalesPage::sndUser()
+void SalesPage::updateCust()
 {
-    sql_customs->select();
+    sql_custs->select();
 }
 
-void SalesPage::addRole()
+void SalesPage::appendSale()
 {
     int row = sql_sales->rowCount();
     sql_sales->insertRow(row);
@@ -341,7 +339,7 @@ void SalesPage::addRole()
     sql_sales->submitAll();
 }
 
-void SalesPage::delRole()
+void SalesPage::deleteSale()
 {
     int row = tab_sales->currentIndex().row();
     sql_sales->removeRow(row);
@@ -349,7 +347,7 @@ void SalesPage::delRole()
     sql_sales->select();
 }
 
-void SalesPage::uptRole()
+void SalesPage::changeSale()
 {
     int row = tab_sales->currentIndex().row();
     for (int i=1; i < m_sales->rowCount(); i++)
@@ -357,7 +355,7 @@ void SalesPage::uptRole()
     sql_sales->submitAll();
 }
 
-void SalesPage::sndRole()
+void SalesPage::updateSale()
 {
     sql_sales->select();
 }

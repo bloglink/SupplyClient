@@ -303,6 +303,5 @@ void OrderPage::refresh()
 
 void OrderPage::showEvent(QShowEvent *e)
 {
-    //    refresh();
     e->accept();
 }
