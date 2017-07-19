@@ -69,10 +69,13 @@ private:
     QTableView *tab_irole;
     QToolButton *btn_user;
     QToolButton *btn_role;
-    QWidget *wiUsers;
-    QWidget *wiRoles;
+    QWidget *userWidget;
+    QWidget *roleWidget;
     QSqlDatabase db;
     ComboBoxDelegate *role_delegate;
+
+    QStringList user_items;
+    QStringList role_items;
 };
 
 #endif // HUMANPAGE_H
