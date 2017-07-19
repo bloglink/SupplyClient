@@ -297,6 +297,7 @@ void ProdsPage::tabProdSync(QModelIndex index)
 
 void ProdsPage::recvSocket(QUrl url)
 {
+    qDebug() << url;
 //    QString cmd = url.query();
 //    QString usr = url.userName();
 //    if (usr != "ProdPage")
@@ -328,37 +329,7 @@ void ProdsPage::recvSocket(QUrl url)
 //    }
 }
 
-
-
-void ProdsPage::showSnd()
-{
-//    if (prodWidget->isHidden() && w_snd->isHidden()) {
-//        w_snd->show();
-//        btn_prods->setIcon(QIcon(":/icons/right.png"));
-//        btn_snd->setIcon(QIcon(":/icons/right.png"));
-//    } else {
-//        prodWidget->hide();
-//        w_snd->hide();
-//        btn_prods->setIcon(QIcon(":/icons/left.png"));
-//        btn_snd->setIcon(QIcon(":/icons/left.png"));
-//    }
-}
-
-void ProdsPage::refresh()
-{
-//    m_show->setRowCount(0);
-//    QUrl url;
-//    url.setQuery("orderinfo");
-//    QJsonObject obj;
-//    obj.insert("odstarttime",s_date->date().toString("yyyyMMdd"));
-//    obj.insert("odendtime",e_date->date().toString("yyyyMMdd"));
-//    QByteArray msg = QJsonDocument(obj).toJson();
-//    url.setFragment(msg.toBase64());
-//    emit sendSocket(url);
-}
-
 void ProdsPage::showEvent(QShowEvent *e)
 {
-    //    refresh();
     e->accept();
 }

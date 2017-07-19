@@ -80,7 +80,7 @@ void MainScreen::initUI()
 
     QToolButton *title_order = new QToolButton(this);
     QToolButton *title_prods = new QToolButton(this);
-    QToolButton *title_purchase = new QToolButton(this);
+    QToolButton *title_purch = new QToolButton(this);
     QToolButton *title_human = new QToolButton(this);
     QToolButton *title_action = new QToolButton(this);
     QToolButton *title_about = new QToolButton(this);
@@ -90,11 +90,11 @@ void MainScreen::initUI()
     title_sales->setObjectName("SalesPage");
     title_order->setObjectName("OrderPage");
     title_prods->setObjectName("ProdsPage");
-    title_purchase->setObjectName("purchasemanagement");
+    title_purch->setObjectName("PurchPage");
 
     initToolButton(title_order);
     initToolButton(title_prods);
-    initToolButton(title_purchase);
+    initToolButton(title_purch);
     initToolButton(title_human);
     initToolButton(title_action);
     initToolButton(title_about);
@@ -104,8 +104,8 @@ void MainScreen::initUI()
     title_order->setText(tr("订单管理"));
     title_prods->setIcon(QIcon(":/icons/industry.png"));
     title_prods->setText(tr("生产管理"));
-    title_purchase->setIcon(QIcon(":/icons/dollar.png"));
-    title_purchase->setText(tr("采购管理"));
+    title_purch->setIcon(QIcon(":/icons/dollar.png"));
+    title_purch->setText(tr("采购管理"));
     title_human->setIcon(QIcon(":/icons/user.png"));
     title_human->setText(tr("人员管理"));
     title_action->setIcon(QIcon(":/icons/stop.png"));
@@ -118,7 +118,7 @@ void MainScreen::initUI()
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(title_order);
     layout->addWidget(title_prods);
-    layout->addWidget(title_purchase);
+    layout->addWidget(title_purch);
     layout->addWidget(title_human);
     layout->addWidget(title_sales);
     layout->addWidget(title_action);
@@ -165,10 +165,10 @@ void MainScreen::initUI()
     connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
     stack->addWidget(lack);
 
-    purchase = new PurchaseManagement(this);
-    connect(purchase,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),purchase,SLOT(recvSocket(QUrl)));
-    stack->addWidget(purchase);
+    purch = new PurchPage(this);
+    connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),purch,SLOT(recvSocket(QUrl)));
+    stack->addWidget(purch);
 }
 
 void MainScreen::initUdp()

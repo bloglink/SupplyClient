@@ -77,5 +77,23 @@ void ErpSql::initSql()
     cmd += "prod_name text,";
     cmd += "prod_mode text)";
     query.exec(cmd);
+
+    cmd = "create table if not exists erp_purchs(";
+    cmd += "purch_id integer primary key,";
+    cmd += "purch_numb text,";
+    cmd += "purch_code text,";
+    cmd += "purch_name text,";
+    cmd += "purch_unit text,";
+    cmd += "purch_lack text,";
+    cmd += "purch_quan text,";
+    cmd += "purch_date text,";
+    cmd += "purch_bout text,";
+    cmd += "purch_expt text,";
+    cmd += "purch_real text,";
+    cmd += "purch_come text,";
+    cmd += "purch_oway text,";
+    cmd += "purch_ofix text,";
+    cmd += "purch_mark text)";
+    query.exec(cmd);
 }
 

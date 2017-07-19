@@ -23,20 +23,6 @@
 
 #include "OrderPage.h"
 
-//#define ORDER_ID 0
-//#define ORDER_NUMB 1
-//#define ORDER_DATE 2
-//#define ORDER_VIEW 3
-//#define ORDER_CUST 4
-//#define ORDER_SALE 5
-//#define ORDER_AREA 6
-//#define ORDER_DEAD 7
-//#define ORDER_QUAN 8
-//#define ORDER_STCK 9
-//#define ORDER_PROD 10
-//#define ORDER_LACK 11
-//#define ORDER_DNUM 12
-
 #define PROD_ID 0
 #define PROD_NUMB 1
 #define PROD_DATE 2
@@ -75,9 +61,6 @@ private slots:
     void tabPlanSync(QModelIndex index);
     void tabProdSync(QModelIndex index);
     void recvSocket(QUrl url);
-
-    void showSnd();
-    void refresh();
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_prod;

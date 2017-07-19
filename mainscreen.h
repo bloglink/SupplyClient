@@ -21,6 +21,7 @@
 #include "SalesPage.h"
 #include "OrderPage.h"
 #include "ProdsPage.h"
+#include "PurchPage.h"
 #include "erpsql.h"
 
 class MainScreen : public QMainWindow
@@ -56,12 +57,12 @@ private:
     QStackedWidget *stack;
     UdpSocket udp;
     LackManagement *lack;
-    PurchaseManagement *purchase;
     int preindex;
     HumanPage *human;
     SalesPage *sales;
     OrderPage *order;
     ProdsPage *prods;
+    PurchPage *purch;
 };
 
 #endif // MAINSCREEN_H

@@ -1,4 +1,17 @@
-
+/*QMainWindow*************************************************************************************/
+QMainWindow{background-repeat:repeat-xy;font:12pt "Verdana";
+background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
+/*QWidget*****************************************************************************************/
+QWidget{font:11pt "Consolas";}
+/*QDialog*****************************************************************************************/
+QDialog{
+background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
+QDialog QToolButton{background-color:transparent;color:white;}
+QDialog QToolButton:hover{border: 1px;
+background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
+QDialog QToolButton:disabled{background-color:gray;border:1px;}
+QDialog QLineEdit {color:white;border:none;background-color:rgb(0,0,64);}
+QDialog QPushButton {min-width:97;min-height:35;}
 /*QComboBox***************************************************************************************/
 QComboBox{color:white;font:15px "Verdana";background-color:rgb(0,0,64);}
 QComboBox:disabled{ background-color:gray;}
@@ -9,18 +22,7 @@ QComboBox QAbstractItemView::item:hover{ background-color:#005270; }
 QComboBox::drop-down{width:24px;background-color:rgb(0,0,64);}
 QComboBox::down-arrow{image:url(:/icons/downarrow.png);}
 /*QLineEdit***************************************************************************************/
-QDialog QLineEdit {color:white;border:none;background-color:rgb(0,0,64);}
-QDialog QPushButton {min-width:97;min-height:35;}
-/*QMainWindow*************************************************************************************/
-QMainWindow{background-repeat:repeat-xy;
-background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
-/*QDialog*****************************************************************************************/
-QDialog{
-background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
-QDialog QToolButton{background-color:transparent;color:white;}
-QDialog QToolButton:hover{border: 1px;
-background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #005270,stop:0.5 #00D3C5,stop:1 #005270);}
-QDialog QToolButton:disabled{background-color:gray;border:1px;}
+
 /*QLabel******************************************************************************************/
 QLabel{color:white;qproperty-alignment:AlignCenter;}
 /*QGroupBox***************************************************************************************/
@@ -119,7 +121,6 @@ QScrollBar::sub-line:vertical {
 QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical {
     background: none;
 }
-
 
 QScrollBar:horizontal {
     background: white;
