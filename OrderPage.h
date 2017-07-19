@@ -46,55 +46,27 @@ private slots:
     void initData();
     void showTabOrder();
     void autoNumber();
-    void addOrder();
-    void delOrder();
-    void uptOrder();
-    void sndOrder();
+    void appendOrder();
+    void deleteOrder();
+    void changeOrder();
+    void updateOrder();
     void tabSync(QModelIndex index);
     void recvSocket(QUrl url);
-
-    void showSnd();
-    void refresh();
     virtual void showEvent(QShowEvent *e);
 private:
-    StandardItemModel *m_show;
     StandardItemModel *m_order;
-    StandardItemModel *m_snd;
     StandardSqlModel *sql_order;
-    StandardSqlModel *sql_customs;
+    StandardSqlModel *sql_custs;
     StandardSqlModel *sql_sales;
-
     QTableView *tab_order;
     QTableView *tab_iorder;
-
-    QWidget *wiOrders;
-
-    QToolButton *btn_add;
-
-    QJsonArray json_show;
-
-    QTableView *tab_add;
-
-
-    QJsonArray json_sale;
-    QJsonArray json_customer;
-    QDateEdit *s_date;
-    QDateEdit *e_date;
-
-
-
-    QTableView *tab_snd;
-    QToolButton *btn_snd;
-    QWidget *w_snd;
-
-    int max_order_id;
-    QComboBox *status;
-
+    QWidget *orderWidget;
+    QToolButton *btn_order;
     QSqlDatabase db;
-
     ComboBoxDelegate *sale_delegate;
     ComboBoxDelegate *area_delegate;
-    ComboBoxDelegate *customer;
+    ComboBoxDelegate *cust_delegate;
+    QStringList order_items;
 };
 
 #endif // ORDERPAGE_H
