@@ -42,3 +42,5 @@ HEADERS  += mainscreen.h \
 
 RESOURCES += \
     source.qrc
+
+RC_FILE += ico.rc

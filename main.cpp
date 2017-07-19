@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     if (ret == QDialog::Accepted) {
-        w.show();
+        w.showMaximized();
     }
 
     return a.exec();
