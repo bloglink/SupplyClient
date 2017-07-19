@@ -14,14 +14,13 @@
 #include "loginscreen.h"
 #include "AboutPage.h"
 
-#include "ordermanagement.h"
-#include "productionmanagement.h"
 #include "lackmanagement.h"
 #include "purchasemanagement.h"
 
 #include "HumanPage.h"
 #include "SalesPage.h"
 #include "OrderPage.h"
+#include "ProdsPage.h"
 #include "erpsql.h"
 
 class MainScreen : public QMainWindow
@@ -56,13 +55,13 @@ private:
     QPoint dragPosition;
     QStackedWidget *stack;
     UdpSocket udp;
-    ProductionManagement *prod;
     LackManagement *lack;
     PurchaseManagement *purchase;
     int preindex;
     HumanPage *human;
     SalesPage *sales;
     OrderPage *order;
+    ProdsPage *prods;
 };
 
 #endif // MAINSCREEN_H

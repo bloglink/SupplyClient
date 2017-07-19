@@ -46,16 +46,36 @@ void ErpSql::initSql()
 
     cmd = "create table if not exists erp_orders(";
     cmd += "order_id integer primary key,";
-    cmd += "order_number text,";
-    cmd += "order_custom text,";
+    cmd += "order_numb text,";
+    cmd += "order_date text,";
+    cmd += "order_view text,";
+    cmd += "order_cust text,";
     cmd += "order_sale text,";
     cmd += "order_area text,";
-    cmd += "order_quantity text,";
-    cmd += "order_date text,";
-    cmd += "order_stock text,";
-    cmd += "order_produce text,";
+    cmd += "order_dead text,";
+    cmd += "order_quan text,";
+    cmd += "order_stck text,";
+    cmd += "order_prod text,";
     cmd += "order_lack text,";
-    cmd += "order_delivery text)";
+    cmd += "order_dnum text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_prods(";
+    cmd += "prod_id integer primary key,";
+    cmd += "prod_numb text,";
+    cmd += "prod_date text,";
+    cmd += "prod_view text,";
+    cmd += "prod_cust text,";
+    cmd += "prod_sale text,";
+    cmd += "prod_area text,";
+    cmd += "prod_dead text,";
+    cmd += "prod_need text,";
+    cmd += "prod_quan text,";
+    cmd += "prod_pnum text,";
+    cmd += "prod_type text,";
+    cmd += "prod_code text,";
+    cmd += "prod_name text,";
+    cmd += "prod_mode text)";
     query.exec(cmd);
 }
 

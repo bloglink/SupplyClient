@@ -79,7 +79,7 @@ void MainScreen::initUI()
     title->setSpacing(5);
 
     QToolButton *title_order = new QToolButton(this);
-    QToolButton *title_product = new QToolButton(this);
+    QToolButton *title_prods = new QToolButton(this);
     QToolButton *title_purchase = new QToolButton(this);
     QToolButton *title_human = new QToolButton(this);
     QToolButton *title_action = new QToolButton(this);
@@ -89,11 +89,11 @@ void MainScreen::initUI()
     title_human->setObjectName("HumanPage");
     title_sales->setObjectName("SalesPage");
     title_order->setObjectName("OrderPage");
-    title_product->setObjectName("productionmanagement");
+    title_prods->setObjectName("ProdsPage");
     title_purchase->setObjectName("purchasemanagement");
 
     initToolButton(title_order);
-    initToolButton(title_product);
+    initToolButton(title_prods);
     initToolButton(title_purchase);
     initToolButton(title_human);
     initToolButton(title_action);
@@ -102,8 +102,8 @@ void MainScreen::initUI()
 
     title_order->setIcon(QIcon(":/icons/note.png"));
     title_order->setText(tr("订单管理"));
-    title_product->setIcon(QIcon(":/icons/industry.png"));
-    title_product->setText(tr("生产管理"));
+    title_prods->setIcon(QIcon(":/icons/industry.png"));
+    title_prods->setText(tr("生产管理"));
     title_purchase->setIcon(QIcon(":/icons/dollar.png"));
     title_purchase->setText(tr("采购管理"));
     title_human->setIcon(QIcon(":/icons/user.png"));
@@ -117,7 +117,7 @@ void MainScreen::initUI()
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(title_order);
-    layout->addWidget(title_product);
+    layout->addWidget(title_prods);
     layout->addWidget(title_purchase);
     layout->addWidget(title_human);
     layout->addWidget(title_sales);
@@ -155,10 +155,10 @@ void MainScreen::initUI()
     connect(this,SIGNAL(sendMsg(QUrl)),order,SLOT(recvSocket(QUrl)));
     stack->addWidget(order);
 
-    prod = new ProductionManagement(this);
-    connect(prod,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),prod,SLOT(recvSocket(QUrl)));
-    stack->addWidget(prod);
+    prods = new ProdsPage(this);
+    connect(prods,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(this,SIGNAL(sendMsg(QUrl)),prods,SLOT(recvSocket(QUrl)));
+    stack->addWidget(prods);
 
     lack = new LackManagement(this);
     connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));

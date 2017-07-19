@@ -20,16 +20,18 @@
 #include "delegate.h"
 
 #define ORDER_ID 0
-#define ORDER_NUMBER 1
-#define ORDER_CUSTOM 2
-#define ORDER_SALE 3
-#define ORDER_AREA 4
-#define ORDER_QUANTITY 5
-#define ORDER_DATE 6
-#define ORDER_STOCK 7
-#define ORDER_PRODUCE 8
-#define ORDER_LACK 9
-#define ORDER_DELIVERY 10
+#define ORDER_NUMB 1
+#define ORDER_DATE 2
+#define ORDER_VIEW 3
+#define ORDER_CUST 4
+#define ORDER_SALE 5
+#define ORDER_AREA 6
+#define ORDER_DEAD 7
+#define ORDER_QUAN 8
+#define ORDER_STCK 9
+#define ORDER_PROD 10
+#define ORDER_LACK 11
+#define ORDER_DNUM 12
 
 class OrderPage : public QWidget
 {

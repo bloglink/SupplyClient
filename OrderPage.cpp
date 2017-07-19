@@ -45,9 +45,9 @@ void OrderPage::initUI()
     obtnsLayout->addWidget(btn_order);
     obtnsLayout->addStretch();
 
-    order_items << tr("编号") << tr("评审单号") << tr("客户名称") << tr("销售经理")
-              << tr("所属区域") << tr("订货数量") << tr("发货日期")
-              << tr("库存数量") << tr("在产数量") << tr("缺料数量") << tr("发货数量");
+    order_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
+                << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
+                << tr("订货数量") << tr("库存数量") << tr("在产数量") << tr("缺料数量") << tr("发货数量");
     m_order = new StandardItemModel();
     QStringList order_header;
     order_header << tr("项目") << tr("参数");
@@ -64,10 +64,11 @@ void OrderPage::initUI()
     tab_iorder->setColumnWidth(0,100);
     tab_iorder->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_iorder->setItemDelegateForColumn(0,new ReadOnlyDelegate);
-    tab_iorder->setItemDelegateForRow(ORDER_CUSTOM,cust_delegate);
+    tab_iorder->setItemDelegateForRow(ORDER_DATE,new DateEditDelegate);
+    tab_iorder->setItemDelegateForRow(ORDER_CUST,cust_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_AREA,area_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_SALE,sale_delegate);
-    tab_iorder->setItemDelegateForRow(ORDER_DATE,new DateEditDelegate);
+    tab_iorder->setItemDelegateForRow(ORDER_DEAD,new DateEditDelegate);
 
     QPushButton *order_append = new QPushButton(this);
     order_append->setFlat(true);
@@ -127,16 +128,16 @@ void OrderPage::initSql()
         sql_order->setHeaderData(i, Qt::Horizontal, order_items.at(i));
     tab_order->setModel(sql_order);
     tab_order->setColumnWidth(ORDER_ID,50);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_NUMBER,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_CUSTOM,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_NUMB,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_CUST,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_SALE,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_AREA,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_QUANTITY,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DATE,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STOCK,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_PRODUCE,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STCK,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_LACK,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DELIVERY,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DNUM,QHeaderView::Stretch);
 
     sql_custs = new StandardSqlModel(this,db);
     sql_custs->setTable("erp_customs");
@@ -180,7 +181,7 @@ void OrderPage::autoNumber()
     QString dat = QDate::currentDate().toString("yyyyMMdd");
     int max = 0;
     for (int i=0; i < sql_order->rowCount(); i++) {
-        QString number = sql_order->index(i,ORDER_NUMBER).data().toString();
+        QString number = sql_order->index(i,ORDER_NUMB).data().toString();
         if (number.contains(dat)) {
             int num = number.remove(dat).toInt();
             if (max < num)
@@ -188,7 +189,7 @@ void OrderPage::autoNumber()
         }
     }
     QString odds = QString("%1%2").arg(dat).arg(max+1,3,10,QLatin1Char('0'));
-    m_order->item(ORDER_NUMBER,1)->setText(odds);
+    m_order->item(ORDER_NUMB,1)->setText(odds);
 }
 
 void OrderPage::initData()
@@ -239,35 +240,35 @@ void OrderPage::tabSync(QModelIndex index)
 
 void OrderPage::recvSocket(QUrl url)
 {
-//    QString cmd = url.query();
-//    QString usr = url.userName();
-//    if (usr != "OrderPage")
-//        return;
-//    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
-//    if (cmd == "orderinfo") {
-//        json_show = QJsonDocument::fromJson(byte).array();
-//        initData();
-//    } else if (cmd == "saleinfo") {
-//        json_sale = QJsonDocument::fromJson(byte).array();
-//        QStringList items;
-//        for (int i=0; i < json_sale.size(); i++) {
-//            QJsonObject obj = json_sale.at(i).toObject();
-//            items.append(obj.value("erp_solename").toString());
-//        }
-//        sale_delegate->setItemHeaders(items);
-//    } else if (cmd == "customerinfo") {
-//        json_customer = QJsonDocument::fromJson(byte).array();
-//        QStringList items;
-//        for (int i=0; i < json_customer.size(); i++) {
-//            QJsonObject obj = json_customer.at(i).toObject();
-//            items.append(obj.value("erp_solename").toString());
-//        }
-//        cust_delegate->setItemHeaders(items);
-//    } else if (cmd == "pmstayinfo") {
-//        qDebug() << QJsonDocument::fromJson(byte).array();
-//    } else {
-//        qDebug() << "recv others" << url.toString();
-//    }
+    //    QString cmd = url.query();
+    //    QString usr = url.userName();
+    //    if (usr != "OrderPage")
+    //        return;
+    //    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
+    //    if (cmd == "orderinfo") {
+    //        json_show = QJsonDocument::fromJson(byte).array();
+    //        initData();
+    //    } else if (cmd == "saleinfo") {
+    //        json_sale = QJsonDocument::fromJson(byte).array();
+    //        QStringList items;
+    //        for (int i=0; i < json_sale.size(); i++) {
+    //            QJsonObject obj = json_sale.at(i).toObject();
+    //            items.append(obj.value("erp_solename").toString());
+    //        }
+    //        sale_delegate->setItemHeaders(items);
+    //    } else if (cmd == "customerinfo") {
+    //        json_customer = QJsonDocument::fromJson(byte).array();
+    //        QStringList items;
+    //        for (int i=0; i < json_customer.size(); i++) {
+    //            QJsonObject obj = json_customer.at(i).toObject();
+    //            items.append(obj.value("erp_solename").toString());
+    //        }
+    //        cust_delegate->setItemHeaders(items);
+    //    } else if (cmd == "pmstayinfo") {
+    //        qDebug() << QJsonDocument::fromJson(byte).array();
+    //    } else {
+    //        qDebug() << "recv others" << url.toString();
+    //    }
 }
 
 void OrderPage::showEvent(QShowEvent *e)
