@@ -223,6 +223,7 @@ void HumanPage::initSql()
     tab_users->horizontalHeader()->setSectionResizeMode(USER_ROLE,QHeaderView::Stretch);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_DATE,QHeaderView::Stretch);
     tab_users->hideColumn(USER_PASSWORD);
+    tab_users->hideColumn(USER_STAT);
 
     sql_roles = new StandardSqlModel(this,db);
     sql_roles->setTable("erp_roles");

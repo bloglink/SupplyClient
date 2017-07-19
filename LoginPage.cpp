@@ -135,7 +135,8 @@ void LoginPage::initSql()
     cmd += "user_name text,";
     cmd += "user_password text,";
     cmd += "user_role text,";
-    cmd += "user_date text)";
+    cmd += "user_date text,";
+    cmd += "user_stat text)";
     query.exec(cmd);
 
     cmd = "create table if not exists erp_roles(";

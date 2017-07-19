@@ -15,7 +15,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainscreen.cpp \
     udpsocket.cpp \
-    lackmanagement.cpp \
     HumanPage.cpp \
     AboutPage.cpp \
     SalesPage.cpp \
@@ -27,7 +26,6 @@ SOURCES += main.cpp\
 HEADERS  += mainscreen.h \
     udpsocket.h \
     delegate.h \
-    lackmanagement.h \
     HumanPage.h \
     AboutPage.h \
     SalesPage.h \

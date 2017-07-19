@@ -26,6 +26,7 @@
 #define USER_PASSWORD 2
 #define USER_ROLE 3
 #define USER_DATE 4
+#define USER_STAT 5
 
 #define ROLE_ID 0
 #define ROLE_NAME 1

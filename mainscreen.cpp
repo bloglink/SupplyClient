@@ -75,7 +75,7 @@ void MainScreen::initUI()
     QToolButton *title_human = new QToolButton(this);
     QToolButton *title_about = new QToolButton(this);
     QToolButton *title_sales = new QToolButton(this);
-    QToolButton *title_action = new QToolButton(this);
+    QToolButton *title_power = new QToolButton(this);
     title_about->setObjectName("AboutPage");
     title_human->setObjectName("HumanPage");
     title_sales->setObjectName("SalesPage");
@@ -87,7 +87,7 @@ void MainScreen::initUI()
     initToolButton(title_prods);
     initToolButton(title_purch);
     initToolButton(title_human);
-    initToolButton(title_action);
+    initToolButton(title_power);
     initToolButton(title_about);
     initToolButton(title_sales);
 
@@ -99,12 +99,12 @@ void MainScreen::initUI()
     title_purch->setText(tr("采购管理"));
     title_human->setIcon(QIcon(":/icons/user.png"));
     title_human->setText(tr("人员管理"));
-    title_action->setIcon(QIcon(":/icons/stop.png"));
-    title_action->setText(tr("权限管理"));
-    title_about->setIcon(QIcon(":/icons/link.ico"));
-    title_about->setText(tr("关于软件"));
+    title_power->setIcon(QIcon(":/icons/stop.png"));
+    title_power->setText(tr("权限管理"));
     title_sales->setIcon(QIcon(":/icons/man.png"));
     title_sales->setText(tr("销售管理"));
+    title_about->setIcon(QIcon(":/icons/link.ico"));
+    title_about->setText(tr("关于软件"));
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(title_order);
@@ -112,7 +112,7 @@ void MainScreen::initUI()
     layout->addWidget(title_purch);
     layout->addWidget(title_human);
     layout->addWidget(title_sales);
-    layout->addWidget(title_action);
+    layout->addWidget(title_power);
     layout->addWidget(title_about);
     layout->addStretch();
     layout->setMargin(0);
@@ -150,11 +150,6 @@ void MainScreen::initUI()
     connect(prods,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
     connect(this,SIGNAL(sendMsg(QUrl)),prods,SLOT(recvSocket(QUrl)));
     stack->addWidget(prods);
-
-//    lack = new LackManagement(this);
-//    connect(lack,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-//    connect(this,SIGNAL(sendMsg(QUrl)),lack,SLOT(recvSocket(QUrl)));
-//    stack->addWidget(lack);
 
     purch = new PurchPage(this);
     connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
