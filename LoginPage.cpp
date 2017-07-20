@@ -158,6 +158,8 @@ void LoginPage::initSql()
     cmd += "sale_area text)";
     query.exec(cmd);
 
+//    query.exec("drop table erp_orders");
+
     cmd = "create table if not exists erp_orders(";
     cmd += "order_id integer primary key,";
     cmd += "order_numb text,";
@@ -168,9 +170,8 @@ void LoginPage::initSql()
     cmd += "order_area text,";
     cmd += "order_dead text,";
     cmd += "order_quan text,";
-    cmd += "order_stck text,";
     cmd += "order_prod text,";
-    cmd += "order_lack text,";
+    cmd += "order_stck text,";
     cmd += "order_dnum text)";
     query.exec(cmd);
 

@@ -87,18 +87,10 @@ void ProdsPage::initUI()
         m_prod->setItem(i,0,new QStandardItem(prod_items.at(i)));
         m_prod->setItem(i,1,new QStandardItem(""));
     }
-//    sale_delegate = new ComboBoxDelegate;
-//    area_delegate = new ComboBoxDelegate;
-//    cust_delegate = new ComboBoxDelegate;
     tab_iprod = new QTableView(this);
     tab_iprod->setModel(m_prod);
     tab_iprod->setColumnWidth(0,100);
     tab_iprod->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-//    tab_iprod->setItemDelegateForColumn(0,new ReadOnlyDelegate);
-//    tab_iorder->setItemDelegateForRow(ORDER_CUST,cust_delegate);
-//    tab_iorder->setItemDelegateForRow(ORDER_AREA,area_delegate);
-//    tab_iorder->setItemDelegateForRow(ORDER_SALE,sale_delegate);
-//    tab_iorder->setItemDelegateForRow(ORDER_DEAD,new DateEditDelegate);
 
     QPushButton *prod_append = new QPushButton(this);
     prod_append->setFlat(true);
@@ -157,7 +149,7 @@ void ProdsPage::initSql()
     QStringList order_items;
     order_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
                 << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
-                << tr("订货数量") << tr("库存数量") << tr("在产数量") << tr("缺料数量") << tr("发货数量");;
+                << tr("订货数量") << tr("在产数量") << tr("入库数量") << tr("发货数量");;
     for (int i=0; i < order_items.size(); i++)
         sql_plan->setHeaderData(i, Qt::Horizontal, order_items.at(i));
     tab_plan->setModel(sql_plan);
@@ -171,8 +163,6 @@ void ProdsPage::initSql()
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
     tab_plan->hideColumn(ORDER_STCK);
-    tab_plan->hideColumn(ORDER_PROD);
-    tab_plan->hideColumn(ORDER_LACK);
     tab_plan->hideColumn(ORDER_DNUM);
 
     sql_prod = new StandardSqlModel(this,db);
@@ -244,17 +234,25 @@ void ProdsPage::autoNumber()
 
 void ProdsPage::initData()
 {
-
+    sql_plan->select();
+    sql_prod->select();
 }
 
 void ProdsPage::appendProd()
 {
     autoNumber();
     int row = sql_prod->rowCount();
-    sql_prod->insertRow(row);
-    for (int i=1; i < m_prod->rowCount(); i++)
-        sql_prod->setData(sql_prod->index(row,i),m_prod->item(i,1)->text());
-    sql_prod->submitAll();
+    int need = m_prod->item(PROD_NEED,1)->text().toInt();
+    int numb = m_prod->item(PROD_QUAN,1)->text().toInt();
+    for (int k=0; k < numb; k++) {
+        sql_prod->insertRow(row+k);
+        int s = 1;
+        if (need <= k)
+            s = PROD_QUAN;
+        for (int i=s; i < m_prod->rowCount(); i++)
+            sql_prod->setData(sql_prod->index(row+k,i),m_prod->item(i,1)->text());
+        sql_prod->submitAll();
+    }
 }
 
 void ProdsPage::deleteProd()
@@ -298,38 +296,39 @@ void ProdsPage::tabProdSync(QModelIndex index)
 void ProdsPage::recvSocket(QUrl url)
 {
     qDebug() << url;
-//    QString cmd = url.query();
-//    QString usr = url.userName();
-//    if (usr != "ProdPage")
-//        return;
-//    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
-//    if (cmd == "orderinfo") {
-//        json_show = QJsonDocument::fromJson(byte).array();
-//        initData();
-//    } else if (cmd == "saleinfo") {
-//        json_sale = QJsonDocument::fromJson(byte).array();
-//        QStringList items;
-//        for (int i=0; i < json_sale.size(); i++) {
-//            QJsonObject obj = json_sale.at(i).toObject();
-//            items.append(obj.value("erp_solename").toString());
-//        }
-//        sale_delegate->setItemHeaders(items);
-//    } else if (cmd == "customerinfo") {
-//        json_customer = QJsonDocument::fromJson(byte).array();
-//        QStringList items;
-//        for (int i=0; i < json_customer.size(); i++) {
-//            QJsonObject obj = json_customer.at(i).toObject();
-//            items.append(obj.value("erp_solename").toString());
-//        }
-//        cust_delegate->setItemHeaders(items);
-//    } else if (cmd == "pmstayinfo") {
-//        qDebug() << QJsonDocument::fromJson(byte).array();
-//    } else {
-//        qDebug() << "recv others" << url.toString();
-//    }
+    //    QString cmd = url.query();
+    //    QString usr = url.userName();
+    //    if (usr != "ProdPage")
+    //        return;
+    //    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
+    //    if (cmd == "orderinfo") {
+    //        json_show = QJsonDocument::fromJson(byte).array();
+    //        initData();
+    //    } else if (cmd == "saleinfo") {
+    //        json_sale = QJsonDocument::fromJson(byte).array();
+    //        QStringList items;
+    //        for (int i=0; i < json_sale.size(); i++) {
+    //            QJsonObject obj = json_sale.at(i).toObject();
+    //            items.append(obj.value("erp_solename").toString());
+    //        }
+    //        sale_delegate->setItemHeaders(items);
+    //    } else if (cmd == "customerinfo") {
+    //        json_customer = QJsonDocument::fromJson(byte).array();
+    //        QStringList items;
+    //        for (int i=0; i < json_customer.size(); i++) {
+    //            QJsonObject obj = json_customer.at(i).toObject();
+    //            items.append(obj.value("erp_solename").toString());
+    //        }
+    //        cust_delegate->setItemHeaders(items);
+    //    } else if (cmd == "pmstayinfo") {
+    //        qDebug() << QJsonDocument::fromJson(byte).array();
+    //    } else {
+    //        qDebug() << "recv others" << url.toString();
+    //    }
 }
 
 void ProdsPage::showEvent(QShowEvent *e)
 {
+    initData();
     e->accept();
 }

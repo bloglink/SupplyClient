@@ -28,10 +28,9 @@
 #define ORDER_AREA 6
 #define ORDER_DEAD 7
 #define ORDER_QUAN 8
-#define ORDER_STCK 9
-#define ORDER_PROD 10
-#define ORDER_LACK 11
-#define ORDER_DNUM 12
+#define ORDER_PROD 9
+#define ORDER_STCK 10
+#define ORDER_DNUM 11
 
 class OrderPage : public QWidget
 {

@@ -47,7 +47,7 @@ void OrderPage::initUI()
 
     order_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
                 << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
-                << tr("订货数量") << tr("库存数量") << tr("在产数量") << tr("缺料数量") << tr("发货数量");
+                << tr("订货数量") << tr("在产数量") << tr("入库数量") << tr("发货数量");
     m_order = new StandardItemModel();
     QStringList order_header;
     order_header << tr("项目") << tr("参数");
@@ -69,6 +69,10 @@ void OrderPage::initUI()
     tab_iorder->setItemDelegateForRow(ORDER_AREA,area_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_SALE,sale_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_DEAD,new DateEditDelegate);
+    tab_iorder->hideRow(ORDER_ID);
+    tab_iorder->hideRow(ORDER_PROD);
+    tab_iorder->hideRow(ORDER_STCK);
+    tab_iorder->hideRow(ORDER_DNUM);
 
     QPushButton *order_append = new QPushButton(this);
     order_append->setFlat(true);
@@ -134,9 +138,8 @@ void OrderPage::initSql()
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_AREA,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STCK,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_LACK,QHeaderView::Stretch);
+    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STCK,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DNUM,QHeaderView::Stretch);
 
     sql_custs = new StandardSqlModel(this,db);
@@ -173,7 +176,12 @@ void OrderPage::showTabOrder()
         customs_head.append(sql_custs->data(sql_custs->index(i,1)).toString());
     cust_delegate->setItemHeaders(customs_head);
 
+    for (int i=0; i < m_order->rowCount(); i++) {
+        m_order->item(i,1)->setText("");
+    }
+
     autoNumber();
+    m_order->item(ORDER_DATE,1)->setText(QDate::currentDate().toString("yyyy-MM-dd"));
 }
 
 void OrderPage::autoNumber()
@@ -273,5 +281,6 @@ void OrderPage::recvSocket(QUrl url)
 
 void OrderPage::showEvent(QShowEvent *e)
 {
+    initData();
     e->accept();
 }
