@@ -41,14 +41,14 @@ void ProdsPage::initUI()
     prod_match->setMinimumSize(97,44);
     prod_match->setText(tr("匹配生产"));
     prod_match->setFocusPolicy(Qt::NoFocus);
-    //    connect(order_mat,SIGNAL(clicked(bool)),this,SLOT(matchPlan()));
+    connect(prod_match,SIGNAL(clicked(bool)),this,SLOT(matchProds()));
 
     QPushButton *prod_cancel = new QPushButton(this);
     prod_cancel->setFlat(true);
     prod_cancel->setMinimumSize(97,44);
     prod_cancel->setText(tr("取消匹配"));
     prod_cancel->setFocusPolicy(Qt::NoFocus);
-    //    connect(order_cnl,SIGNAL(clicked(bool)),this,SLOT(matchCancel()));
+    connect(prod_cancel,SIGNAL(clicked(bool)),this,SLOT(matchCancel()));
 
     QSplitter *pSpliter = new QSplitter(Qt::Vertical);
     pSpliter->addWidget(tab_plan);
@@ -245,25 +245,21 @@ void ProdsPage::initData()
         int dnum = sql_plan->index(i,ORDER_DNUM).data().toInt();
         if (quan == prod+stck+dnum)
             tab_plan->hideRow(i);
+        else
+            tab_plan->showRow(i);
     }
     sql_prod->select();
 }
 
 void ProdsPage::appendProd()
 {
-    autoNumber();
-    int row = sql_prod->rowCount();
-    int need = m_prod->item(PROD_NEED,1)->text().toInt();
+    int rowCount = sql_prod->rowCount();
     int numb = m_prod->item(PROD_QUAN,1)->text().toInt();
     for (int k=0; k < numb; k++) {
-        sql_prod->insertRow(row+k);
-        int s = 1;
-        if (need <= k)
-            s = PROD_QUAN;
-        else
-            s = 1;
-        for (int i=s; i < m_prod->rowCount(); i++)
-            sql_prod->setData(sql_prod->index(row+k,i),m_prod->item(i,1)->text());
+        sql_prod->insertRow(rowCount+k);
+        for (int i=PROD_QUAN; i < m_prod->rowCount(); i++)
+            sql_prod->setData(sql_prod->index(rowCount+k,i),m_prod->item(i,1)->text());
+        sql_prod->setData(sql_prod->index(rowCount+k,PROD_VIEW),m_prod->item(PROD_VIEW,1)->text());
         sql_prod->submitAll();
     }
 }
@@ -293,7 +289,7 @@ void ProdsPage::updateProd()
 void ProdsPage::tabPlanSync(QModelIndex index)
 {
     int row = index.row();
-    for (int i=0; i < m_prod->rowCount(); i++) {
+    for (int i=1; i <= ORDER_QUAN; i++) {
         m_prod->item(i,1)->setText(sql_plan->index(row,i).data().toString());
     }
 }
@@ -304,6 +300,60 @@ void ProdsPage::tabProdSync(QModelIndex index)
     for (int i=0; i < m_prod->rowCount(); i++) {
         m_prod->item(i,1)->setText(sql_prod->index(row,i).data().toString());
     }
+}
+
+void ProdsPage::matchProds()
+{
+    int row = tab_plan->currentIndex().row();
+    if (row < 0)
+        return;
+    QString view = sql_plan->index(row,ORDER_VIEW).data().toString();
+    int quan = sql_plan->index(row,ORDER_QUAN).data().toInt();
+    int prod = sql_plan->index(row,ORDER_PROD).data().toInt();
+    int stck = sql_plan->index(row,ORDER_STCK).data().toInt();
+    int dnum = sql_plan->index(row,ORDER_DNUM).data().toInt();
+
+    for (int i=0; i < sql_prod->rowCount(); i++) {
+        QString prod_view = sql_prod->index(i,PROD_VIEW).data().toString();
+        QString numb = sql_prod->index(i,PROD_NUMB).data().toString();
+        if (numb.isEmpty() && view == prod_view) {
+            for (int k=1; k < PROD_QUAN; k++)
+                sql_prod->setData(sql_prod->index(i,k),sql_plan->index(row,k).data().toString());
+            sql_prod->submitAll();
+            prod++;
+            if (quan == (prod+stck+dnum))
+                break;
+        }
+    }
+    sql_plan->setData(sql_plan->index(row,ORDER_PROD),QString::number(prod));
+    sql_plan->submitAll();
+    initData();
+}
+
+void ProdsPage::matchCancel()
+{
+    int row = tab_prod->currentIndex().row();
+    if (row < 0)
+        return;
+    QString numb = sql_prod->index(row,PROD_NUMB).data().toString();
+    for (int i=0; i < sql_plan->rowCount(); i++) {
+        QString plan_numb = sql_plan->index(i,PROD_NUMB).data().toString();
+        if (numb == plan_numb) {
+            int prod = sql_plan->index(i,ORDER_PROD).data().toInt();
+            prod--;
+            sql_plan->setData(sql_plan->index(i,ORDER_PROD),QString::number(prod));
+            sql_plan->submitAll();
+            qDebug() << prod;
+            break;
+        }
+    }
+    for (int k=1; k < PROD_QUAN; k++) {
+        if (k == PROD_VIEW)
+            continue;
+        sql_prod->setData(sql_prod->index(row,k),"");
+        sql_prod->submitAll();
+    }
+    initData();
 }
 
 void ProdsPage::recvSocket(QUrl url)

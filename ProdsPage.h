@@ -61,6 +61,8 @@ private slots:
     void updateProd();
     void tabPlanSync(QModelIndex index);
     void tabProdSync(QModelIndex index);
+    void matchProds();
+    void matchCancel();
     void recvSocket(QUrl url);
     virtual void showEvent(QShowEvent *e);
 private:

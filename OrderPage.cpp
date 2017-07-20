@@ -215,6 +215,13 @@ void OrderPage::appendOrder()
     for (int i=1; i < m_order->rowCount(); i++)
         sql_order->setData(sql_order->index(row,i),m_order->item(i,1)->text());
     sql_order->submitAll();
+
+    for (int i=ORDER_QUAN; i < m_order->rowCount(); i++) {
+        m_order->item(i,1)->setText("");
+    }
+
+    autoNumber();
+    m_order->item(ORDER_DATE,1)->setText(QDate::currentDate().toString("yyyy-MM-dd"));
 }
 
 void OrderPage::deleteOrder()
