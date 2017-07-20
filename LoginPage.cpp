@@ -175,6 +175,8 @@ void LoginPage::initSql()
     cmd += "order_dnum text)";
     query.exec(cmd);
 
+    query.exec("drop table erp_prods");
+
     cmd = "create table if not exists erp_prods(";
     cmd += "prod_id integer primary key,";
     cmd += "prod_numb text,";
@@ -190,7 +192,9 @@ void LoginPage::initSql()
     cmd += "prod_type text,";
     cmd += "prod_code text,";
     cmd += "prod_name text,";
-    cmd += "prod_mode text)";
+    cmd += "prod_mode text,";
+    cmd += "prod_mnum text,";
+    cmd += "prod_stck text)";
     query.exec(cmd);
 
     cmd = "create table if not exists erp_purchs(";

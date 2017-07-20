@@ -78,7 +78,7 @@ void ProdsPage::initUI()
     prod_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
                << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
                << tr("订货数量") << tr("生产数量") << tr("生产单号") << tr("产品大类")
-               << tr("产品编号") << tr("产品名称") << tr("产品规格");
+               << tr("产品编号") << tr("产品名称") << tr("产品规格") << tr("仪表编号") << tr("入库标志");
     m_prod = new StandardItemModel();
     QStringList prod_header;
     prod_header << tr("项目") << tr("参数");
@@ -91,6 +91,7 @@ void ProdsPage::initUI()
     tab_iprod->setModel(m_prod);
     tab_iprod->setColumnWidth(0,100);
     tab_iprod->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    tab_iprod->hideRow(PROD_ID);
 
     QPushButton *prod_append = new QPushButton(this);
     prod_append->setFlat(true);
@@ -145,7 +146,6 @@ void ProdsPage::initSql()
 
     sql_plan = new StandardSqlModel(this,db);
     sql_plan->setTable("erp_orders");
-    sql_plan->select();
     QStringList order_items;
     order_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
                 << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
@@ -162,13 +162,12 @@ void ProdsPage::initSql()
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_AREA,QHeaderView::Stretch);
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
+    tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
     tab_plan->hideColumn(ORDER_STCK);
     tab_plan->hideColumn(ORDER_DNUM);
 
     sql_prod = new StandardSqlModel(this,db);
     sql_prod->setTable("erp_prods");
-    sql_prod->select();
-
     for (int i=0; i < prod_items.size(); i++)
         sql_prod->setHeaderData(i, Qt::Horizontal, prod_items.at(i));
     tab_prod->setModel(sql_prod);
@@ -180,13 +179,13 @@ void ProdsPage::initSql()
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_SALE,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_AREA,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_DEAD,QHeaderView::Stretch);
-    tab_prod->horizontalHeader()->setSectionResizeMode(PROD_NEED,QHeaderView::Stretch);
-    tab_prod->horizontalHeader()->setSectionResizeMode(PROD_QUAN,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_PNUM,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_TYPE,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_CODE,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_NAME,QHeaderView::Stretch);
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_MODE,QHeaderView::Stretch);
+    tab_prod->hideColumn(PROD_NEED);
+    tab_prod->hideColumn(PROD_QUAN);
 }
 void ProdsPage::showTabProd()
 {
@@ -196,6 +195,10 @@ void ProdsPage::showTabProd()
     } else {
         prodWidget->hide();
         btn_prods->setIcon(QIcon(":/icons/left.png"));
+    }
+
+    for (int i=0; i < m_prod->rowCount(); i++) {
+        m_prod->item(i,1)->setText("");
     }
 
     //    QStringList sales_head;
@@ -235,6 +238,14 @@ void ProdsPage::autoNumber()
 void ProdsPage::initData()
 {
     sql_plan->select();
+    for (int i=0; i < sql_plan->rowCount(); i++) {
+        int quan = sql_plan->index(i,ORDER_QUAN).data().toInt();
+        int prod = sql_plan->index(i,ORDER_PROD).data().toInt();
+        int stck = sql_plan->index(i,ORDER_STCK).data().toInt();
+        int dnum = sql_plan->index(i,ORDER_DNUM).data().toInt();
+        if (quan == prod+stck+dnum)
+            tab_plan->hideRow(i);
+    }
     sql_prod->select();
 }
 
@@ -249,6 +260,8 @@ void ProdsPage::appendProd()
         int s = 1;
         if (need <= k)
             s = PROD_QUAN;
+        else
+            s = 1;
         for (int i=s; i < m_prod->rowCount(); i++)
             sql_prod->setData(sql_prod->index(row+k,i),m_prod->item(i,1)->text());
         sql_prod->submitAll();

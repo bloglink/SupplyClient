@@ -38,6 +38,7 @@
 #define PROD_CODE 12
 #define PROD_NAME 13
 #define PROD_MODE 14
+#define PROD_STCK 15
 
 class ProdsPage : public QWidget
 {
