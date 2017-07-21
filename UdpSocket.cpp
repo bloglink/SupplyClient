@@ -18,6 +18,12 @@ void UdpSocket::initSocket()
     this->bind(QHostAddress::AnyIPv4,LOCAL_PORT);
     connect(this, SIGNAL(readyRead()), this, SLOT(readSocket()));
     guid.setMachineId(20,20);
+    QTimer *t_send = new QTimer(this);
+    connect(t_send,SIGNAL(timeout()),this,SLOT(sendJsonMsg()));
+    t_send->start(5);
+    QTimer *t_recv = new QTimer(this);
+    connect(t_recv,SIGNAL(timeout()),this,SLOT(readJsonMsg()));
+    t_recv->start(5);
 }
 
 void UdpSocket::quitSocket()
@@ -34,25 +40,32 @@ void UdpSocket::readSocket()
         quint16 senderPort;
         this->readDatagram(msg.data(), msg.size(), &sender, &senderPort);
         QJsonObject obj = QJsonDocument::fromJson(QByteArray::fromBase64(msg)).object();
-        emit sendJson(obj);
-        qDebug() << obj;
-
-//        QUrl url(QByteArray::fromBase64(msg));
-//        emit recvSocket(url);
+        qDebug() << "rcev" << obj;
+        recv_queue.enqueue(obj);
     }
 }
 
 void UdpSocket::readJson(QJsonObject obj)
 {
-    obj.insert("guid",qint64(guid.getId()));
-    QByteArray msg = QJsonDocument(obj).toJson().toBase64();
-    this->writeDatagram(msg, QHostAddress::Broadcast, LOCAL_PORT);
+    send_queue.enqueue(obj);
 }
 
-void UdpSocket::excuteMessage()
+void UdpSocket::sendJsonMsg()
 {
-    if (!send_queue.isEmpty())
-        sendSocket(send_queue.dequeue());
+    if (!send_queue.isEmpty()) {
+        QJsonObject obj = send_queue.dequeue();
+        if (obj.value("logs_guid").toDouble() == 0)
+            obj.insert("logs_guid",qint64(guid.getId()));
+        QByteArray msg = QJsonDocument(obj).toJson();
+        this->writeDatagram(msg.toBase64(),QHostAddress::Broadcast,LOCAL_PORT);
+        this->waitForBytesWritten();
+    }
+}
+
+void UdpSocket::readJsonMsg()
+{
+    if (!recv_queue.isEmpty())
+        emit sendJson(recv_queue.dequeue());
 }
 
 void UdpSocket::sendSocket(QUrl url)

@@ -43,17 +43,19 @@ private slots:
     void sendSocket(QUrl url);
     void readSocket(void);
     void readJson(QJsonObject obj);
-    void excuteMessage();
+    void sendJsonMsg();
+    void readJsonMsg();
     QString getLocalHostIP();
     QString getUid();
     void Delay(int ms);
 private:
     QHostAddress addr;
-    QQueue <QUrl> send_queue;
-    QQueue <QUrl> recv_queue;
+    QQueue <QJsonObject> send_queue;
+    QQueue <QJsonObject> recv_queue;
     QUrl userinfo;
     QString uid;
     Snowflake guid;
+
 };
 
 #endif // SocketUdp_H

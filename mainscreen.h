@@ -31,6 +31,8 @@ public:
 signals:
     void sendSocket(QUrl url);
     void sendMsg(QUrl url);
+
+    void sendCommand(QString cmd);
     void sendJson(QJsonObject obj);
 public:
     int login();
@@ -46,6 +48,7 @@ private slots:
     void animationClose();
     void recvSocket(QUrl url);
     void readJson(QJsonObject obj);
+    void roleCommand(QJsonObject obj);
 
     virtual void cloudAntimation();
     virtual void mousePressEvent(QMouseEvent *e);

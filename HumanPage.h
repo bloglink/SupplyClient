@@ -15,6 +15,7 @@
 #include <QSplitter>
 #include <QToolButton>
 
+#include <QSqlQuery>
 #include <QSqlDatabase>
 #include <QSqlTableModel>
 #include <QAbstractItemView>
@@ -59,6 +60,7 @@ private slots:
     void changeRole();
     void updateRole();
     void recvSocket(QUrl url);
+    void recvCommand(QString cmd);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_users;

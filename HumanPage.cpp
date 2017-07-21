@@ -324,10 +324,11 @@ void HumanPage::updateUser()
 void HumanPage::appendRole()
 {
     QJsonObject obj;
-    obj.insert("command","erp_roles");
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",1);
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-    obj.insert("role_sign","1");
+    for (int i=0; i < 100; i++)
     emit sendJson(obj);
     for (int i=0; i < m_roles->rowCount(); i++) {
         m_roles->item(i,1)->setText("");
@@ -337,16 +338,12 @@ void HumanPage::appendRole()
 void HumanPage::deleteRole()
 {
     QJsonObject obj;
-    QString guid = m_roles->item(ROLE_ID,1)->text();
-    if (!guid.isEmpty())
-        obj.insert("role_guid",guid.toDouble());
-    else
-        return;
-    qDebug() << guid;
-    obj.insert("command","erp_roles");
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",2);
+    obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-    obj.insert("role_sign","2");
+
     emit sendJson(obj);
     for (int i=0; i < m_roles->rowCount(); i++) {
         m_roles->item(i,1)->setText("");
@@ -356,21 +353,27 @@ void HumanPage::deleteRole()
 void HumanPage::changeRole()
 {
     QJsonObject obj;
-    QString guid = m_roles->item(ROLE_ID,1)->text();
-    if (!guid.isEmpty())
-        obj.insert("role_guid",guid.toDouble());
-    else
-        return;
-    obj.insert("command","erp_roles");
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",3);
+    obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-    obj.insert("role_sign","3");
+
     emit sendJson(obj);
 }
 
 void HumanPage::updateRole()
 {
-    sql_roles->select();
+    qint64 logs_guid = 0xffffffff;
+    QSqlQuery query(db);
+    query.exec("select id from erp_roles_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
 }
 
 void HumanPage::recvSocket(QUrl url)
@@ -391,6 +394,12 @@ void HumanPage::recvSocket(QUrl url)
     //    } else {
     //        qDebug() << "recv others" << url.toString();
     //    }
+}
+
+void HumanPage::recvCommand(QString cmd)
+{
+    if (cmd == "update")
+        initData();
 }
 
 void HumanPage::showEvent(QShowEvent *e)
