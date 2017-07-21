@@ -24,6 +24,14 @@ int MainScreen::login()
 
 void MainScreen::initUI()
 {
+    //设置界面风格
+    QFile file;
+    QString qss;
+    file.setFileName(":/skins/gn_bu.css");
+    file.open(QFile::ReadOnly);
+    qss = QLatin1String(file.readAll());
+    qApp->setStyleSheet(qss);
+
     this->setWindowFlags(Qt::FramelessWindowHint);
 
     QApplication::setOrganizationName("AIP");

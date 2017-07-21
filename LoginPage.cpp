@@ -22,14 +22,6 @@ LoginPage::~LoginPage()
 
 void LoginPage::initUI()
 {
-    //设置界面风格
-    QFile file;
-    QString qss;
-    file.setFileName(":/skins/gn_bu.css");
-    file.open(QFile::ReadOnly);
-    qss = QLatin1String(file.readAll());
-    qApp->setStyleSheet(qss);
-
     this->setObjectName("LoginPage");
     this->setWindowFlags(Qt::FramelessWindowHint);
 
