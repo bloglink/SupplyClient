@@ -35,6 +35,7 @@ public:
 private slots:
     void initUI();
     void initUdp();
+    void initSql();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);
     void readToolButton();
@@ -58,6 +59,7 @@ private:
     OrderPage *order;
     ProdsPage *prods;
     PurchPage *purch;
+    QSqlDatabase db;
 };
 
 #endif // MAINSCREEN_H

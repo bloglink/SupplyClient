@@ -1,11 +1,13 @@
 #include "mainscreen.h"
 #include <QApplication>
 
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainScreen w;
-    int ret = w.login();
+    LoginPage login;
+    int ret = login.exec();
     if (ret == QDialog::Rejected) {
         return 0;
     }
