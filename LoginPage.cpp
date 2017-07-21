@@ -158,7 +158,7 @@ void LoginPage::initSql()
     cmd += "sale_area text)";
     query.exec(cmd);
 
-//    query.exec("drop table erp_orders");
+    //    query.exec("drop table erp_orders");
 
     cmd = "create table if not exists erp_orders(";
     cmd += "order_id integer primary key,";
@@ -175,7 +175,7 @@ void LoginPage::initSql()
     cmd += "order_dnum text)";
     query.exec(cmd);
 
-//    query.exec("drop table erp_prods");
+    //    query.exec("drop table erp_prods");
 
     cmd = "create table if not exists erp_prods(";
     cmd += "prod_id integer primary key,";
@@ -214,6 +214,10 @@ void LoginPage::initSql()
     cmd += "purch_ofix text,";
     cmd += "purch_mark text)";
     query.exec(cmd);
+
+    m_login = new QSqlTableModel(this,db);
+    m_login->setTable("erp_users");
+    m_login->select();
 }
 
 void LoginPage::initData()
@@ -272,36 +276,17 @@ void LoginPage::saveData()
 
 void LoginPage::login()
 {
-    QUrl url;
-    url.setUserName(usr->currentText());
-    url.setPassword(pwd->text());
-    url.setHost(svr->currentText());
-    url.setPort(10000);
-    url.setQuery("login");
-    emit sendSocket(url);
-
-    QTimer *timer = new QTimer(this);
-    timer->singleShot(200,this,SLOT(loginError()));
-
     saveData();
+    for (int i=0; i < m_login->rowCount(); i++) {
+        QString name = m_login->data(m_login->index(i,USER_NAME)).toString();
+        QString password = m_login->data(m_login->index(i,USER_PASSWORD)).toString();
+        if (name == usr->currentText() && password == pwd->text()) {
+            m_login->setData(m_login->index(i,USER_STAT),"1");
+            this->accept();
+            return;
+        }
+    }
+    QMessageBox::warning(this,"",tr("帐号或密码错误"));
 }
 
-void LoginPage::loginError()
-{
-    QMessageBox::warning(this,"",tr("登录超时"));
-    QTimer *timer = new QTimer(this);
-    timer->singleShot(100,this,SLOT(accept()));
-}
-
-void LoginPage::recvSocket(QUrl url)
-{
-    QString cmd = url.query();
-    QString usr = url.userName();
-    if (usr != "loginscreen")
-        return;
-    if (cmd == "action")
-        this->accept();
-    if (cmd == "error")
-        QMessageBox::warning(this,"",tr("登录失败"));
-}
 /*********************************END OF FILE**********************************/

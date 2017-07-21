@@ -6,18 +6,22 @@
  * author:      zhaonanlin
  * brief:       UDP处理模块
 *******************************************************************************/
-#include "udpsocket.h"
+#include "UdpSocket.h"
 
 UdpSocket::UdpSocket(QObject *parent) : QUdpSocket(parent)
 {
+
 }
 
 void UdpSocket::initSocket()
 {
-    this->bind(LOCAL_PORT);
+    this->bind(QHostAddress::AnyIPv4,LOCAL_PORT);
     connect(this, SIGNAL(readyRead()), this, SLOT(readSocket()));
     addr = QHostAddress(getLocalHostIP());
     uid = getUid();
+    QTimer *timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(Delay(int)));
+    timer->start(10);
 }
 
 void UdpSocket::quitSocket()
@@ -33,10 +37,17 @@ void UdpSocket::readSocket()
         QHostAddress sender;
         quint16 senderPort;
         this->readDatagram(msg.data(), msg.size(), &sender, &senderPort);
+        qDebug() << sender.toString() << msg;
 
         QUrl url(QByteArray::fromBase64(msg));
         emit recvSocket(url);
     }
+}
+
+void UdpSocket::excuteMessage()
+{
+    if (!send_queue.isEmpty())
+        sendSocket(send_queue.dequeue());
 }
 
 void UdpSocket::sendSocket(QUrl url)
@@ -54,11 +65,7 @@ void UdpSocket::sendSocket(QUrl url)
     url.setPort(LOCAL_PORT);
     url.setPath(QString("/%1").arg(getUid()));
     QByteArray msg = url.toString().toUtf8();
-    this->writeDatagram(msg, host, port);
-    this->waitForBytesWritten(1000);
-    Delay(100);
-
-    qDebug() << "send" << url.toString();
+    this->writeDatagram(msg, QHostAddress::Broadcast, port);
 }
 
 QString UdpSocket::getLocalHostIP()

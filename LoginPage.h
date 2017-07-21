@@ -1,7 +1,7 @@
 #ifndef CLOGIN_H
 #define CLOGIN_H
 
-#include <QUrl>
+//#include <QUrl>
 #include <QFile>
 #include <QTimer>
 #include <QDebug>
@@ -21,6 +21,9 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSettings>
+#include <QSqlTableModel>
+
+#include <HumanPage.h>
 
 #define SAVE_MAX 5
 
@@ -39,8 +42,6 @@ private slots:
     void initData();
     void saveData();
     void login();
-    void loginError();
-    void recvSocket(QUrl url);
 private:
     QSqlDatabase db;
     QComboBox *svr;
@@ -48,6 +49,7 @@ private:
     QComboBox *usr;
     QLineEdit *pwd;
     QSettings *ini;
+    QSqlTableModel *m_login;
 };
 
 #endif // CLOGIN_H

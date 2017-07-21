@@ -10,7 +10,7 @@
 #include <QParallelAnimationGroup>
 #include <QSqlTableModel>
 
-#include "udpsocket.h"
+#include "UdpSocket.h"
 
 #include "LoginPage.h"
 #include "AboutPage.h"

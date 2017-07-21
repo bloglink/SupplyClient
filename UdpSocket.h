@@ -11,6 +11,8 @@
 
 #include <QUrl>
 #include <QUuid>
+#include <QTimer>
+#include <QQueue>
 #include <QObject>
 #include <QUdpSocket>
 #include <QElapsedTimer>
@@ -35,11 +37,14 @@ public:
 private slots:
     void sendSocket(QUrl url);
     void readSocket(void);
+    void excuteMessage();
     QString getLocalHostIP();
     QString getUid();
     void Delay(int ms);
 private:
     QHostAddress addr;
+    QQueue <QUrl> send_queue;
+    QQueue <QUrl> recv_queue;
     QUrl userinfo;
     QString uid;
 };
