@@ -56,7 +56,7 @@ class StandardSqlModel : public QSqlTableModel
 {
     Q_OBJECT
 public:
-    StandardSqlModel(QObject *parent, QSqlDatabase db) : QSqlTableModel(parent,db) { }
+    StandardSqlModel(QObject * parent = 0, QSqlDatabase db = QSqlDatabase()) : QSqlTableModel(parent,db) { }
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
     {
         if( Qt::TextAlignmentRole == role )

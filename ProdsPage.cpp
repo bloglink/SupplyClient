@@ -262,12 +262,17 @@ void ProdsPage::appendProd()
         sql_prod->setData(sql_prod->index(rowCount+k,PROD_VIEW),m_prod->item(PROD_VIEW,1)->text());
         sql_prod->submitAll();
     }
+    matchProds();
 }
 
 void ProdsPage::deleteProd()
 {
-    int row = tab_prod->currentIndex().row();
-    sql_prod->removeRow(row);
+    QItemSelectionModel *selections = tab_prod->selectionModel(); //返回当前的选择模式
+    QModelIndexList selecteds = selections->selectedIndexes(); //返回所有选定的模型项目索引列表
+    foreach (QModelIndex index, selecteds) {
+        int row = index.row(); //删除所有被选中的行
+        sql_prod->removeRow(row);
+    }
     sql_prod->submitAll();
     sql_prod->select();
 }
@@ -343,7 +348,6 @@ void ProdsPage::matchCancel()
             prod--;
             sql_plan->setData(sql_plan->index(i,ORDER_PROD),QString::number(prod));
             sql_plan->submitAll();
-            qDebug() << prod;
             break;
         }
     }

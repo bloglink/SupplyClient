@@ -216,7 +216,7 @@ void OrderPage::appendOrder()
         sql_order->setData(sql_order->index(row,i),m_order->item(i,1)->text());
     sql_order->submitAll();
 
-    for (int i=ORDER_QUAN; i < m_order->rowCount(); i++) {
+    for (int i=ORDER_QUAN+1; i < m_order->rowCount(); i++) {
         m_order->item(i,1)->setText("");
     }
 
