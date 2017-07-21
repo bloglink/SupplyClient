@@ -116,7 +116,7 @@ void HumanPage::initUI()
     role_update->setMinimumSize(97,44);
     role_update->setText(tr("刷新显示"));
     role_update->setFocusPolicy(Qt::NoFocus);
-    connect(user_update,SIGNAL(clicked(bool)),this,SLOT(updateRole()));
+    connect(role_update,SIGNAL(clicked(bool)),this,SLOT(updateRole()));
 
     QGridLayout *sroleLayout = new QGridLayout;
     sroleLayout->addWidget(tab_roles,0,0,1,2);
@@ -148,6 +148,7 @@ void HumanPage::initUI()
     tab_irole->setModel(m_roles);
     tab_irole->setColumnWidth(0,50);
     tab_irole->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    tab_irole->hideRow(ROLE_ID);
 
     QPushButton *role_append = new QPushButton(this);
     role_append->setFlat(true);
@@ -235,6 +236,7 @@ void HumanPage::initSql()
     tab_roles->setColumnWidth(ROLE_ID,50);
     tab_roles->setColumnWidth(ROLE_NAME,100);
     tab_roles->horizontalHeader()->setSectionResizeMode(ROLE_MARK,QHeaderView::Stretch);
+    tab_roles->hideColumn(ROLE_ID);
 }
 
 void HumanPage::initData()
@@ -267,6 +269,9 @@ void HumanPage::showTabRole()
     } else {
         roleWidget->hide();
         btn_role->setIcon(QIcon(":/icons/left.png"));
+    }
+    for (int i=0; i < m_roles->rowCount(); i++) {
+        m_roles->item(i,1)->setText("");
     }
 }
 
@@ -318,27 +323,49 @@ void HumanPage::updateUser()
 
 void HumanPage::appendRole()
 {
-    int row = sql_roles->rowCount();
-    sql_roles->insertRow(row);
-    for (int i=1; i < m_roles->rowCount(); i++)
-        sql_roles->setData(sql_roles->index(row,i),m_roles->item(i,1)->text());
-    sql_roles->submitAll();
+    QJsonObject obj;
+    obj.insert("command","erp_roles");
+    obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
+    obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
+    obj.insert("role_sign","1");
+    emit sendJson(obj);
+    for (int i=0; i < m_roles->rowCount(); i++) {
+        m_roles->item(i,1)->setText("");
+    }
 }
 
 void HumanPage::deleteRole()
 {
-    int row = tab_roles->currentIndex().row();
-    sql_roles->removeRow(row);
-    sql_roles->submitAll();
-    sql_roles->select();
+    QJsonObject obj;
+    QString guid = m_roles->item(ROLE_ID,1)->text();
+    if (!guid.isEmpty())
+        obj.insert("role_guid",guid.toDouble());
+    else
+        return;
+    qDebug() << guid;
+    obj.insert("command","erp_roles");
+    obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
+    obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
+    obj.insert("role_sign","2");
+    emit sendJson(obj);
+    for (int i=0; i < m_roles->rowCount(); i++) {
+        m_roles->item(i,1)->setText("");
+    }
 }
 
 void HumanPage::changeRole()
 {
-    int row = tab_roles->currentIndex().row();
-    for (int i=1; i < m_roles->rowCount(); i++)
-        sql_roles->setData(sql_roles->index(row,i),m_roles->item(i,1)->text());
-    sql_roles->submitAll();
+    QJsonObject obj;
+    QString guid = m_roles->item(ROLE_ID,1)->text();
+    if (!guid.isEmpty())
+        obj.insert("role_guid",guid.toDouble());
+    else
+        return;
+    obj.insert("command","erp_roles");
+    obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
+    obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
+    obj.insert("role_sign","3");
+    emit sendJson(obj);
 }
 
 void HumanPage::updateRole()
@@ -348,20 +375,22 @@ void HumanPage::updateRole()
 
 void HumanPage::recvSocket(QUrl url)
 {
-    QString cmd = url.query();
-    QString usr = url.userName();
-    if (usr != "Users")
-        return;
-    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
-    if (cmd == "userinfo") {
-        qDebug() << "recv userinfo" << QJsonDocument::fromJson(byte).array();
-        initData();
-    } else if (cmd == "roleinfo") {
-        qDebug() << "recv roleinfo" << QJsonDocument::fromJson(byte).array();
-        initData();
-    } else {
-        qDebug() << "recv others" << url.toString();
-    }
+    initData();
+    qDebug() << url;
+    //    QString cmd = url.query();
+    //    QString usr = url.userName();
+    //    if (usr != "Users")
+    //        return;
+    //    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
+    //    if (cmd == "userinfo") {
+    //        qDebug() << "recv userinfo" << QJsonDocument::fromJson(byte).array();
+    //        initData();
+    //    } else if (cmd == "roleinfo") {
+    //        qDebug() << "recv roleinfo" << QJsonDocument::fromJson(byte).array();
+    //        initData();
+    //    } else {
+    //        qDebug() << "recv others" << url.toString();
+    //    }
 }
 
 void HumanPage::showEvent(QShowEvent *e)

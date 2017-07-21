@@ -18,6 +18,10 @@
 #include <QElapsedTimer>
 #include <QApplication>
 #include <QNetworkInterface>
+#include <QJsonObject>
+#include <QJsonDocument>
+
+#include "Snowflake.h"
 
 #define LOCAL_PORT 10000
 #define VERSION "erp-0.0.0.1"
@@ -30,6 +34,7 @@ public:
 
 signals:
     void recvSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 public:
     void initSocket(void);
     void quitSocket(void);
@@ -37,6 +42,7 @@ public:
 private slots:
     void sendSocket(QUrl url);
     void readSocket(void);
+    void readJson(QJsonObject obj);
     void excuteMessage();
     QString getLocalHostIP();
     QString getUid();
@@ -47,6 +53,7 @@ private:
     QQueue <QUrl> recv_queue;
     QUrl userinfo;
     QString uid;
+    Snowflake guid;
 };
 
 #endif // SocketUdp_H

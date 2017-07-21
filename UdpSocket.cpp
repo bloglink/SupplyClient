@@ -17,11 +17,7 @@ void UdpSocket::initSocket()
 {
     this->bind(QHostAddress::AnyIPv4,LOCAL_PORT);
     connect(this, SIGNAL(readyRead()), this, SLOT(readSocket()));
-    addr = QHostAddress(getLocalHostIP());
-    uid = getUid();
-    QTimer *timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(Delay(int)));
-    timer->start(10);
+    guid.setMachineId(20,20);
 }
 
 void UdpSocket::quitSocket()
@@ -37,11 +33,20 @@ void UdpSocket::readSocket()
         QHostAddress sender;
         quint16 senderPort;
         this->readDatagram(msg.data(), msg.size(), &sender, &senderPort);
-        qDebug() << sender.toString() << msg;
+        QJsonObject obj = QJsonDocument::fromJson(QByteArray::fromBase64(msg)).object();
+        emit sendJson(obj);
+        qDebug() << obj;
 
-        QUrl url(QByteArray::fromBase64(msg));
-        emit recvSocket(url);
+//        QUrl url(QByteArray::fromBase64(msg));
+//        emit recvSocket(url);
     }
+}
+
+void UdpSocket::readJson(QJsonObject obj)
+{
+    obj.insert("guid",qint64(guid.getId()));
+    QByteArray msg = QJsonDocument(obj).toJson().toBase64();
+    this->writeDatagram(msg, QHostAddress::Broadcast, LOCAL_PORT);
 }
 
 void UdpSocket::excuteMessage()

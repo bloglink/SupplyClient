@@ -9,6 +9,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QSqlTableModel>
+#include <QSqlError>
 
 #include "UdpSocket.h"
 
@@ -30,6 +31,7 @@ public:
 signals:
     void sendSocket(QUrl url);
     void sendMsg(QUrl url);
+    void sendJson(QJsonObject obj);
 public:
     int login();
 private slots:
@@ -43,6 +45,7 @@ private slots:
     void animationHide();
     void animationClose();
     void recvSocket(QUrl url);
+    void readJson(QJsonObject obj);
 
     virtual void cloudAntimation();
     virtual void mousePressEvent(QMouseEvent *e);

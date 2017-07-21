@@ -41,6 +41,7 @@ public:
 
 signals:
     void sendSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 private slots:
     void initUI();
     void initSql();

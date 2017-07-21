@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     ProdsPage.cpp \
     PurchPage.cpp \
     LoginPage.cpp \
-    UdpSocket.cpp
+    UdpSocket.cpp \
+    Snowflake.cpp
 
 HEADERS  += mainscreen.h \
     delegate.h \
@@ -32,7 +33,8 @@ HEADERS  += mainscreen.h \
     ProdsPage.h \
     PurchPage.h \
     LoginPage.h \
-    UdpSocket.h
+    UdpSocket.h \
+    Snowflake.h
 
 RESOURCES += \
     source.qrc

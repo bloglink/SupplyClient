@@ -140,7 +140,7 @@ void MainScreen::initUI()
     this->resize(1280,900);
 
     human = new HumanPage(this);
-    connect(human,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+    connect(human,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
     connect(this,SIGNAL(sendMsg(QUrl)),human,SLOT(recvSocket(QUrl)));
     stack->addWidget(human);
 
@@ -168,8 +168,8 @@ void MainScreen::initUI()
 void MainScreen::initUdp()
 {
     udp.initSocket();
-    connect(this,SIGNAL(sendSocket(QUrl)),&udp,SLOT(sendSocket(QUrl)));
-    connect(&udp,SIGNAL(recvSocket(QUrl)),this,SLOT(recvSocket(QUrl)));
+    connect(this,SIGNAL(sendJson(QJsonObject)),&udp,SLOT(readJson(QJsonObject)));
+    connect(&udp,SIGNAL(sendJson(QJsonObject)),this,SLOT(readJson(QJsonObject)));
 }
 
 void MainScreen::initSql()
@@ -194,18 +194,20 @@ void MainScreen::initSql()
     cmd += "user_stat text)";
     query.exec(cmd);
 
+    query.exec("drop table erp_roles");
+    query.exec("drop table erp_roles_log");
+
     cmd = "create table if not exists erp_roles(";
-    cmd += "role_id integer primary key,";
+    cmd += "role_guid integer primary key,";
     cmd += "role_name text,";
     cmd += "role_mark text)";
     query.exec(cmd);
 
     cmd = "create table if not exists erp_roles_log(";
     cmd += "role_log_id integer primary key,";
-    cmd += "role_id text";
+    cmd += "role_guid integer,";
     cmd += "role_name text,";
     cmd += "role_mark text,";
-    cmd += "role_opera text,";
     cmd += "role_sign text)";
     query.exec(cmd);
 
@@ -364,6 +366,47 @@ void MainScreen::recvSocket(QUrl url)
     } else {
         qDebug() << "recv others" << url.toString();
     }
+}
+
+void MainScreen::readJson(QJsonObject obj)
+{
+    QString cmd = obj.value("command").toString();
+
+    QSqlQuery query(db);
+    if (cmd == "erp_roles") {
+        qint64 guid = obj.value("guid").toDouble();
+        qint64 role_guid = obj.value("role_guid").toDouble();
+        if (role_guid == 0)
+            role_guid = guid;
+        if (obj.value("role_sign") == "1") {
+            query.prepare("insert into erp_roles values(?,?,?)");
+            query.bindValue(0,role_guid);
+            query.bindValue(1,obj.value("role_name").toString());
+            query.bindValue(2,obj.value("role_mark").toString());
+            query.exec();
+        }
+        if (obj.value("role_sign") == "2") {
+            query.prepare("delete from erp_roles where role_guid=:id");
+            query.bindValue(":id",role_guid);
+            query.exec();
+        }
+        if (obj.value("role_sign") == "3") {
+            query.prepare("update erp_roles set role_name=:1,role_mark=:2 where role_guid=:3");
+            query.bindValue(":1",obj.value("role_name").toString());
+            query.bindValue(":2",obj.value("role_mark").toString());
+            query.bindValue(":3",role_guid);
+            query.exec();
+        }
+        query.prepare("insert into erp_roles_log values(?,?,?,?,?)");
+        query.bindValue(0,guid);
+        query.bindValue(1,role_guid);
+        query.bindValue(2,obj.value("role_name").toString());
+        query.bindValue(3,obj.value("role_mark").toString());
+        query.bindValue(4,obj.value("role_sign").toString());
+        query.exec();
+    }
+    QUrl url;
+    emit sendMsg(url);
 }
 
 void MainScreen::cloudAntimation()
