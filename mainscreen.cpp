@@ -184,6 +184,7 @@ void MainScreen::initSql()
     db.open();
 
     QSqlQuery query(db);
+
     QString cmd = "create table if not exists erp_users(";
     cmd += "user_id integer primary key,";
     cmd += "user_name text,";
@@ -197,6 +198,15 @@ void MainScreen::initSql()
     cmd += "role_id integer primary key,";
     cmd += "role_name text,";
     cmd += "role_mark text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_roles_log(";
+    cmd += "role_log_id integer primary key,";
+    cmd += "role_id text";
+    cmd += "role_name text,";
+    cmd += "role_mark text,";
+    cmd += "role_opera text,";
+    cmd += "role_sign text)";
     query.exec(cmd);
 
     cmd = "create table if not exists erp_customs(";
