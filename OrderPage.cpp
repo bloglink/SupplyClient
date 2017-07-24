@@ -141,9 +141,10 @@ void OrderPage::initSql()
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STCK,QHeaderView::Stretch);
     tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DNUM,QHeaderView::Stretch);
+    tab_order->hideColumn(ORDER_ID);
 
     sql_custs = new StandardSqlModel(this,db);
-    sql_custs->setTable("erp_customs");
+    sql_custs->setTable("erp_custs");
     sql_custs->select();
 
     sql_sales = new StandardSqlModel(this,db);
@@ -209,35 +210,65 @@ void OrderPage::initData()
 
 void OrderPage::appendOrder()
 {
-    autoNumber();
-    int row = sql_order->rowCount();
-    sql_order->insertRow(row);
-    for (int i=1; i < m_order->rowCount(); i++)
-        sql_order->setData(sql_order->index(row,i),m_order->item(i,1)->text());
-    sql_order->submitAll();
-
-    for (int i=ORDER_QUAN+1; i < m_order->rowCount(); i++) {
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_orders");
+    obj.insert("logs_sign",1);
+    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
+    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
+    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
+    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
+    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
+    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
+    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
+    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
+    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_order->rowCount(); i++)
         m_order->item(i,1)->setText("");
-    }
-
-    autoNumber();
-    m_order->item(ORDER_DATE,1)->setText(QDate::currentDate().toString("yyyy-MM-dd"));
 }
 
 void OrderPage::deleteOrder()
 {
-    int row = tab_order->currentIndex().row();
-    sql_order->removeRow(row);
-    sql_order->submitAll();
-    sql_order->select();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_orders");
+    obj.insert("logs_sign",2);
+    obj.insert("tabs_guid",m_order->item(ORDER_ID,1)->text().toDouble());
+    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
+    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
+    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
+    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
+    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
+    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
+    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
+    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
+    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_order->rowCount(); i++)
+        m_order->item(i,1)->setText("");
 }
 
 void OrderPage::changeOrder()
 {
-    int row = tab_order->currentIndex().row();
-    for (int i=1; i < m_order->rowCount(); i++)
-        sql_order->setData(sql_order->index(row,i),m_order->item(i,1)->text());
-    sql_order->submitAll();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_orders");
+    obj.insert("logs_sign",3);
+    obj.insert("tabs_guid",m_order->item(ORDER_ID,1)->text().toDouble());
+    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
+    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
+    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
+    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
+    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
+    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
+    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
+    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
+    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    emit sendJson(obj);
 }
 
 void OrderPage::updateOrder()
@@ -253,37 +284,124 @@ void OrderPage::tabSync(QModelIndex index)
     }
 }
 
-void OrderPage::recvSocket(QUrl url)
+void OrderPage::recvOrderJson(QJsonObject obj)
 {
-    //    QString cmd = url.query();
-    //    QString usr = url.userName();
-    //    if (usr != "OrderPage")
-    //        return;
-    //    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
-    //    if (cmd == "orderinfo") {
-    //        json_show = QJsonDocument::fromJson(byte).array();
-    //        initData();
-    //    } else if (cmd == "saleinfo") {
-    //        json_sale = QJsonDocument::fromJson(byte).array();
-    //        QStringList items;
-    //        for (int i=0; i < json_sale.size(); i++) {
-    //            QJsonObject obj = json_sale.at(i).toObject();
-    //            items.append(obj.value("erp_solename").toString());
-    //        }
-    //        sale_delegate->setItemHeaders(items);
-    //    } else if (cmd == "customerinfo") {
-    //        json_customer = QJsonDocument::fromJson(byte).array();
-    //        QStringList items;
-    //        for (int i=0; i < json_customer.size(); i++) {
-    //            QJsonObject obj = json_customer.at(i).toObject();
-    //            items.append(obj.value("erp_solename").toString());
-    //        }
-    //        cust_delegate->setItemHeaders(items);
-    //    } else if (cmd == "pmstayinfo") {
-    //        qDebug() << QJsonDocument::fromJson(byte).array();
-    //    } else {
-    //        qDebug() << "recv others" << url.toString();
-    //    }
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    query.prepare("select count(*) from erp_orders_log where id=:id");
+    query.bindValue(":id",logs_guid);
+    query.exec();
+    query.next();
+    if (query.value(0).toInt() > 0)
+        return;
+    QString cmd;
+
+    switch (logs_sign) {
+    case 0://查询
+        logs_guid = tabs_guid;
+        if (logs_guid == 0xffffffff) {
+            query.prepare("select * from erp_orders_log");
+        } else {
+            query.prepare("select * from erp_orders_log where id>:id");
+            query.bindValue(":id",logs_guid);
+        }
+        query.exec();
+        while (query.next()) {
+            QJsonObject send_obj;
+            send_obj.insert("sendto",obj.value("sender").toString());
+            send_obj.insert("logs_cmmd","erp_orders");
+            send_obj.insert("logs_guid",query.value(0).toDouble());
+            send_obj.insert("logs_sign",query.value(1).toDouble());
+            send_obj.insert("tabs_guid",query.value(2).toDouble());
+            send_obj.insert("order_numb",query.value(3).toString());
+            send_obj.insert("order_date",query.value(4).toString());
+            send_obj.insert("order_view",query.value(5).toString());
+            send_obj.insert("order_cust",query.value(6).toString());
+            send_obj.insert("order_sale",query.value(7).toDouble());
+            send_obj.insert("order_area",query.value(8).toDouble());
+            send_obj.insert("order_dead",query.value(9).toDouble());
+            send_obj.insert("order_quan",query.value(10).toString());
+            send_obj.insert("order_prod",query.value(11).toString());
+            send_obj.insert("order_stck",query.value(12).toString());
+            send_obj.insert("order_dnum",query.value(13).toString());
+            emit sendJson(send_obj);
+        }
+        return;
+        break;
+    case 1://增加
+        tabs_guid = logs_guid;
+        query.prepare("insert into erp_orders values(?,?,?,?,?,?,?,?,?,?,?,?)");
+        query.bindValue(0,tabs_guid);
+        query.bindValue(1,obj.value("order_numb").toString());
+        query.bindValue(2,obj.value("order_date").toString());
+        query.bindValue(3,obj.value("order_view").toString());
+        query.bindValue(4,obj.value("order_cust").toString());
+        query.bindValue(5,obj.value("order_sale").toString());
+        query.bindValue(6,obj.value("order_area").toString());
+        query.bindValue(7,obj.value("order_dead").toString());
+        query.bindValue(8,obj.value("order_quan").toString());
+        query.bindValue(9,obj.value("order_prod").toString());
+        query.bindValue(10,obj.value("order_stck").toString());
+        query.bindValue(11,obj.value("order_dnum").toString());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_orders where id=:id");
+        query.bindValue(":id",tabs_guid);
+        query.exec();
+        break;
+    case 3://修改
+        cmd += "update erp_orders set ";
+        cmd += "order_numb=:order_numb,";
+        cmd += "order_date=:order_date,";
+        cmd += "order_view=:order_view,";
+        cmd += "order_cust=:order_cust,";
+        cmd += "order_sale=:order_sale,";
+        cmd += "order_area=:order_area,";
+        cmd += "order_dead=:order_dead,";
+        cmd += "order_quan=:order_quan,";
+        cmd += "order_prod=:order_prod,";
+        cmd += "order_stck=:order_stck,";
+        cmd += "order_dnum=:order_dnum ";
+        cmd += "where id=:tabs_guid";
+        query.prepare(cmd);
+        query.bindValue(":order_numb",obj.value("order_numb").toString());
+        query.bindValue(":order_date",obj.value("order_date").toString());
+        query.bindValue(":order_view",obj.value("order_view").toString());
+        query.bindValue(":order_cust",obj.value("order_cust").toString());
+        query.bindValue(":order_sale",obj.value("order_sale").toString());
+        query.bindValue(":order_area",obj.value("order_area").toString());
+        query.bindValue(":order_dead",obj.value("order_dead").toString());
+        query.bindValue(":order_quan",obj.value("order_quan").toString());
+        query.bindValue(":order_prod",obj.value("order_prod").toString());
+        query.bindValue(":order_stck",obj.value("order_stck").toString());
+        query.bindValue(":order_dnum",obj.value("order_dnum").toString());
+        query.bindValue(":tabs_guid",tabs_guid);
+        query.exec();
+        break;
+    default:
+        break;
+    }
+    query.prepare("insert into erp_orders_log values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.bindValue(0,logs_guid);
+    query.bindValue(1,logs_sign);
+    query.bindValue(2,tabs_guid);
+    query.bindValue(3,obj.value("order_numb").toString());
+    query.bindValue(4,obj.value("order_date").toString());
+    query.bindValue(5,obj.value("order_view").toString());
+    query.bindValue(6,obj.value("order_cust").toString());
+    query.bindValue(7,obj.value("order_sale").toString());
+    query.bindValue(8,obj.value("order_area").toString());
+    query.bindValue(9,obj.value("order_dead").toString());
+    query.bindValue(10,obj.value("order_quan").toString());
+    query.bindValue(11,obj.value("order_prod").toString());
+    query.bindValue(12,obj.value("order_stck").toString());
+    query.bindValue(13,obj.value("order_dnum").toString());
+    query.exec();
+    sql_order->select();
 }
 
 void OrderPage::showEvent(QShowEvent *e)

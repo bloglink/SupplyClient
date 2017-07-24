@@ -13,9 +13,14 @@
 #include <QHeaderView>
 #include <QPushButton>
 #include <QToolButton>
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+
+#include <QSqlQuery>
+#include <QSqlDatabase>
+#include <QSqlTableModel>
 
 #include "delegate.h"
 
@@ -41,6 +46,7 @@ public:
 
 signals:
     void sendSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 private slots:
     void initUI();
     void initSql();
@@ -52,7 +58,7 @@ private slots:
     void changeOrder();
     void updateOrder();
     void tabSync(QModelIndex index);
-    void recvSocket(QUrl url);
+    void recvOrderJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_order;

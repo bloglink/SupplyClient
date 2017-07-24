@@ -152,8 +152,8 @@ void MainScreen::initUI()
     stack->addWidget(sales);
 
     order = new OrderPage(this);
-    connect(order,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),order,SLOT(recvSocket(QUrl)));
+    connect(order,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
+    connect(this,SIGNAL(orderJson(QJsonObject)),order,SLOT(recvOrderJson(QJsonObject)));
     stack->addWidget(order);
 
     prods = new ProdsPage(this);
@@ -194,38 +194,37 @@ void MainScreen::initSql()
 
     cmd = "create table if not exists erp_roles(";
     cmd += "id integer primary key,";
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
+    cmd += "role_name text,";//角色名称
+    cmd += "role_mark text)";//角色备注
     query.exec(cmd);
 
     cmd = "create table if not exists erp_roles_log(";
     cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
+    cmd += "logs_sign integer,";//操作标识
+    cmd += "tabs_guid integer,";//角色ID
     cmd += "role_name text,";
     cmd += "role_mark text)";
     query.exec(cmd);
 
     query.exec("select id from erp_roles_log order by id desc");
     if (query.next())
-        logs_guid = query.value(0).toDouble();
+        logs_guid = query.value(0).toDouble();//找到本地最新的日志记录
     else
         logs_guid = 0xffffffff;
     obj.insert("logs_cmmd","erp_roles");
     obj.insert("logs_sign",0);
     obj.insert("tabs_guid",logs_guid);
-
-    emit sendJson(obj);
+    emit sendJson(obj);//查询是否是最新,服务器返回比此记录更新的操作记录
 
 //    query.exec("drop table erp_users");
 //    query.exec("drop table erp_users_log");
 
     cmd = "create table if not exists erp_users(";
     cmd += "id integer primary key,";
-    cmd += "user_name text,";
-    cmd += "user_pass text,";
-    cmd += "user_role text,";
-    cmd += "user_date text)";
+    cmd += "user_name text,";//用户名称
+    cmd += "user_pass text,";//用户密码
+    cmd += "user_role text,";//用户角色
+    cmd += "user_date text)";//加入日期
     query.exec(cmd);
 
     cmd = "create table if not exists erp_users_log(";
@@ -244,7 +243,7 @@ void MainScreen::initSql()
     query.bindValue(2,"1234");
     query.bindValue(3,"管理");
     query.bindValue(4,"2017-07-24");
-    query.exec();
+    query.exec();//加入管理员
 
     query.exec("select id from erp_users_log order by id desc");
     if (query.next())
@@ -256,13 +255,13 @@ void MainScreen::initSql()
     obj.insert("tabs_guid",logs_guid);
     emit sendJson(obj);
 
-    query.exec("drop table erp_sales");
-    query.exec("drop table erp_sales_log");
+//    query.exec("drop table erp_sales");
+//    query.exec("drop table erp_sales_log");
 
     cmd = "create table if not exists erp_sales(";
     cmd += "id integer primary key,";
-    cmd += "sale_name text,";
-    cmd += "sale_area text)";
+    cmd += "sale_name text,";//销售名称
+    cmd += "sale_area text)";//所属区域
     query.exec(cmd);
 
     cmd = "create table if not exists erp_sales_log(";
@@ -283,14 +282,14 @@ void MainScreen::initSql()
     obj.insert("tabs_guid",logs_guid);
     emit sendJson(obj);
 
-    query.exec("drop table erp_custs");
-    query.exec("drop table erp_custs_log");
+//    query.exec("drop table erp_custs");
+//    query.exec("drop table erp_custs_log");
 
     cmd = "create table if not exists erp_custs(";
     cmd += "id integer primary key,";
-    cmd += "cust_name text,";
-    cmd += "cust_sale text,";
-    cmd += "cust_area text)";
+    cmd += "cust_name text,";//客户名称
+    cmd += "cust_sale text,";//销售名称
+    cmd += "cust_area text)";//所属区域
     query.exec(cmd);
 
     cmd = "create table if not exists erp_custs_log(";
@@ -312,24 +311,50 @@ void MainScreen::initSql()
     obj.insert("tabs_guid",logs_guid);
     emit sendJson(obj);
 
-//    QSqlQuery query(db);
+    query.exec("drop table erp_orders");
+    query.exec("drop table erp_orders_log");
 
-//    //    query.exec("drop table erp_orders");
+    cmd = "create table if not exists erp_orders(";
+    cmd += "id integer primary key,";
+    cmd += "order_numb text,";//订单编号
+    cmd += "order_date text,";//订单日期
+    cmd += "order_view text,";//评审编号
+    cmd += "order_cust text,";//客户名称
+    cmd += "order_sale text,";//销售经理
+    cmd += "order_area text,";//所属区域
+    cmd += "order_dead text,";//交货日期
+    cmd += "order_quan text,";//订货数量
+    cmd += "order_prod text,";//在产数量
+    cmd += "order_stck text,";//入库数量
+    cmd += "order_dnum text)";//发货数量
+    query.exec(cmd);
 
-//    QString cmd = "create table if not exists erp_orders(";
-//    cmd += "order_id integer primary key,";
-//    cmd += "order_numb text,";
-//    cmd += "order_date text,";
-//    cmd += "order_view text,";
-//    cmd += "order_cust text,";
-//    cmd += "order_sale text,";
-//    cmd += "order_area text,";
-//    cmd += "order_dead text,";
-//    cmd += "order_quan text,";
-//    cmd += "order_prod text,";
-//    cmd += "order_stck text,";
-//    cmd += "order_dnum text)";
-//    query.exec(cmd);
+    cmd = "create table if not exists erp_orders_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "order_numb text,";
+    cmd += "order_date text,";
+    cmd += "order_view text,";
+    cmd += "order_cust text,";
+    cmd += "order_sale text,";
+    cmd += "order_area text,";
+    cmd += "order_dead text,";
+    cmd += "order_quan text,";
+    cmd += "order_prod text,";
+    cmd += "order_stck text,";
+    cmd += "order_dnum text)";
+    query.exec(cmd);
+
+    query.exec("select id from erp_orders_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    else
+        logs_guid = 0xffffffff;
+    obj.insert("logs_cmmd","erp_orders");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
 
 //    //    query.exec("drop table erp_prods");
 
@@ -470,6 +495,8 @@ void MainScreen::recvNetJson(QJsonObject obj)
         emit salesJson(obj);
     if (cmd == "erp_custs")
         emit custsJson(obj);
+    if (cmd == "erp_orders")
+        emit orderJson(obj);
 }
 
 void MainScreen::cloudAntimation()

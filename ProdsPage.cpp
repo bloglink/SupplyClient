@@ -3,7 +3,7 @@
 ProdsPage::ProdsPage(QWidget *parent) : QWidget(parent)
 {
     initUI();
-    initSql();
+//    initSql();
 }
 
 

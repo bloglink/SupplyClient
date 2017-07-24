@@ -36,6 +36,7 @@ signals:
     void usersJson(QJsonObject obj);
     void salesJson(QJsonObject obj);
     void custsJson(QJsonObject obj);
+    void orderJson(QJsonObject obj);
     void sendJson(QJsonObject obj);
 public:
     int login();

@@ -3,7 +3,7 @@
 PurchPage::PurchPage(QWidget *parent) : QWidget(parent)
 {
     initUI();
-    initSql();
+//    initSql();
 }
 
 PurchPage::~PurchPage()
