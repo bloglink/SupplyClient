@@ -62,6 +62,7 @@ void HumanPage::initUI()
     tab_iuser->setItemDelegateForRow(USER_ID, new ReadOnlyDelegate);
     tab_iuser->setItemDelegateForRow(USER_ROLE, role_delegate);
     tab_iuser->setItemDelegateForRow(USER_DATE, new DateEditDelegate);
+    tab_iuser->hideRow(USER_ID);
 
     QPushButton *user_append = new QPushButton(this);
     user_append->setFlat(true);
@@ -211,6 +212,74 @@ void HumanPage::initSql()
     db = QSqlDatabase::addDatabase("QSQLITE", "erp_human");
     db.setDatabaseName("erp.db");
     db.open();
+
+    qint64 logs_guid = 0xffffffff;
+    QSqlQuery query(db);
+    QString cmd;
+    QJsonObject obj;
+    //    query.exec("drop table erp_roles");
+    //    query.exec("drop table erp_roles_log");
+
+    cmd = "create table if not exists erp_roles(";
+    cmd += "id integer primary key,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_roles_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    query.exec("select id from erp_roles_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
+
+//    query.exec("drop table erp_users");
+//    query.exec("drop table erp_users_log");
+
+    cmd = "create table if not exists erp_users(";
+    cmd += "id integer primary key,";
+    cmd += "user_name text,";
+    cmd += "user_pass text,";
+    cmd += "user_role text,";
+    cmd += "user_date text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_users_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "user_name text,";
+    cmd += "user_pass text,";
+    cmd += "user_role text,";
+    cmd += "user_date text)";
+    query.exec(cmd);
+
+    query.prepare("insert into erp_users values(?,?,?,?,?)");
+    query.bindValue(0,0xffffffff);
+    query.bindValue(1,"admin");
+    query.bindValue(2,"1234");
+    query.bindValue(3,"管理");
+    query.bindValue(4,"2017-07-24");
+    query.exec();
+
+    query.exec("select id from erp_users_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
+
     sql_users = new StandardSqlModel(this,db);
     sql_users->setTable("erp_users");
     sql_users->select();
@@ -220,11 +289,11 @@ void HumanPage::initSql()
     tab_users->setModel(sql_users);
     tab_users->setColumnWidth(USER_ID,50);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_NAME,QHeaderView::Stretch);
-    tab_users->horizontalHeader()->setSectionResizeMode(USER_PASSWORD,QHeaderView::Stretch);
+    tab_users->horizontalHeader()->setSectionResizeMode(USER_PASS,QHeaderView::Stretch);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_ROLE,QHeaderView::Stretch);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_DATE,QHeaderView::Stretch);
-    tab_users->hideColumn(USER_PASSWORD);
-    tab_users->hideColumn(USER_STAT);
+    tab_users->hideColumn(USER_PASS);
+    tab_users->hideColumn(USER_ID);
 
     sql_roles = new StandardSqlModel(this,db);
     sql_roles->setTable("erp_roles");
@@ -293,27 +362,45 @@ void HumanPage::tabRoleSync(QModelIndex index)
 
 void HumanPage::appendUser()
 {
-    int row = sql_users->rowCount();
-    sql_users->insertRow(row);
-    for (int i=1; i < m_users->rowCount(); i++)
-        sql_users->setData(sql_users->index(row,i),m_users->item(i,1)->text());
-    sql_users->submitAll();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_sign",1);
+    obj.insert("user_name",m_users->item(USER_NAME,1)->text());
+    obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
+    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_date",m_users->item(USER_DATE,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_users->rowCount(); i++)
+        m_users->item(i,1)->setText("");
 }
 
 void HumanPage::deleteUser()
 {
-    int row = tab_users->currentIndex().row();
-    sql_users->removeRow(row);
-    sql_users->submitAll();
-    sql_users->select();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_sign",2);
+    obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
+    obj.insert("user_name",m_users->item(USER_NAME,1)->text());
+    obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
+    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_date",m_users->item(USER_DATE,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_users->rowCount(); i++)
+        m_users->item(i,1)->setText("");
+
 }
 
 void HumanPage::changeUser()
 {
-    int row = tab_users->currentIndex().row();
-    for (int i=1; i < m_users->rowCount(); i++)
-        sql_users->setData(sql_users->index(row,i),m_users->item(i,1)->text());
-    sql_users->submitAll();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_sign",3);
+    obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
+    obj.insert("user_name",m_users->item(USER_NAME,1)->text());
+    obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
+    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_date",m_users->item(USER_DATE,1)->text());
+    emit sendJson(obj);
 }
 
 void HumanPage::updateUser()
@@ -329,9 +416,8 @@ void HumanPage::appendRole()
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_roles->rowCount(); i++) {
+    for (int i=0; i < m_roles->rowCount(); i++)
         m_roles->item(i,1)->setText("");
-    }
 }
 
 void HumanPage::deleteRole()
@@ -342,11 +428,9 @@ void HumanPage::deleteRole()
     obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-
     emit sendJson(obj);
-    for (int i=0; i < m_roles->rowCount(); i++) {
+    for (int i=0; i < m_roles->rowCount(); i++)
         m_roles->item(i,1)->setText("");
-    }
 }
 
 void HumanPage::changeRole()
@@ -357,7 +441,6 @@ void HumanPage::changeRole()
     obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-
     emit sendJson(obj);
 }
 

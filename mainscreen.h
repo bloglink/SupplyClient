@@ -40,7 +40,6 @@ private slots:
     void initUI();
     void initUdp();
     void initSql();
-    void initRole();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);
     void readToolButton();
@@ -50,6 +49,7 @@ private slots:
     void recvSocket(QUrl url);
     void recvNetJson(QJsonObject obj);
     void roleCommand(QJsonObject obj);
+    void userCommand(QJsonObject obj);
 
     virtual void cloudAntimation();
     virtual void mousePressEvent(QMouseEvent *e);

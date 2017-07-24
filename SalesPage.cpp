@@ -11,7 +11,6 @@ SalesPage::~SalesPage()
     db.close();
 }
 
-
 void SalesPage::initUI()
 {
     this->setObjectName("SalesPage");

@@ -186,18 +186,7 @@ void MainScreen::initSql()
 
     QSqlQuery query(db);
 
-    QString cmd = "create table if not exists erp_users(";
-    cmd += "user_id integer primary key,";
-    cmd += "user_name text,";
-    cmd += "user_password text,";
-    cmd += "user_role text,";
-    cmd += "user_date text,";
-    cmd += "user_stat text)";
-    query.exec(cmd);
-
-    initRole();
-
-    cmd = "create table if not exists erp_customs(";
+    QString cmd = "create table if not exists erp_customs(";
     cmd += "custom_id integer primary key,";
     cmd += "custom_name text,";
     cmd += "custom_sale text,";
@@ -268,37 +257,6 @@ void MainScreen::initSql()
     query.exec(cmd);
 }
 
-void MainScreen::initRole()
-{
-    isLogin = false;
-    qint64 logs_guid = 0xffffffff;
-    QSqlQuery query(db);
-    query.exec("drop table erp_roles");
-    query.exec("drop table erp_roles_log");
-
-    QString cmd = "create table if not exists erp_roles(";
-    cmd += "id integer primary key,";
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
-    query.exec(cmd);
-
-    cmd = "create table if not exists erp_roles_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
-    query.exec(cmd);
-
-    query.exec("select id from erp_roles_log order by id desc");
-    if (query.next())
-        logs_guid = query.value(0).toDouble();
-    QJsonObject obj;
-    obj.insert("logs_cmmd","erp_roles");
-    obj.insert("logs_sign",0);
-    obj.insert("tabs_guid",logs_guid);
-    emit sendJson(obj);
-}
 void MainScreen::swithMaxNormal()
 {
     if(isMaximized())
@@ -391,6 +349,8 @@ void MainScreen::recvNetJson(QJsonObject obj)
     QString cmd = obj.value("logs_cmmd").toString();
     if (cmd == "erp_roles")
         roleCommand(obj);
+    if (cmd == "erp_users")
+        userCommand(obj);
 }
 
 void MainScreen::roleCommand(QJsonObject obj)
@@ -404,12 +364,9 @@ void MainScreen::roleCommand(QJsonObject obj)
     query.bindValue(":id",logs_guid);
     query.exec();
     query.next();
-    if (query.value(0).toInt() > 0) {
-        qDebug() << "contains log" << logs_guid;
+    if (query.value(0).toInt() > 0)
         return;
-    } else {
-        qDebug() << "not contain" << obj;
-    }
+
     switch (logs_sign) {
     case 0://查询
         logs_guid = tabs_guid;
@@ -464,6 +421,92 @@ void MainScreen::roleCommand(QJsonObject obj)
     query.bindValue(2,tabs_guid);
     query.bindValue(3,obj.value("role_name").toString());
     query.bindValue(4,obj.value("role_mark").toString());
+    query.exec();
+    emit sendCommand("update");
+}
+
+void MainScreen::userCommand(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    query.prepare("select count(*) from erp_users_log where id=:id");
+    query.bindValue(":id",logs_guid);
+    query.exec();
+    query.next();
+    if (query.value(0).toInt() > 0)
+        return;
+    QString cmd;
+
+    switch (logs_sign) {
+    case 0://查询
+        logs_guid = tabs_guid;
+        if (logs_guid == 0xffffffff) {
+            qDebug() << "blank";
+            query.prepare("select * from erp_users_log");
+        } else {
+            query.prepare("select * from erp_users_log where id>:id");
+            query.bindValue(":id",logs_guid);
+        }
+        query.exec();
+        while (query.next()) {
+            QJsonObject sned_obj;
+            sned_obj.insert("sendto",obj.value("sender").toString());
+            sned_obj.insert("logs_cmmd","erp_users");
+            sned_obj.insert("logs_guid",query.value(0).toDouble());
+            sned_obj.insert("logs_sign",query.value(1).toDouble());
+            sned_obj.insert("tabs_guid",query.value(2).toDouble());
+            sned_obj.insert("user_name",query.value(3).toString());
+            sned_obj.insert("user_pass",query.value(4).toString());
+            sned_obj.insert("user_role",query.value(5).toString());
+            sned_obj.insert("user_date",query.value(6).toString());
+            emit sendJson(sned_obj);
+        }
+        return;
+        break;
+    case 1://增加
+        tabs_guid = logs_guid;
+        query.prepare("insert into erp_users values(?,?,?,?,?)");
+        query.bindValue(0,tabs_guid);
+        query.bindValue(1,obj.value("user_name").toString());
+        query.bindValue(2,obj.value("user_pass").toString());
+        query.bindValue(3,obj.value("user_role").toString());
+        query.bindValue(4,obj.value("user_date").toString());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_users where id=:id");
+        query.bindValue(":id",tabs_guid);
+        query.exec();
+        break;
+    case 3://修改
+        cmd += "update erp_users set ";
+        cmd += "user_name=:user_name,";
+        cmd += "user_pass=:user_pass,";
+        cmd += "user_role=:user_role,";
+        cmd += "user_date=:user_date ";
+        cmd += "where id=:tabs_guid";
+        query.prepare(cmd);
+        query.bindValue(":user_name",obj.value("user_name").toString());
+        query.bindValue(":user_pass",obj.value("user_pass").toString());
+        query.bindValue(":user_role",obj.value("user_role").toString());
+        query.bindValue(":user_date",obj.value("user_date").toString());
+        query.bindValue(":tabs_guid",tabs_guid);
+        qDebug() << query.exec() << query.lastError();
+        break;
+    default:
+        break;
+    }
+    query.prepare("insert into erp_users_log values(?,?,?,?,?,?,?)");
+    query.bindValue(0,logs_guid);
+    query.bindValue(1,logs_sign);
+    query.bindValue(2,tabs_guid);
+    query.bindValue(3,obj.value("user_name").toString());
+    query.bindValue(4,obj.value("user_pass").toString());
+    query.bindValue(5,obj.value("user_role").toString());
+    query.bindValue(6,obj.value("user_date").toString());
     query.exec();
     emit sendCommand("update");
 }

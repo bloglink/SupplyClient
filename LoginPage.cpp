@@ -180,9 +180,8 @@ void LoginPage::login()
     m_login->select();
     for (int i=0; i < m_login->rowCount(); i++) {
         QString name = m_login->data(m_login->index(i,USER_NAME)).toString();
-        QString password = m_login->data(m_login->index(i,USER_PASSWORD)).toString();
+        QString password = m_login->data(m_login->index(i,USER_PASS)).toString();
         if (name == usr->currentText() && password == pwd->text()) {
-            m_login->setData(m_login->index(i,USER_STAT),"1");
             this->accept();
             return;
         }

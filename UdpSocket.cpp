@@ -28,7 +28,7 @@ void UdpSocket::initSocket(quint16 port)
 
     guid.setMachineId(20,20);
 
-    QTimer *t_send = new QTimer(this);
+    QTimer *t_send = new QTimer(this);//定时处理消息队列
     connect(t_send,SIGNAL(timeout()),this,SLOT(transmitJson()));
     t_send->start(5);
 }
@@ -50,7 +50,7 @@ void UdpSocket::recvNetJson()
         QString sendto = obj.value("sendto").toString();
         if (!sendto.isEmpty() && sendto != txAddr.toString())//不是发给自己的,返回
             return;
-        if (sender == txAddr && obj.value("logs_sign").toInt() == 0)//自己发的查询,不处理;服务器启动时出现
+        if (sender == txAddr && obj.value("logs_sign").toInt() == 0)//自己发的查询,不处理;启动时出现
             return;
         obj.insert("sender",sender.toString());
         qDebug() << "rcev" << obj;
