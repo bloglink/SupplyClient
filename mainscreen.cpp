@@ -141,13 +141,14 @@ void MainScreen::initUI()
 
     human = new HumanPage(this);
     connect(human,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
-    connect(this,SIGNAL(sendMsg(QUrl)),human,SLOT(recvSocket(QUrl)));
-    connect(this,SIGNAL(sendCommand(QString)),human,SLOT(recvCommand(QString)));
+    connect(this,SIGNAL(rolesJson(QJsonObject)),human,SLOT(recvRolesJson(QJsonObject)));
+    connect(this,SIGNAL(usersJson(QJsonObject)),human,SLOT(recvUsersJson(QJsonObject)));
     stack->addWidget(human);
 
     sales = new SalesPage(this);
-    connect(sales,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),sales,SLOT(recvSocket(QUrl)));
+    connect(sales,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
+    connect(this,SIGNAL(salesJson(QJsonObject)),sales,SLOT(recvSalesJson(QJsonObject)));
+    connect(this,SIGNAL(custsJson(QJsonObject)),sales,SLOT(recvCustsJson(QJsonObject)));
     stack->addWidget(sales);
 
     order = new OrderPage(this);
@@ -184,77 +185,191 @@ void MainScreen::initSql()
     db.setDatabaseName("erp.db");
     db.open();
 
+    qint64 logs_guid = 0xffffffff;
     QSqlQuery query(db);
+    QString cmd;
+    QJsonObject obj;
+    //    query.exec("drop table erp_roles");
+    //    query.exec("drop table erp_roles_log");
 
-    QString cmd = "create table if not exists erp_customs(";
-    cmd += "custom_id integer primary key,";
-    cmd += "custom_name text,";
-    cmd += "custom_sale text,";
-    cmd += "custom_area text)";
+    cmd = "create table if not exists erp_roles(";
+    cmd += "id integer primary key,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
     query.exec(cmd);
 
+    cmd = "create table if not exists erp_roles_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    query.exec("select id from erp_roles_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    else
+        logs_guid = 0xffffffff;
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+
+    emit sendJson(obj);
+
+//    query.exec("drop table erp_users");
+//    query.exec("drop table erp_users_log");
+
+    cmd = "create table if not exists erp_users(";
+    cmd += "id integer primary key,";
+    cmd += "user_name text,";
+    cmd += "user_pass text,";
+    cmd += "user_role text,";
+    cmd += "user_date text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_users_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "user_name text,";
+    cmd += "user_pass text,";
+    cmd += "user_role text,";
+    cmd += "user_date text)";
+    query.exec(cmd);
+
+    query.prepare("insert into erp_users values(?,?,?,?,?)");
+    query.bindValue(0,0xffffffff);
+    query.bindValue(1,"admin");
+    query.bindValue(2,"1234");
+    query.bindValue(3,"管理");
+    query.bindValue(4,"2017-07-24");
+    query.exec();
+
+    query.exec("select id from erp_users_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    else
+        logs_guid = 0xffffffff;
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
+
+    query.exec("drop table erp_sales");
+    query.exec("drop table erp_sales_log");
+
     cmd = "create table if not exists erp_sales(";
-    cmd += "sale_id integer primary key,";
+    cmd += "id integer primary key,";
     cmd += "sale_name text,";
     cmd += "sale_area text)";
     query.exec(cmd);
 
-    //    query.exec("drop table erp_orders");
-
-    cmd = "create table if not exists erp_orders(";
-    cmd += "order_id integer primary key,";
-    cmd += "order_numb text,";
-    cmd += "order_date text,";
-    cmd += "order_view text,";
-    cmd += "order_cust text,";
-    cmd += "order_sale text,";
-    cmd += "order_area text,";
-    cmd += "order_dead text,";
-    cmd += "order_quan text,";
-    cmd += "order_prod text,";
-    cmd += "order_stck text,";
-    cmd += "order_dnum text)";
+    cmd = "create table if not exists erp_sales_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "sale_name text,";
+    cmd += "sale_area text)";
     query.exec(cmd);
 
-    //    query.exec("drop table erp_prods");
+    query.exec("select id from erp_sales_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    else
+        logs_guid = 0xffffffff;
+    obj.insert("logs_cmmd","erp_sales");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
 
-    cmd = "create table if not exists erp_prods(";
-    cmd += "prod_id integer primary key,";
-    cmd += "prod_numb text,";
-    cmd += "prod_date text,";
-    cmd += "prod_view text,";
-    cmd += "prod_cust text,";
-    cmd += "prod_sale text,";
-    cmd += "prod_area text,";
-    cmd += "prod_dead text,";
-    cmd += "prod_need text,";
-    cmd += "prod_quan text,";
-    cmd += "prod_pnum text,";
-    cmd += "prod_type text,";
-    cmd += "prod_code text,";
-    cmd += "prod_name text,";
-    cmd += "prod_mode text,";
-    cmd += "prod_mnum text,";
-    cmd += "prod_stck text)";
+    query.exec("drop table erp_custs");
+    query.exec("drop table erp_custs_log");
+
+    cmd = "create table if not exists erp_custs(";
+    cmd += "id integer primary key,";
+    cmd += "cust_name text,";
+    cmd += "cust_sale text,";
+    cmd += "cust_area text)";
     query.exec(cmd);
 
-    cmd = "create table if not exists erp_purchs(";
-    cmd += "purch_id integer primary key,";
-    cmd += "purch_numb text,";
-    cmd += "purch_code text,";
-    cmd += "purch_name text,";
-    cmd += "purch_unit text,";
-    cmd += "purch_lack text,";
-    cmd += "purch_quan text,";
-    cmd += "purch_date text,";
-    cmd += "purch_bout text,";
-    cmd += "purch_expt text,";
-    cmd += "purch_real text,";
-    cmd += "purch_come text,";
-    cmd += "purch_oway text,";
-    cmd += "purch_ofix text,";
-    cmd += "purch_mark text)";
+    cmd = "create table if not exists erp_custs_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "cust_name text,";
+    cmd += "cust_sale text,";
+    cmd += "cust_area text)";
     query.exec(cmd);
+
+    query.exec("select id from erp_custs_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    else
+        logs_guid = 0xffffffff;
+    obj.insert("logs_cmmd","erp_custs");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
+
+//    QSqlQuery query(db);
+
+//    //    query.exec("drop table erp_orders");
+
+//    QString cmd = "create table if not exists erp_orders(";
+//    cmd += "order_id integer primary key,";
+//    cmd += "order_numb text,";
+//    cmd += "order_date text,";
+//    cmd += "order_view text,";
+//    cmd += "order_cust text,";
+//    cmd += "order_sale text,";
+//    cmd += "order_area text,";
+//    cmd += "order_dead text,";
+//    cmd += "order_quan text,";
+//    cmd += "order_prod text,";
+//    cmd += "order_stck text,";
+//    cmd += "order_dnum text)";
+//    query.exec(cmd);
+
+//    //    query.exec("drop table erp_prods");
+
+//    cmd = "create table if not exists erp_prods(";
+//    cmd += "prod_id integer primary key,";
+//    cmd += "prod_numb text,";
+//    cmd += "prod_date text,";
+//    cmd += "prod_view text,";
+//    cmd += "prod_cust text,";
+//    cmd += "prod_sale text,";
+//    cmd += "prod_area text,";
+//    cmd += "prod_dead text,";
+//    cmd += "prod_need text,";
+//    cmd += "prod_quan text,";
+//    cmd += "prod_pnum text,";
+//    cmd += "prod_type text,";
+//    cmd += "prod_code text,";
+//    cmd += "prod_name text,";
+//    cmd += "prod_mode text,";
+//    cmd += "prod_mnum text,";
+//    cmd += "prod_stck text)";
+//    query.exec(cmd);
+
+//    cmd = "create table if not exists erp_purchs(";
+//    cmd += "purch_id integer primary key,";
+//    cmd += "purch_numb text,";
+//    cmd += "purch_code text,";
+//    cmd += "purch_name text,";
+//    cmd += "purch_unit text,";
+//    cmd += "purch_lack text,";
+//    cmd += "purch_quan text,";
+//    cmd += "purch_date text,";
+//    cmd += "purch_bout text,";
+//    cmd += "purch_expt text,";
+//    cmd += "purch_real text,";
+//    cmd += "purch_come text,";
+//    cmd += "purch_oway text,";
+//    cmd += "purch_ofix text,";
+//    cmd += "purch_mark text)";
+//    query.exec(cmd);
 }
 
 void MainScreen::swithMaxNormal()
@@ -348,167 +463,13 @@ void MainScreen::recvNetJson(QJsonObject obj)
 {
     QString cmd = obj.value("logs_cmmd").toString();
     if (cmd == "erp_roles")
-        roleCommand(obj);
+        emit rolesJson(obj);
     if (cmd == "erp_users")
-        userCommand(obj);
-}
-
-void MainScreen::roleCommand(QJsonObject obj)
-{
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    query.prepare("select count(*) from erp_roles_log where id=:id");
-    query.bindValue(":id",logs_guid);
-    query.exec();
-    query.next();
-    if (query.value(0).toInt() > 0)
-        return;
-
-    switch (logs_sign) {
-    case 0://查询
-        logs_guid = tabs_guid;
-        if (logs_guid == 0xffffffff) {
-            qDebug() << "blank";
-            query.prepare("select * from erp_roles_log");
-        } else {
-            query.prepare("select * from erp_roles_log where id>:id");
-            query.bindValue(":id",logs_guid);
-        }
-        query.exec();
-        while (query.next()) {
-            QJsonObject sned_obj;
-            sned_obj.insert("sendto",obj.value("sender").toString());
-            sned_obj.insert("logs_cmmd","erp_roles");
-            sned_obj.insert("logs_guid",query.value(0).toDouble());
-            sned_obj.insert("logs_sign",query.value(1).toDouble());
-            sned_obj.insert("tabs_guid",query.value(2).toDouble());
-            sned_obj.insert("role_name",query.value(3).toString());
-            sned_obj.insert("role_mark",query.value(4).toString());
-            emit sendJson(sned_obj);
-            qDebug() << "send" << sned_obj;
-        }
-        return;
-        break;
-    case 1://增加
-        tabs_guid = logs_guid;
-        query.prepare("insert into erp_roles values(?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,obj.value("role_name").toString());
-        query.bindValue(2,obj.value("role_mark").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_roles where id=:id");
-        query.bindValue(":id",tabs_guid);
-        query.exec();
-        break;
-    case 3://修改
-        query.prepare("update erp_roles set role_name=:1,role_mark=:2 where id=:3");
-        query.bindValue(":1",obj.value("role_name").toString());
-        query.bindValue(":2",obj.value("role_mark").toString());
-        query.bindValue(":3",tabs_guid);
-        query.exec();
-        break;
-    default:
-        break;
-    }
-    query.prepare("insert into erp_roles_log values(?,?,?,?,?)");
-    query.bindValue(0,logs_guid);
-    query.bindValue(1,logs_sign);
-    query.bindValue(2,tabs_guid);
-    query.bindValue(3,obj.value("role_name").toString());
-    query.bindValue(4,obj.value("role_mark").toString());
-    query.exec();
-    emit sendCommand("update");
-}
-
-void MainScreen::userCommand(QJsonObject obj)
-{
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    query.prepare("select count(*) from erp_users_log where id=:id");
-    query.bindValue(":id",logs_guid);
-    query.exec();
-    query.next();
-    if (query.value(0).toInt() > 0)
-        return;
-    QString cmd;
-
-    switch (logs_sign) {
-    case 0://查询
-        logs_guid = tabs_guid;
-        if (logs_guid == 0xffffffff) {
-            qDebug() << "blank";
-            query.prepare("select * from erp_users_log");
-        } else {
-            query.prepare("select * from erp_users_log where id>:id");
-            query.bindValue(":id",logs_guid);
-        }
-        query.exec();
-        while (query.next()) {
-            QJsonObject sned_obj;
-            sned_obj.insert("sendto",obj.value("sender").toString());
-            sned_obj.insert("logs_cmmd","erp_users");
-            sned_obj.insert("logs_guid",query.value(0).toDouble());
-            sned_obj.insert("logs_sign",query.value(1).toDouble());
-            sned_obj.insert("tabs_guid",query.value(2).toDouble());
-            sned_obj.insert("user_name",query.value(3).toString());
-            sned_obj.insert("user_pass",query.value(4).toString());
-            sned_obj.insert("user_role",query.value(5).toString());
-            sned_obj.insert("user_date",query.value(6).toString());
-            emit sendJson(sned_obj);
-        }
-        return;
-        break;
-    case 1://增加
-        tabs_guid = logs_guid;
-        query.prepare("insert into erp_users values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,obj.value("user_name").toString());
-        query.bindValue(2,obj.value("user_pass").toString());
-        query.bindValue(3,obj.value("user_role").toString());
-        query.bindValue(4,obj.value("user_date").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_users where id=:id");
-        query.bindValue(":id",tabs_guid);
-        query.exec();
-        break;
-    case 3://修改
-        cmd += "update erp_users set ";
-        cmd += "user_name=:user_name,";
-        cmd += "user_pass=:user_pass,";
-        cmd += "user_role=:user_role,";
-        cmd += "user_date=:user_date ";
-        cmd += "where id=:tabs_guid";
-        query.prepare(cmd);
-        query.bindValue(":user_name",obj.value("user_name").toString());
-        query.bindValue(":user_pass",obj.value("user_pass").toString());
-        query.bindValue(":user_role",obj.value("user_role").toString());
-        query.bindValue(":user_date",obj.value("user_date").toString());
-        query.bindValue(":tabs_guid",tabs_guid);
-        qDebug() << query.exec() << query.lastError();
-        break;
-    default:
-        break;
-    }
-    query.prepare("insert into erp_users_log values(?,?,?,?,?,?,?)");
-    query.bindValue(0,logs_guid);
-    query.bindValue(1,logs_sign);
-    query.bindValue(2,tabs_guid);
-    query.bindValue(3,obj.value("user_name").toString());
-    query.bindValue(4,obj.value("user_pass").toString());
-    query.bindValue(5,obj.value("user_role").toString());
-    query.bindValue(6,obj.value("user_date").toString());
-    query.exec();
-    emit sendCommand("update");
+        emit usersJson(obj);
+    if (cmd == "erp_sales")
+        emit salesJson(obj);
+    if (cmd == "erp_custs")
+        emit custsJson(obj);
 }
 
 void MainScreen::cloudAntimation()

@@ -59,7 +59,8 @@ private slots:
     void changeRole();
     void updateRole();
     void recvSocket(QUrl url);
-    void recvCommand(QString cmd);
+    void recvRolesJson(QJsonObject obj);
+    void recvUsersJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_users;

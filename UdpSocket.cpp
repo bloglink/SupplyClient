@@ -84,22 +84,4 @@ void UdpSocket::transmitJson()
         emit sendJson(recv_queue.dequeue());
 }
 
-void UdpSocket::sendSocket(QUrl url)
-{
-    //    QString cmd = url.query();
-    //    if (cmd == "login") {
-    //        url.setFragment(uid.toUtf8().toBase64());
-    //        userinfo = url;
-    //    }
-    //    QHostAddress host = QHostAddress(userinfo.host());
-    //    int port = userinfo.port();
-    //    url.setScheme(VERSION);
-    //    url.setUserInfo(userinfo.userInfo());
-    //    url.setHost(addr.toString());
-    //    url.setPort(LOCAL_PORT);
-    //    url.setPath(QString("/%1").arg(getUid()));
-    //    QByteArray msg = url.toString().toUtf8();
-    //    this->writeDatagram(msg, host, port);
-}
-
 /*********************************END OF FILE**********************************/

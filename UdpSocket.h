@@ -33,14 +33,12 @@ public:
     explicit UdpSocket(QObject *parent = 0);
 
 signals:
-    void recvSocket(QUrl url);
     void sendJson(QJsonObject obj);
 public:
     void initSocket(quint16 port);
     void quitSocket(void);
 
 private slots:
-    void sendSocket(QUrl url);
     void recvNetJson(void);
     void recvAppJson(QJsonObject obj);
     void transmitJson();
@@ -49,8 +47,6 @@ private:
     quint16 txPort;
     QQueue <QJsonObject> send_queue;
     QQueue <QJsonObject> recv_queue;
-    QUrl userinfo;
-    QString uid;
     Snowflake guid;
 
 };

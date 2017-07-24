@@ -18,13 +18,14 @@
 #include <QSqlDatabase>
 #include <QSqlTableModel>
 #include <QAbstractItemView>
+#include <QSqlQuery>
 
 #include "delegate.h"
 
-#define CUSTOM_ID 0
-#define CUSTOM_NAME 1
-#define CUSTOM_SALE 2
-#define CUSTOM_AREA 3
+#define CUST_ID 0
+#define CUST_NAME 1
+#define CUST_SALE 2
+#define CUST_AREA 3
 
 #define SALE_ID 0
 #define SALE_NAME 1
@@ -39,6 +40,7 @@ public:
 
 signals:
     void sendSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 private slots:
     void initUI();
     void initSql();
@@ -56,6 +58,8 @@ private slots:
     void changeSale();
     void updateSale();
     void recvSocket(QUrl url);
+    void recvSalesJson(QJsonObject obj);
+    void recvCustsJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_custs;
