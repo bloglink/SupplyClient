@@ -328,7 +328,6 @@ void HumanPage::appendRole()
     obj.insert("logs_sign",1);
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
-    for (int i=0; i < 100; i++)
     emit sendJson(obj);
     for (int i=0; i < m_roles->rowCount(); i++) {
         m_roles->item(i,1)->setText("");

@@ -13,17 +13,24 @@ UdpSocket::UdpSocket(QObject *parent) : QUdpSocket(parent)
 
 }
 
-void UdpSocket::initSocket()
+void UdpSocket::initSocket(quint16 port)
 {
-    this->bind(QHostAddress::AnyIPv4,LOCAL_PORT);
-    connect(this, SIGNAL(readyRead()), this, SLOT(readSocket()));
+    QList<QHostAddress> addrs = QNetworkInterface::allAddresses();
+    for(int i=0;i < addrs.size();i++) {
+        if((addrs.at(i)!=QHostAddress::LocalHost) &&
+                (addrs.at(i).protocol()==QAbstractSocket::IPv4Protocol))
+            txAddr = addrs.at(i);
+    }
+    txPort = port;
+
+    this->bind(QHostAddress::AnyIPv4,port);
+    connect(this, SIGNAL(readyRead()), this, SLOT(recvNetJson()));
+
     guid.setMachineId(20,20);
+
     QTimer *t_send = new QTimer(this);
-    connect(t_send,SIGNAL(timeout()),this,SLOT(sendJsonMsg()));
+    connect(t_send,SIGNAL(timeout()),this,SLOT(transmitJson()));
     t_send->start(5);
-    QTimer *t_recv = new QTimer(this);
-    connect(t_recv,SIGNAL(timeout()),this,SLOT(readJsonMsg()));
-    t_recv->start(5);
 }
 
 void UdpSocket::quitSocket()
@@ -31,7 +38,7 @@ void UdpSocket::quitSocket()
     this->close();
 }
 
-void UdpSocket::readSocket()
+void UdpSocket::recvNetJson()
 {
     while (this->hasPendingDatagrams()) {
         QByteArray msg;
@@ -40,79 +47,59 @@ void UdpSocket::readSocket()
         quint16 senderPort;
         this->readDatagram(msg.data(), msg.size(), &sender, &senderPort);
         QJsonObject obj = QJsonDocument::fromJson(QByteArray::fromBase64(msg)).object();
+        QString sendto = obj.value("sendto").toString();
+        if (!sendto.isEmpty() && sendto != txAddr.toString())//不是发给自己的,返回
+            return;
+        if (sender == txAddr && obj.value("logs_sign").toInt() == 0)//自己发的查询,不处理;服务器启动时出现
+            return;
+        obj.insert("sender",sender.toString());
         qDebug() << "rcev" << obj;
         recv_queue.enqueue(obj);
     }
 }
 
-void UdpSocket::readJson(QJsonObject obj)
+void UdpSocket::recvAppJson(QJsonObject obj)
 {
     send_queue.enqueue(obj);
 }
 
-void UdpSocket::sendJsonMsg()
+void UdpSocket::transmitJson()
 {
     if (!send_queue.isEmpty()) {
         QJsonObject obj = send_queue.dequeue();
-        if (obj.value("logs_guid").toDouble() == 0)
+        if (obj.value("logs_guid").toDouble() == 0)//未定义记录ID,添加记录ID
             obj.insert("logs_guid",qint64(guid.getId()));
-        QByteArray msg = QJsonDocument(obj).toJson();
-        this->writeDatagram(msg.toBase64(),QHostAddress::Broadcast,LOCAL_PORT);
-        this->waitForBytesWritten();
-    }
-}
 
-void UdpSocket::readJsonMsg()
-{
+        QByteArray msg = QJsonDocument(obj).toJson();
+        if (obj.value("sendto").toString().isEmpty()) {//未定义接收者,则发广播
+            this->writeDatagram(msg.toBase64(),QHostAddress::Broadcast,txPort);
+            this->waitForBytesWritten();
+        } else {
+            QHostAddress hostAddr(obj.value("sendto").toString());
+            this->writeDatagram(msg.toBase64(),hostAddr,txPort);
+            this->waitForBytesWritten();
+        }
+    }
     if (!recv_queue.isEmpty())
         emit sendJson(recv_queue.dequeue());
 }
 
 void UdpSocket::sendSocket(QUrl url)
 {
-    QString cmd = url.query();
-    if (cmd == "login") {
-        url.setFragment(uid.toUtf8().toBase64());
-        userinfo = url;
-    }
-    QHostAddress host = QHostAddress(userinfo.host());
-    int port = userinfo.port();
-    url.setScheme(VERSION);
-    url.setUserInfo(userinfo.userInfo());
-    url.setHost(addr.toString());
-    url.setPort(LOCAL_PORT);
-    url.setPath(QString("/%1").arg(getUid()));
-    QByteArray msg = url.toString().toUtf8();
-    this->writeDatagram(msg, QHostAddress::Broadcast, port);
+    //    QString cmd = url.query();
+    //    if (cmd == "login") {
+    //        url.setFragment(uid.toUtf8().toBase64());
+    //        userinfo = url;
+    //    }
+    //    QHostAddress host = QHostAddress(userinfo.host());
+    //    int port = userinfo.port();
+    //    url.setScheme(VERSION);
+    //    url.setUserInfo(userinfo.userInfo());
+    //    url.setHost(addr.toString());
+    //    url.setPort(LOCAL_PORT);
+    //    url.setPath(QString("/%1").arg(getUid()));
+    //    QByteArray msg = url.toString().toUtf8();
+    //    this->writeDatagram(msg, host, port);
 }
 
-QString UdpSocket::getLocalHostIP()
-{
-    QList<QHostAddress> AddressList = QNetworkInterface::allAddresses();
-    QHostAddress result;
-    foreach(QHostAddress address,  AddressList) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
-                address != QHostAddress::Null &&
-                address != QHostAddress::LocalHost) {
-            if (address.toString().contains("127.0."))
-                continue;
-            result = address;
-            break;
-        }
-    }
-    return result.toString();
-}
-
-QString UdpSocket::getUid()
-{
-    return QUuid::createUuid().toString().mid(1,6);
-}
-
-void UdpSocket::Delay(int ms)
-{
-    QElapsedTimer t;
-    t.start();
-    while (t.elapsed() < ms)
-        QCoreApplication::processEvents();
-}
 /*********************************END OF FILE**********************************/

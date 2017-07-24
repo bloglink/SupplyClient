@@ -40,6 +40,7 @@ private slots:
     void initUI();
     void initUdp();
     void initSql();
+    void initRole();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);
     void readToolButton();
@@ -47,7 +48,7 @@ private slots:
     void animationHide();
     void animationClose();
     void recvSocket(QUrl url);
-    void readJson(QJsonObject obj);
+    void recvNetJson(QJsonObject obj);
     void roleCommand(QJsonObject obj);
 
     virtual void cloudAntimation();
@@ -66,6 +67,8 @@ private:
     ProdsPage *prods;
     PurchPage *purch;
     QSqlDatabase db;
+    bool isLogin;
+    QHostAddress addr;
 };
 
 #endif // MAINSCREEN_H

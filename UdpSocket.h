@@ -36,20 +36,17 @@ signals:
     void recvSocket(QUrl url);
     void sendJson(QJsonObject obj);
 public:
-    void initSocket(void);
+    void initSocket(quint16 port);
     void quitSocket(void);
 
 private slots:
     void sendSocket(QUrl url);
-    void readSocket(void);
-    void readJson(QJsonObject obj);
-    void sendJsonMsg();
-    void readJsonMsg();
-    QString getLocalHostIP();
-    QString getUid();
-    void Delay(int ms);
+    void recvNetJson(void);
+    void recvAppJson(QJsonObject obj);
+    void transmitJson();
 private:
-    QHostAddress addr;
+    QHostAddress txAddr;
+    quint16 txPort;
     QQueue <QJsonObject> send_queue;
     QQueue <QJsonObject> recv_queue;
     QUrl userinfo;

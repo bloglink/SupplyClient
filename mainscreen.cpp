@@ -168,9 +168,9 @@ void MainScreen::initUI()
 
 void MainScreen::initUdp()
 {
-    udp.initSocket();
-    connect(this,SIGNAL(sendJson(QJsonObject)),&udp,SLOT(readJson(QJsonObject)));
-    connect(&udp,SIGNAL(sendJson(QJsonObject)),this,SLOT(readJson(QJsonObject)));
+    udp.initSocket(10000);
+    connect(this,SIGNAL(sendJson(QJsonObject)),&udp,SLOT(recvAppJson(QJsonObject)));
+    connect(&udp,SIGNAL(sendJson(QJsonObject)),this,SLOT(recvNetJson(QJsonObject)));
 }
 
 void MainScreen::initSql()
@@ -195,23 +195,7 @@ void MainScreen::initSql()
     cmd += "user_stat text)";
     query.exec(cmd);
 
-//    query.exec("drop table erp_roles");
-//    query.exec("drop table erp_roles_log");
-
-    cmd = "create table if not exists erp_roles(";
-    cmd += "id integer primary key,";
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
-    query.exec(cmd);
-
-    cmd = "create table if not exists erp_roles_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
-    query.exec(cmd);
-
+    initRole();
 
     cmd = "create table if not exists erp_customs(";
     cmd += "custom_id integer primary key,";
@@ -282,6 +266,38 @@ void MainScreen::initSql()
     cmd += "purch_ofix text,";
     cmd += "purch_mark text)";
     query.exec(cmd);
+}
+
+void MainScreen::initRole()
+{
+    isLogin = false;
+    qint64 logs_guid = 0xffffffff;
+    QSqlQuery query(db);
+    query.exec("drop table erp_roles");
+    query.exec("drop table erp_roles_log");
+
+    QString cmd = "create table if not exists erp_roles(";
+    cmd += "id integer primary key,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_roles_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "role_name text,";
+    cmd += "role_mark text)";
+    query.exec(cmd);
+
+    query.exec("select id from erp_roles_log order by id desc");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_sign",0);
+    obj.insert("tabs_guid",logs_guid);
+    emit sendJson(obj);
 }
 void MainScreen::swithMaxNormal()
 {
@@ -370,7 +386,7 @@ void MainScreen::recvSocket(QUrl url)
     }
 }
 
-void MainScreen::readJson(QJsonObject obj)
+void MainScreen::recvNetJson(QJsonObject obj)
 {
     QString cmd = obj.value("logs_cmmd").toString();
     if (cmd == "erp_roles")
@@ -406,15 +422,16 @@ void MainScreen::roleCommand(QJsonObject obj)
         }
         query.exec();
         while (query.next()) {
-            QJsonObject obj;
-            obj.insert("logs_cmmd","erp_roles");
-            obj.insert("logs_guid",query.value(0).toDouble());
-            obj.insert("logs_sign",query.value(1).toDouble());
-            obj.insert("tabs_guid",query.value(2).toDouble());
-            obj.insert("role_name",query.value(3).toString());
-            obj.insert("role_mark",query.value(4).toString());
-            emit sendJson(obj);
-            qDebug() << "send" << obj;
+            QJsonObject sned_obj;
+            sned_obj.insert("sendto",obj.value("sender").toString());
+            sned_obj.insert("logs_cmmd","erp_roles");
+            sned_obj.insert("logs_guid",query.value(0).toDouble());
+            sned_obj.insert("logs_sign",query.value(1).toDouble());
+            sned_obj.insert("tabs_guid",query.value(2).toDouble());
+            sned_obj.insert("role_name",query.value(3).toString());
+            sned_obj.insert("role_mark",query.value(4).toString());
+            emit sendJson(sned_obj);
+            qDebug() << "send" << sned_obj;
         }
         return;
         break;
