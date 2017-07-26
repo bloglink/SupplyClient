@@ -287,8 +287,10 @@ void MainScreen::initSql()
     cmd += "order_view text,";//评审编号
     cmd += "order_quan text,";//订货数量
     cmd += "order_dead text,";//交货日期
+    cmd += "order_mark text,";//备注内容
     cmd += "order_prod text,";//在产数量
     cmd += "order_stck text,";//入库数量
+    cmd += "order_lnum text,";//未发数量
     cmd += "order_dnum text)";//发货数量
     query.exec(cmd);
 
@@ -305,8 +307,10 @@ void MainScreen::initSql()
     cmd += "order_view text,";//评审编号
     cmd += "order_quan text,";//订货数量
     cmd += "order_dead text,";//交货日期
+    cmd += "order_mark text,";//备注内容
     cmd += "order_prod text,";//在产数量
     cmd += "order_stck text,";//入库数量
+    cmd += "order_lnum text,";//未发数量
     cmd += "order_dnum text)";//发货数量
     query.exec(cmd);
 

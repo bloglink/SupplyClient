@@ -46,9 +46,9 @@ void OrderPage::initUI()
     obtnsLayout->addStretch();
 
     order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
-                << tr("下单日期") << tr("所属区域") << tr("业务经理")
-                << tr("客户名称") << tr("评审单号") << tr("订货数量")
-                << tr("发货日期") << tr("在产数量") << tr("入库数量") << tr("发货数量");
+                << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
+                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
+                << tr("在产数量") << tr("入库数量") << tr("未发数量") << tr("发货数量");
     m_order = new StandardItemModel();
     QStringList order_header;
     order_header << tr("项目") << tr("参数");
@@ -75,6 +75,7 @@ void OrderPage::initUI()
     tab_iorder->hideRow(ORDER_SIGN);
     tab_iorder->hideRow(ORDER_PROD);
     tab_iorder->hideRow(ORDER_STCK);
+    tab_iorder->hideRow(ORDER_LNUM);
     tab_iorder->hideRow(ORDER_DNUM);
 
     QPushButton *order_append = new QPushButton(this);
@@ -219,8 +220,10 @@ void OrderPage::appendOrder()
     obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
     obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
     obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
     obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
     obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
     obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_order->rowCount(); i++)
@@ -241,8 +244,10 @@ void OrderPage::deleteOrder()
     obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
     obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
     obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
     obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
     obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
     obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_order->rowCount(); i++)
@@ -263,8 +268,10 @@ void OrderPage::changeOrder()
     obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
     obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
     obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
+    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
     obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
     obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
+    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
     obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
     emit sendJson(obj);
 }
@@ -348,7 +355,7 @@ void OrderPage::recvOrderJson(QJsonObject obj)
         break;
     case 1://增加
     case 3://修改
-        query.prepare("replace into erp_order values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        query.prepare("replace into erp_order values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         query.bindValue(ORDER_ID,tabs_guid);
         query.bindValue(ORDER_GUID,logs_guid);
         query.bindValue(ORDER_SIGN,logs_sign);
@@ -360,8 +367,10 @@ void OrderPage::recvOrderJson(QJsonObject obj)
         query.bindValue(ORDER_AREA,obj.value("order_area").toString());
         query.bindValue(ORDER_DEAD,obj.value("order_dead").toString());
         query.bindValue(ORDER_QUAN,obj.value("order_quan").toString());
+        query.bindValue(ORDER_MARK,obj.value("order_mark").toString());
         query.bindValue(ORDER_PROD,obj.value("order_prod").toString());
         query.bindValue(ORDER_STCK,obj.value("order_stck").toString());
+        query.bindValue(ORDER_LNUM,obj.value("order_lnum").toString());
         query.bindValue(ORDER_DNUM,obj.value("order_dnum").toString());
         query.exec();
         break;
