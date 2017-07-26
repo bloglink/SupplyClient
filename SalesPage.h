@@ -23,13 +23,17 @@
 #include "delegate.h"
 
 #define CUST_ID 0
-#define CUST_NAME 1
-#define CUST_SALE 2
-#define CUST_AREA 3
+#define CUST_GUID 1
+#define CUST_SIGN 2
+#define CUST_NAME 3
+#define CUST_SALE 4
+#define CUST_AREA 5
 
 #define SALE_ID 0
-#define SALE_NAME 1
-#define SALE_AREA 2
+#define SALE_GUID 1
+#define SALE_SIGN 2
+#define SALE_NAME 3
+#define SALE_AREA 4
 
 class SalesPage : public QWidget
 {

@@ -329,7 +329,6 @@ void HumanPage::deleteUser()
     emit sendJson(obj);
     for (int i=0; i < m_users->rowCount(); i++)
         m_users->item(i,1)->setText("");
-
 }
 
 void HumanPage::changeUser()
@@ -355,10 +354,12 @@ void HumanPage::updateUser()
     query.exec();
     query.next();
     logs_guid = query.value(0).toDouble();
+
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
+
     sql_users->select();
 }
 

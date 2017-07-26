@@ -138,7 +138,7 @@ void SalesPage::initUI()
     sbtnsLayout->addWidget(btn_sales);
     sbtnsLayout->addStretch();
 
-    sale_items << tr("编号") << tr("姓名") << tr("区域");
+    sale_items << tr("编号") << tr("记录") << tr("操作") << tr("姓名") << tr("区域");
     m_sales = new StandardItemModel();
     QStringList sale_header;
     sale_header << tr("项目") << tr("参数");
@@ -152,6 +152,8 @@ void SalesPage::initUI()
     tab_isale->setColumnWidth(0,50);
     tab_isale->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_isale->hideRow(SALE_ID);
+    tab_isale->hideRow(SALE_GUID);
+    tab_isale->hideRow(SALE_SIGN);
 
     QPushButton *sale_append = new QPushButton(this);
     sale_append->setFlat(true);
@@ -376,6 +378,20 @@ void SalesPage::changeSale()
 
 void SalesPage::updateSale()
 {
+    QSqlQuery query(db);
+    qint64 logs_guid = 0;
+    QJsonObject obj;
+
+    query.prepare("select max(logs_guid) from erp_sales");
+    query.exec();
+    query.next();
+    logs_guid = query.value(0).toDouble();
+
+    obj.insert("logs_cmmd","erp_sales");
+    obj.insert("logs_guid",logs_guid);
+    obj.insert("logs_sign",0);
+    emit sendJson(obj);
+
     sql_sales->select();
 }
 
@@ -404,66 +420,28 @@ void SalesPage::recvSalesJson(QJsonObject obj)
     qint64 logs_guid = obj.value("logs_guid").toDouble();
     qint64 tabs_guid = obj.value("tabs_guid").toDouble();
 
-    query.prepare("select count(*) from erp_sales_log where id=:id");
-    query.bindValue(":id",logs_guid);
-    query.exec();
-    query.next();
-    if (query.value(0).toInt() > 0)
-        return;
-
     switch (logs_sign) {
     case 0://查询
-        logs_guid = tabs_guid;
-        if (logs_guid == 0xffffffff) {
-            query.prepare("select * from erp_sales_log");
-        } else {
-            query.prepare("select * from erp_sales_log where id>:id");
-            query.bindValue(":id",logs_guid);
-        }
-        query.exec();
-        while (query.next()) {
-            QJsonObject sned_obj;
-            sned_obj.insert("sendto",obj.value("sender").toString());
-            sned_obj.insert("logs_cmmd","erp_sales");
-            sned_obj.insert("logs_guid",query.value(0).toDouble());
-            sned_obj.insert("logs_sign",query.value(1).toDouble());
-            sned_obj.insert("tabs_guid",query.value(2).toDouble());
-            sned_obj.insert("sale_name",query.value(3).toString());
-            sned_obj.insert("sale_area",query.value(4).toString());
-            emit sendJson(sned_obj);
-        }
+        updateSale();
         return;
         break;
     case 1://增加
-        tabs_guid = logs_guid;
-        query.prepare("insert into erp_sales values(?,?,?)");
+    case 3://修改
+        query.prepare("replace into erp_sales values(?,?,?,?,?)");
         query.bindValue(0,tabs_guid);
-        query.bindValue(1,obj.value("sale_name").toString());
-        query.bindValue(2,obj.value("sale_area").toString());
+        query.bindValue(1,logs_guid);
+        query.bindValue(2,logs_sign);
+        query.bindValue(3,obj.value("sale_name").toString());
+        query.bindValue(4,obj.value("sale_area").toString());
         query.exec();
         break;
     case 2://删除
         query.prepare("delete from erp_sales where id=:id");
         query.bindValue(":id",tabs_guid);
         query.exec();
-        break;
-    case 3://修改
-        query.prepare("update erp_sales set sale_name=:1,sale_area=:2 where id=:3");
-        query.bindValue(":1",obj.value("sale_name").toString());
-        query.bindValue(":2",obj.value("sale_area").toString());
-        query.bindValue(":3",tabs_guid);
-        query.exec();
-        break;
     default:
         break;
     }
-    query.prepare("insert into erp_sales_log values(?,?,?,?,?)");
-    query.bindValue(0,logs_guid);
-    query.bindValue(1,logs_sign);
-    query.bindValue(2,tabs_guid);
-    query.bindValue(3,obj.value("sale_name").toString());
-    query.bindValue(4,obj.value("sale_area").toString());
-    query.exec();
     sql_sales->select();
 }
 
@@ -550,5 +528,7 @@ void SalesPage::recvCustsJson(QJsonObject obj)
 
 void SalesPage::showEvent(QShowEvent *e)
 {
+    updateSale();
+    updateCust();
     e->accept();
 }

@@ -109,7 +109,7 @@ void MainScreen::initUI()
     title_power->setIcon(QIcon(":/icons/stop.png"));
     title_power->setText(tr("权限管理"));
     title_sales->setIcon(QIcon(":/icons/man.png"));
-    title_sales->setText(tr("销售管理"));
+    title_sales->setText(tr("客户档案"));
     title_about->setIcon(QIcon(":/icons/link.ico"));
     title_about->setText(tr("关于软件"));
 
@@ -118,8 +118,8 @@ void MainScreen::initUI()
     layout->addWidget(title_prods);
     layout->addWidget(title_purch);
     layout->addWidget(title_human);
-    layout->addWidget(title_sales);
     layout->addWidget(title_power);
+    layout->addWidget(title_sales);
     layout->addWidget(title_about);
     layout->addStretch();
     layout->setMargin(0);
