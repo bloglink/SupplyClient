@@ -3,7 +3,7 @@
 ProdsPage::ProdsPage(QWidget *parent) : QWidget(parent)
 {
     initUI();
-//    initSql();
+    initSql();
 }
 
 
@@ -34,7 +34,6 @@ void ProdsPage::initUI()
     prod_update->setText(tr("刷新显示"));
     prod_update->setFocusPolicy(Qt::NoFocus);
     connect(prod_update,SIGNAL(clicked(bool)),this,SLOT(updateProd()));
-
 
     QPushButton *prod_match = new QPushButton(this);
     prod_match->setFlat(true);
@@ -165,6 +164,7 @@ void ProdsPage::initSql()
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
     tab_plan->hideColumn(ORDER_STCK);
     tab_plan->hideColumn(ORDER_DNUM);
+    tab_plan->hideColumn(ORDER_ID);
 
     sql_prod = new StandardSqlModel(this,db);
     sql_prod->setTable("erp_prods");
@@ -186,6 +186,7 @@ void ProdsPage::initSql()
     tab_prod->horizontalHeader()->setSectionResizeMode(PROD_MODE,QHeaderView::Stretch);
     tab_prod->hideColumn(PROD_NEED);
     tab_prod->hideColumn(PROD_QUAN);
+    tab_prod->hideColumn(PROD_ID);
 }
 void ProdsPage::showTabProd()
 {
@@ -253,36 +254,82 @@ void ProdsPage::initData()
 
 void ProdsPage::appendProd()
 {
-    int rowCount = sql_prod->rowCount();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_prods");
+    obj.insert("logs_sign",1);
+//    obj.insert("prod_numb",m_prod->item(PROD_NUMB,1)->text());
+//    obj.insert("prod_date",m_prod->item(PROD_DATE,1)->text());
+    obj.insert("prod_view",m_prod->item(PROD_VIEW,1)->text());
+//    obj.insert("prod_cust",m_prod->item(PROD_CUST,1)->text());
+//    obj.insert("prod_sale",m_prod->item(PROD_SALE,1)->text());
+//    obj.insert("prod_area",m_prod->item(PROD_AREA,1)->text());
+//    obj.insert("prod_dead",m_prod->item(PROD_DEAD,1)->text());
+//    obj.insert("prod_need",m_prod->item(PROD_NEED,1)->text());
+    obj.insert("prod_quan",m_prod->item(PROD_QUAN,1)->text());
+    obj.insert("prod_pnum",m_prod->item(PROD_PNUM,1)->text());
+    obj.insert("prod_type",m_prod->item(PROD_TYPE,1)->text());
+    obj.insert("prod_code",m_prod->item(PROD_CODE,1)->text());
+    obj.insert("prod_name",m_prod->item(PROD_NAME,1)->text());
+    obj.insert("prod_mode",m_prod->item(PROD_MODE,1)->text());
+    obj.insert("prod_mnum",m_prod->item(PROD_MNUM,1)->text());
+    obj.insert("prod_stck",m_prod->item(PROD_STCK,1)->text());
     int numb = m_prod->item(PROD_QUAN,1)->text().toInt();
-    for (int k=0; k < numb; k++) {
-        sql_prod->insertRow(rowCount+k);
-        for (int i=PROD_QUAN; i < m_prod->rowCount(); i++)
-            sql_prod->setData(sql_prod->index(rowCount+k,i),m_prod->item(i,1)->text());
-        sql_prod->setData(sql_prod->index(rowCount+k,PROD_VIEW),m_prod->item(PROD_VIEW,1)->text());
-        sql_prod->submitAll();
-    }
-    matchProds();
+    for (int k=0; k < numb; k++)
+        emit sendJson(obj);
+    for (int i=0; i < m_prod->rowCount(); i++)
+        m_prod->item(i,1)->setText("");
 }
 
 void ProdsPage::deleteProd()
 {
-    QItemSelectionModel *selections = tab_prod->selectionModel(); //返回当前的选择模式
-    QModelIndexList selecteds = selections->selectedIndexes(); //返回所有选定的模型项目索引列表
-    foreach (QModelIndex index, selecteds) {
-        int row = index.row(); //删除所有被选中的行
-        sql_prod->removeRow(row);
-    }
-    sql_prod->submitAll();
-    sql_prod->select();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_prods");
+    obj.insert("logs_sign",2);
+    obj.insert("tabs_guid",m_prod->item(PROD_ID,1)->text().toDouble());
+    obj.insert("prod_numb",m_prod->item(PROD_NUMB,1)->text());
+    obj.insert("prod_date",m_prod->item(PROD_DATE,1)->text());
+    obj.insert("prod_view",m_prod->item(PROD_VIEW,1)->text());
+    obj.insert("prod_cust",m_prod->item(PROD_CUST,1)->text());
+    obj.insert("prod_sale",m_prod->item(PROD_SALE,1)->text());
+    obj.insert("prod_area",m_prod->item(PROD_AREA,1)->text());
+    obj.insert("prod_dead",m_prod->item(PROD_DEAD,1)->text());
+    obj.insert("prod_need",m_prod->item(PROD_NEED,1)->text());
+    obj.insert("prod_quan",m_prod->item(PROD_QUAN,1)->text());
+    obj.insert("prod_pnum",m_prod->item(PROD_PNUM,1)->text());
+    obj.insert("prod_type",m_prod->item(PROD_TYPE,1)->text());
+    obj.insert("prod_code",m_prod->item(PROD_CODE,1)->text());
+    obj.insert("prod_name",m_prod->item(PROD_NAME,1)->text());
+    obj.insert("prod_mode",m_prod->item(PROD_MODE,1)->text());
+    obj.insert("prod_mnum",m_prod->item(PROD_MNUM,1)->text());
+    obj.insert("prod_stck",m_prod->item(PROD_STCK,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_prod->rowCount(); i++)
+        m_prod->item(i,1)->setText("");
 }
 
 void ProdsPage::changeProd()
 {
-    int row = tab_prod->currentIndex().row();
-    for (int i=1; i < m_prod->rowCount(); i++)
-        sql_prod->setData(sql_prod->index(row,i),m_prod->item(i,1)->text());
-    sql_prod->submitAll();
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_prods");
+    obj.insert("logs_sign",3);
+    obj.insert("tabs_guid",m_prod->item(PROD_ID,1)->text().toDouble());
+    obj.insert("prod_numb",m_prod->item(PROD_NUMB,1)->text());
+    obj.insert("prod_date",m_prod->item(PROD_DATE,1)->text());
+    obj.insert("prod_view",m_prod->item(PROD_VIEW,1)->text());
+    obj.insert("prod_cust",m_prod->item(PROD_CUST,1)->text());
+    obj.insert("prod_sale",m_prod->item(PROD_SALE,1)->text());
+    obj.insert("prod_area",m_prod->item(PROD_AREA,1)->text());
+    obj.insert("prod_dead",m_prod->item(PROD_DEAD,1)->text());
+    obj.insert("prod_need",m_prod->item(PROD_NEED,1)->text());
+    obj.insert("prod_quan",m_prod->item(PROD_QUAN,1)->text());
+    obj.insert("prod_pnum",m_prod->item(PROD_PNUM,1)->text());
+    obj.insert("prod_type",m_prod->item(PROD_TYPE,1)->text());
+    obj.insert("prod_code",m_prod->item(PROD_CODE,1)->text());
+    obj.insert("prod_name",m_prod->item(PROD_NAME,1)->text());
+    obj.insert("prod_mode",m_prod->item(PROD_MODE,1)->text());
+    obj.insert("prod_mnum",m_prod->item(PROD_MNUM,1)->text());
+    obj.insert("prod_stck",m_prod->item(PROD_STCK,1)->text());
+    emit sendJson(obj);
 }
 
 void ProdsPage::updateProd()
@@ -322,17 +369,37 @@ void ProdsPage::matchProds()
         QString prod_view = sql_prod->index(i,PROD_VIEW).data().toString();
         QString numb = sql_prod->index(i,PROD_NUMB).data().toString();
         if (numb.isEmpty() && view == prod_view) {
-            for (int k=1; k < PROD_QUAN; k++)
-                sql_prod->setData(sql_prod->index(i,k),sql_plan->index(row,k).data().toString());
-            sql_prod->submitAll();
+            for (int k=1; k < PROD_QUAN; k++) {
+                QJsonObject obj;
+                obj.insert("logs_cmmd","erp_prods");
+                obj.insert("logs_sign",3);
+                obj.insert("tabs_guid",sql_prod->index(k,PROD_ID).data().toDouble());
+                obj.insert("prod_numb",sql_plan->index(row,ORDER_NUMB).data().toString());
+                obj.insert("prod_date",sql_plan->index(row,ORDER_DATE).data().toString());
+                obj.insert("prod_view",sql_plan->index(row,ORDER_VIEW).data().toString());
+                obj.insert("prod_cust",sql_plan->index(row,ORDER_CUST).data().toString());
+                obj.insert("prod_sale",sql_plan->index(row,ORDER_SALE).data().toString());
+                obj.insert("prod_area",sql_plan->index(row,ORDER_AREA).data().toString());
+                obj.insert("prod_dead",sql_plan->index(row,ORDER_DEAD).data().toString());
+                obj.insert("prod_need",sql_plan->index(row,ORDER_QUAN).data().toString());
+                obj.insert("prod_quan",sql_prod->index(k,PROD_QUAN).data().toString());
+                obj.insert("prod_pnum",sql_prod->index(k,PROD_PNUM).data().toString());
+                obj.insert("prod_type",sql_prod->index(k,PROD_TYPE).data().toString());
+                obj.insert("prod_code",sql_prod->index(k,PROD_CODE).data().toString());
+                obj.insert("prod_name",sql_prod->index(k,PROD_NAME).data().toString());
+                obj.insert("prod_mode",sql_prod->index(k,PROD_MODE).data().toString());
+                obj.insert("prod_mnum",sql_prod->index(k,PROD_MNUM).data().toString());
+                obj.insert("prod_stck",sql_prod->index(k,PROD_STCK).data().toString());
+                emit sendJson(obj);
+            }
             prod++;
             if (quan == (prod+stck+dnum))
                 break;
         }
     }
-    sql_plan->setData(sql_plan->index(row,ORDER_PROD),QString::number(prod));
-    sql_plan->submitAll();
-    initData();
+//    sql_plan->setData(sql_plan->index(row,ORDER_PROD),QString::number(prod));
+//    sql_plan->submitAll();
+//    initData();
 }
 
 void ProdsPage::matchCancel()
@@ -392,6 +459,151 @@ void ProdsPage::recvSocket(QUrl url)
     //    } else {
     //        qDebug() << "recv others" << url.toString();
     //    }
+}
+
+void ProdsPage::recvProdsJson(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    query.prepare("select count(*) from erp_prods_log where id=:id");
+    query.bindValue(":id",logs_guid);
+    query.exec();
+    query.next();
+    if (query.value(0).toInt() > 0)
+        return;
+    QString cmd;
+
+    switch (logs_sign) {
+    case 0://查询
+        logs_guid = tabs_guid;
+        if (logs_guid == 0xffffffff) {
+            query.prepare("select * from erp_prods_log");
+        } else {
+            query.prepare("select * from erp_prods_log where id>:id");
+            query.bindValue(":id",logs_guid);
+        }
+        query.exec();
+        while (query.next()) {
+            QJsonObject send_obj;
+            send_obj.insert("sendto",obj.value("sender").toString());
+            send_obj.insert("logs_cmmd","erp_prods");
+            send_obj.insert("logs_guid",query.value(0).toDouble());
+            send_obj.insert("logs_sign",query.value(1).toDouble());
+            send_obj.insert("tabs_guid",query.value(2).toDouble());
+            send_obj.insert("prod_numb",query.value(3).toString());
+            send_obj.insert("prod_date",query.value(4).toString());
+            send_obj.insert("prod_view",query.value(5).toString());
+            send_obj.insert("prod_cust",query.value(6).toString());
+            send_obj.insert("prod_sale",query.value(7).toString());
+            send_obj.insert("prod_area",query.value(8).toString());
+            send_obj.insert("prod_dead",query.value(9).toString());
+            send_obj.insert("prod_quan",query.value(10).toString());
+            send_obj.insert("prod_pnum",query.value(11).toString());
+            send_obj.insert("prod_type",query.value(12).toString());
+            send_obj.insert("prod_code",query.value(13).toString());
+            send_obj.insert("prod_name",query.value(14).toString());
+            send_obj.insert("prod_mode",query.value(15).toString());
+            send_obj.insert("prod_mnum",query.value(16).toString());
+            send_obj.insert("prod_stck",query.value(17).toString());
+            emit sendJson(send_obj);
+        }
+        return;
+        break;
+    case 1://增加
+        tabs_guid = logs_guid;
+        query.prepare("insert into erp_prods values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        query.bindValue(0,tabs_guid);
+        query.bindValue(1,obj.value("prod_numb").toString());
+        query.bindValue(2,obj.value("prod_date").toString());
+        query.bindValue(3,obj.value("prod_view").toString());
+        query.bindValue(4,obj.value("prod_cust").toString());
+        query.bindValue(5,obj.value("prod_sale").toString());
+        query.bindValue(6,obj.value("prod_area").toString());
+        query.bindValue(7,obj.value("prod_dead").toString());
+        query.bindValue(8,obj.value("prod_need").toString());
+        query.bindValue(9,obj.value("prod_quan").toString());
+        query.bindValue(10,obj.value("prod_pnum").toString());
+        query.bindValue(11,obj.value("prod_type").toString());
+        query.bindValue(12,obj.value("prod_code").toString());
+        query.bindValue(13,obj.value("prod_name").toString());
+        query.bindValue(14,obj.value("prod_mode").toString());
+        query.bindValue(15,obj.value("prod_mnum").toString());
+        query.bindValue(16,obj.value("prod_stck").toString());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_prods where id=:id");
+        query.bindValue(":id",tabs_guid);
+        query.exec();
+        break;
+    case 3://修改
+        cmd += "update erp_prods set ";
+        cmd += "prod_numb=:prod_numb,";
+        cmd += "prod_date=:prod_date,";
+        cmd += "prod_view=:prod_view,";
+        cmd += "prod_cust=:prod_cust,";
+        cmd += "prod_sale=:prod_sale,";
+        cmd += "prod_area=:prod_area,";
+        cmd += "prod_dead=:prod_dead,";
+        cmd += "prod_need=:prod_need,";
+        cmd += "prod_quan=:prod_quan,";
+        cmd += "prod_pnum=:prod_pnum,";
+        cmd += "prod_type=:prod_type ";
+        cmd += "prod_code=:prod_code,";
+        cmd += "prod_name=:prod_name,";
+        cmd += "prod_mode=:prod_mode,";
+        cmd += "prod_mnum=:prod_mnum,";
+        cmd += "prod_stck=:prod_stck ";
+        cmd += "where id=:tabs_guid";
+        query.prepare(cmd);
+        query.bindValue(":prod_numb",obj.value("prod_numb").toString());
+        query.bindValue(":prod_date",obj.value("prod_date").toString());
+        query.bindValue(":prod_view",obj.value("prod_view").toString());
+        query.bindValue(":prod_cust",obj.value("prod_cust").toString());
+        query.bindValue(":prod_sale",obj.value("prod_sale").toString());
+        query.bindValue(":prod_area",obj.value("prod_area").toString());
+        query.bindValue(":prod_dead",obj.value("prod_dead").toString());
+        query.bindValue(":prod_need",obj.value("prod_need").toString());
+        query.bindValue(":prod_quan",obj.value("prod_quan").toString());
+        query.bindValue(":prod_pnum",obj.value("prod_pnum").toString());
+        query.bindValue(":prod_type",obj.value("prod_type").toString());
+        query.bindValue(":prod_code",obj.value("prod_code").toString());
+        query.bindValue(":prod_name",obj.value("prod_name").toString());
+        query.bindValue(":prod_mode",obj.value("prod_mode").toString());
+        query.bindValue(":prod_mnum",obj.value("prod_mnum").toString());
+        query.bindValue(":prod_stck",obj.value("prod_stck").toString());
+        query.bindValue(":tabs_guid",tabs_guid);
+
+        query.exec();
+        break;
+    default:
+        break;
+    }
+    query.prepare("insert into erp_prods_log values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.bindValue(0,logs_guid);
+    query.bindValue(1,logs_sign);
+    query.bindValue(2,tabs_guid);
+    query.bindValue(3,obj.value("prod_numb").toString());
+    query.bindValue(4,obj.value("prod_date").toString());
+    query.bindValue(5,obj.value("prod_view").toString());
+    query.bindValue(6,obj.value("prod_cust").toString());
+    query.bindValue(7,obj.value("prod_sale").toString());
+    query.bindValue(8,obj.value("prod_area").toString());
+    query.bindValue(9,obj.value("prod_dead").toString());
+    query.bindValue(10,obj.value("prod_need").toString());
+    query.bindValue(11,obj.value("prod_quan").toString());
+    query.bindValue(12,obj.value("prod_pnum").toString());
+    query.bindValue(13,obj.value("prod_type").toString());
+    query.bindValue(14,obj.value("prod_code").toString());
+    query.bindValue(15,obj.value("prod_name").toString());
+    query.bindValue(16,obj.value("prod_mode").toString());
+    query.bindValue(17,obj.value("prod_mnum").toString());
+    query.bindValue(18,obj.value("prod_stck").toString());
+    query.exec();
+    sql_prod->select();
 }
 
 void ProdsPage::showEvent(QShowEvent *e)

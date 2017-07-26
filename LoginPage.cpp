@@ -11,7 +11,6 @@
 LoginPage::LoginPage(QWidget *parent) : QDialog(parent)
 {
     initUI();
-    initSql();
     initData();
 }
 
@@ -110,23 +109,13 @@ void LoginPage::initUI()
     this->resize(500,360);
 }
 
-void LoginPage::initSql()
-{
-    db = QSqlDatabase::addDatabase("QSQLITE","login");
-    db.setDatabaseName("erp.db");
-    db.open();
-
-    m_login = new QSqlTableModel(this,db);
-    m_login->setTable("erp_users");
-}
-
 void LoginPage::initData()
 {
     ini = new QSettings("conf.ini", QSettings::IniFormat);
     ini->setIniCodec("GB18030");
     ini->beginGroup("LOGIN");
     QStringList items;
-    QByteArray byte_svr = "192.168.1.58";
+    QByteArray byte_svr = "192.168.1.134";
     QByteArray save_svr = ini->value("svr", byte_svr.toBase64()).toByteArray();
     QByteArray byte_prt = "10000";
     QByteArray save_prt = ini->value("prt", byte_prt.toBase64()).toByteArray();
@@ -177,16 +166,21 @@ void LoginPage::saveData()
 void LoginPage::login()
 {
     saveData();
-    m_login->select();
-    for (int i=0; i < m_login->rowCount(); i++) {
-        QString name = m_login->data(m_login->index(i,USER_NAME)).toString();
-        QString password = m_login->data(m_login->index(i,USER_PASS)).toString();
-        if (name == usr->currentText() && password == pwd->text()) {
-            this->accept();
-            return;
-        }
-    }
-    QMessageBox::warning(this,"",tr("帐号或密码错误"));
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_login");
+    obj.insert("user_name",usr->currentText());
+    obj.insert("user_pass",pwd->text());
+    obj.insert("sendto",svr->currentText());
+    emit sendJson(obj);
+}
+
+void LoginPage::recvLoginJson(QJsonObject obj)
+{
+    bool error = obj.value("error").toBool();
+    if (error)
+        QMessageBox::warning(this,"",tr("帐号或密码错误"));
+    else
+        this->accept();
 }
 
 /*********************************END OF FILE**********************************/

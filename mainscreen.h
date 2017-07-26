@@ -31,12 +31,13 @@ public:
 signals:
     void sendSocket(QUrl url);
     void sendMsg(QUrl url);
-
+    void loginJson(QJsonObject obj);
     void rolesJson(QJsonObject obj);
     void usersJson(QJsonObject obj);
     void salesJson(QJsonObject obj);
     void custsJson(QJsonObject obj);
     void orderJson(QJsonObject obj);
+    void prodsJson(QJsonObject obj);
     void sendJson(QJsonObject obj);
 public:
     int login();
@@ -62,6 +63,7 @@ private:
     QPoint dragPosition;
     QStackedWidget *stack;
     UdpSocket udp;
+
     int preindex;
     HumanPage *human;
     SalesPage *sales;

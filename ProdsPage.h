@@ -38,7 +38,8 @@
 #define PROD_CODE 12
 #define PROD_NAME 13
 #define PROD_MODE 14
-#define PROD_STCK 15
+#define PROD_MNUM 15
+#define PROD_STCK 16
 
 class ProdsPage : public QWidget
 {
@@ -49,6 +50,7 @@ public:
 
 signals:
     void sendSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 private slots:
     void initUI();
     void initSql();
@@ -64,6 +66,7 @@ private slots:
     void matchProds();
     void matchCancel();
     void recvSocket(QUrl url);
+    void recvProdsJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_prod;

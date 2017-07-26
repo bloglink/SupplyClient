@@ -21,7 +21,6 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSettings>
-#include <QSqlTableModel>
 
 #include <HumanPage.h>
 
@@ -35,13 +34,13 @@ public:
     ~LoginPage();
 
 signals:
-    void sendSocket(QUrl url);
+    void sendJson(QJsonObject obj);
 private slots:
     void initUI();
-    void initSql();
     void initData();
     void saveData();
     void login();
+    void recvLoginJson(QJsonObject obj);
 private:
     QSqlDatabase db;
     QComboBox *svr;
@@ -49,7 +48,6 @@ private:
     QComboBox *usr;
     QLineEdit *pwd;
     QSettings *ini;
-    QSqlTableModel *m_login;
 };
 
 #endif // CLOGIN_H

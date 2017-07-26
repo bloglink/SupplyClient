@@ -6,8 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainScreen w;
-    LoginPage login;
-    int ret = login.exec();
+    int ret = w.login();
     if (ret == QDialog::Rejected) {
         return 0;
     }

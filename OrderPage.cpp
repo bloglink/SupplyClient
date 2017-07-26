@@ -320,9 +320,9 @@ void OrderPage::recvOrderJson(QJsonObject obj)
             send_obj.insert("order_date",query.value(4).toString());
             send_obj.insert("order_view",query.value(5).toString());
             send_obj.insert("order_cust",query.value(6).toString());
-            send_obj.insert("order_sale",query.value(7).toDouble());
-            send_obj.insert("order_area",query.value(8).toDouble());
-            send_obj.insert("order_dead",query.value(9).toDouble());
+            send_obj.insert("order_sale",query.value(7).toString());
+            send_obj.insert("order_area",query.value(8).toString());
+            send_obj.insert("order_dead",query.value(9).toString());
             send_obj.insert("order_quan",query.value(10).toString());
             send_obj.insert("order_prod",query.value(11).toString());
             send_obj.insert("order_stck",query.value(12).toString());
