@@ -245,6 +245,8 @@ void SalesPage::initSql()
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_NAME,QHeaderView::Stretch);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_AREA,QHeaderView::Stretch);
     tab_sales->hideColumn(SALE_ID);
+    tab_sales->hideColumn(SALE_GUID);
+    tab_sales->hideColumn(SALE_SIGN);
 }
 
 void SalesPage::initData()

@@ -155,15 +155,15 @@ void MainScreen::initUI()
     connect(this,SIGNAL(orderJson(QJsonObject)),order,SLOT(recvOrderJson(QJsonObject)));
     stack->addWidget(order);
 
-    prods = new ProdsPage(this);
-    connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
-    connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
-    stack->addWidget(prods);
+//    prods = new ProdsPage(this);
+//    connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
+//    connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
+//    stack->addWidget(prods);
 
-    purch = new PurchPage(this);
-    connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
-    connect(this,SIGNAL(sendMsg(QUrl)),purch,SLOT(recvSocket(QUrl)));
-    stack->addWidget(purch);
+//    purch = new PurchPage(this);
+//    connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
+//    connect(this,SIGNAL(sendMsg(QUrl)),purch,SLOT(recvSocket(QUrl)));
+//    stack->addWidget(purch);
 }
 
 void MainScreen::initUdp(QJsonObject obj)
@@ -272,41 +272,42 @@ void MainScreen::initSql()
     cmd += "cust_area text)";
     query.exec(cmd);
 
-    query.exec("drop table erp_orders");
-    query.exec("drop table erp_orders_log");
+    query.exec("drop table erp_order");
+    query.exec("drop table erp_order_log");
 
-    cmd = "create table if not exists erp_orders(";
+    cmd = "create table if not exists erp_order(";
     cmd += "id integer primary key,";
     cmd += "logs_guid interger,";
     cmd += "logs_sign interger,";
     cmd += "order_numb text,";//订单编号
     cmd += "order_date text,";//订单日期
-    cmd += "order_view text,";//评审编号
-    cmd += "order_cust text,";//客户名称
-    cmd += "order_sale text,";//销售经理
     cmd += "order_area text,";//所属区域
-    cmd += "order_dead text,";//交货日期
+    cmd += "order_sale text,";//销售经理
+    cmd += "order_cust text,";//客户名称
+    cmd += "order_view text,";//评审编号
     cmd += "order_quan text,";//订货数量
+    cmd += "order_dead text,";//交货日期
     cmd += "order_prod text,";//在产数量
     cmd += "order_stck text,";//入库数量
     cmd += "order_dnum text)";//发货数量
     query.exec(cmd);
 
-    cmd = "create table if not exists erp_orders_log(";
+
+    cmd = "create table if not exists erp_order_log(";
     cmd += "id integer primary key,";
     cmd += "logs_sign integer,";
     cmd += "tabs_guid integer,";
-    cmd += "order_numb text,";
-    cmd += "order_date text,";
-    cmd += "order_view text,";
-    cmd += "order_cust text,";
-    cmd += "order_sale text,";
-    cmd += "order_area text,";
-    cmd += "order_dead text,";
-    cmd += "order_quan text,";
-    cmd += "order_prod text,";
-    cmd += "order_stck text,";
-    cmd += "order_dnum text)";
+    cmd += "order_numb text,";//订单编号
+    cmd += "order_date text,";//订单日期
+    cmd += "order_area text,";//所属区域
+    cmd += "order_sale text,";//销售经理
+    cmd += "order_cust text,";//客户名称
+    cmd += "order_view text,";//评审编号
+    cmd += "order_quan text,";//订货数量
+    cmd += "order_dead text,";//交货日期
+    cmd += "order_prod text,";//在产数量
+    cmd += "order_stck text,";//入库数量
+    cmd += "order_dnum text)";//发货数量
     query.exec(cmd);
 
     query.exec("drop table erp_prods");
@@ -449,41 +450,6 @@ void MainScreen::animationClose()
     timer->singleShot(50,this,SLOT(close()));
 }
 
-void MainScreen::recvSocket(QUrl url)
-{
-    QString cmd = url.query();
-    emit sendMsg(url);
-    if (cmd == "action" || cmd == "error") {
-        url.setUserName("loginscreen");
-        emit sendMsg(url);
-    } else if (cmd == "userinfo") {
-        url.setUserName("usermanagerment");
-        emit sendMsg(url);
-    } else if (cmd == "roleinfo") {
-        url.setUserName("usermanagerment");
-        emit sendMsg(url);
-        url.setUserName("rolemanagerment");
-        emit sendMsg(url);
-    } else if (cmd == "orderinfo") {
-        url.setUserName("ordermanagement");
-        emit sendMsg(url);
-    } else if (cmd == "saleinfo" || cmd == "customerinfo") {
-        url.setUserName("ordermanagement");
-        emit sendMsg(url);
-    } else if (cmd == "pdprepinfo" || cmd == "pdplaninfo") {
-        url.setUserName("productionmanagement");
-        emit sendMsg(url);
-    } else if (cmd == "lackinfo") {
-        url.setUserName("lackmanagement");
-        emit sendMsg(url);
-    } else if (cmd == "buyinfo") {
-        url.setUserName("purchasemanagement");
-        emit sendMsg(url);
-    } else {
-        qDebug() << "recv others" << url.toString();
-    }
-}
-
 void MainScreen::recvNetJson(QJsonObject obj)
 {
     QString cmd = obj.value("logs_cmmd").toString();
@@ -497,7 +463,7 @@ void MainScreen::recvNetJson(QJsonObject obj)
         emit salesJson(obj);
     if (cmd == "erp_custs")
         emit custsJson(obj);
-    if (cmd == "erp_orders")
+    if (cmd == "erp_order")
         emit orderJson(obj);
     if (cmd == "erp_prods")
         emit prodsJson(obj);

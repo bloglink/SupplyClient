@@ -29,8 +29,6 @@ public:
     MainScreen(QWidget *parent = 0);
     ~MainScreen();
 signals:
-    void sendSocket(QUrl url);
-    void sendMsg(QUrl url);
     void loginJson(QJsonObject obj);
     void rolesJson(QJsonObject obj);
     void usersJson(QJsonObject obj);
@@ -51,7 +49,6 @@ private slots:
     void stackChange(QByteArray win);
     void animationHide();
     void animationClose();
-    void recvSocket(QUrl url);
     void recvNetJson(QJsonObject obj);
 
     virtual void cloudAntimation();
