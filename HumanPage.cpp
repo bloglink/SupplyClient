@@ -136,7 +136,7 @@ void HumanPage::initUI()
     rbtnsLayout->addWidget(btn_role);
     rbtnsLayout->addStretch();
 
-    role_items << tr("编号") << tr("角色") << tr("备注");
+    role_items << tr("编号") << tr("记录") << tr("操作") << tr("角色") << tr("备注");
     m_roles = new StandardItemModel();
     QStringList role_header;
     role_header << tr("项目") << tr("参数");
@@ -150,6 +150,8 @@ void HumanPage::initUI()
     tab_irole->setColumnWidth(0,50);
     tab_irole->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_irole->hideRow(ROLE_ID);
+    tab_irole->hideRow(ROLE_GUID);
+    tab_irole->hideRow(ROLE_SIGN);
 
     QPushButton *role_append = new QPushButton(this);
     role_append->setFlat(true);
@@ -239,6 +241,8 @@ void HumanPage::initSql()
     tab_roles->setColumnWidth(ROLE_NAME,100);
     tab_roles->horizontalHeader()->setSectionResizeMode(ROLE_MARK,QHeaderView::Stretch);
     tab_roles->hideColumn(ROLE_ID);
+    tab_roles->hideColumn(ROLE_GUID);
+    tab_roles->hideColumn(ROLE_SIGN);
 }
 
 void HumanPage::initData()
@@ -428,59 +432,26 @@ void HumanPage::recvRolesJson(QJsonObject obj)
 
     switch (logs_sign) {
     case 0://查询
-        logs_guid = tabs_guid;
-        if (logs_guid == 0xffffffff) {
-            qDebug() << "blank";
-            query.prepare("select * from erp_roles_log");
-        } else {
-            query.prepare("select * from erp_roles_log where id>:id");
-            query.bindValue(":id",logs_guid);
-        }
-        query.exec();
-        while (query.next()) {
-            QJsonObject sned_obj;
-            sned_obj.insert("sendto",obj.value("sender").toString());
-            sned_obj.insert("logs_cmmd","erp_roles");
-            sned_obj.insert("logs_guid",query.value(0).toDouble());
-            sned_obj.insert("logs_sign",query.value(1).toDouble());
-            sned_obj.insert("tabs_guid",query.value(2).toDouble());
-            sned_obj.insert("role_name",query.value(3).toString());
-            sned_obj.insert("role_mark",query.value(4).toString());
-            emit sendJson(sned_obj);
-            qDebug() << "send" << sned_obj;
-        }
+        updateRole();
         return;
         break;
     case 1://增加
-        tabs_guid = logs_guid;
-        query.prepare("insert into erp_roles values(?,?,?)");
+    case 3://修改
+        query.prepare("replace into erp_roles values(?,?,?,?,?)");
         query.bindValue(0,tabs_guid);
-        query.bindValue(1,obj.value("role_name").toString());
-        query.bindValue(2,obj.value("role_mark").toString());
+        query.bindValue(1,logs_guid);
+        query.bindValue(2,logs_sign);
+        query.bindValue(3,obj.value("role_name").toString());
+        query.bindValue(4,obj.value("role_mark").toString());
         query.exec();
         break;
     case 2://删除
         query.prepare("delete from erp_roles where id=:id");
         query.bindValue(":id",tabs_guid);
         query.exec();
-        break;
-    case 3://修改
-        query.prepare("update erp_roles set role_name=:1,role_mark=:2 where id=:3");
-        query.bindValue(":1",obj.value("role_name").toString());
-        query.bindValue(":2",obj.value("role_mark").toString());
-        query.bindValue(":3",tabs_guid);
-        query.exec();
-        break;
     default:
         break;
     }
-    query.prepare("insert into erp_roles_log values(?,?,?,?,?)");
-    query.bindValue(0,logs_guid);
-    query.bindValue(1,logs_sign);
-    query.bindValue(2,tabs_guid);
-    query.bindValue(3,obj.value("role_name").toString());
-    query.bindValue(4,obj.value("role_mark").toString());
-    query.exec();
     sql_roles->select();
 }
 

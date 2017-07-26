@@ -177,11 +177,11 @@ void LoginPage::login()
 
 void LoginPage::recvLoginJson(QJsonObject obj)
 {
-    bool error = obj.value("error").toBool();
-    if (error)
-        QMessageBox::warning(this,"",tr("帐号或密码错误"));
-    else
+    bool logs_stat = obj.value("logs_stat").toBool();
+    if (logs_stat)
         this->accept();
+    else
+        QMessageBox::warning(this,"",tr("帐号或密码错误"));        
 }
 
 /*********************************END OF FILE**********************************/

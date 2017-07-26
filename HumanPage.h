@@ -29,8 +29,10 @@
 #define USER_DATE 4
 
 #define ROLE_ID 0
-#define ROLE_NAME 1
-#define ROLE_MARK 2
+#define ROLE_GUID 1
+#define ROLE_SIGN 2
+#define ROLE_NAME 3
+#define ROLE_MARK 4
 
 class HumanPage : public QWidget
 {
