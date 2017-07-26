@@ -43,7 +43,7 @@ public:
     int login();
 private slots:
     void initUI();
-    void initUdp();
+    void initUdp(QJsonObject obj);
     void initSql();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);

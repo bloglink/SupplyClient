@@ -170,7 +170,8 @@ void LoginPage::login()
     obj.insert("logs_cmmd","erp_login");
     obj.insert("user_name",usr->currentText());
     obj.insert("user_pass",pwd->text());
-    obj.insert("sendto",svr->currentText());
+    obj.insert("host_addr",svr->currentText());
+    obj.insert("host_port",prt->currentText());
     emit sendJson(obj);
 }
 

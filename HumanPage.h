@@ -40,7 +40,6 @@ public:
     ~HumanPage();
 
 signals:
-    void sendSocket(QUrl url);
     void sendJson(QJsonObject obj);
 private slots:
     void initUI();
@@ -58,7 +57,7 @@ private slots:
     void deleteRole();
     void changeRole();
     void updateRole();
-    void recvSocket(QUrl url);
+    void updateSql();
     void recvRolesJson(QJsonObject obj);
     void recvUsersJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);

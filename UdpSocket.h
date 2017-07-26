@@ -35,7 +35,7 @@ public:
 signals:
     void sendJson(QJsonObject obj);
 public:
-    void initSocket(quint16 port);
+    void initSocket(QString host,quint16 port);
     void quitSocket(void);
 
 private slots:
@@ -43,12 +43,10 @@ private slots:
     void recvAppJson(QJsonObject obj);
     void transmitJson();
 private:
-    QHostAddress txAddr;
     quint16 txPort;
+    QHostAddress txHost;
     QQueue <QJsonObject> send_queue;
     QQueue <QJsonObject> recv_queue;
-    Snowflake guid;
-
 };
 
 #endif // SocketUdp_H

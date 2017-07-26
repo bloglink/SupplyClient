@@ -338,6 +338,18 @@ void HumanPage::changeUser()
 
 void HumanPage::updateUser()
 {
+    QSqlQuery query(db);
+    qint64 logs_guid = 0;
+    QJsonObject obj;
+
+    query.prepare("select max(logs_guid) from erp_users");
+    query.exec();
+    query.next();
+    logs_guid = query.value(0).toDouble();
+    obj.insert("logs_cmmd","erp_users");
+    obj.insert("logs_guid",logs_guid);
+    obj.insert("logs_sign",0);
+    emit sendJson(obj);
     sql_users->select();
 }
 
@@ -379,36 +391,25 @@ void HumanPage::changeRole()
 
 void HumanPage::updateRole()
 {
-    qint64 logs_guid = 0xffffffff;
     QSqlQuery query(db);
-    query.exec("select id from erp_roles_log order by id desc");
-    if (query.next())
-        logs_guid = query.value(0).toDouble();
+    qint64 logs_guid = 0;
     QJsonObject obj;
+
+    query.prepare("select max(logs_guid) from erp_roles");
+    query.exec();
+    query.next();
+    logs_guid = query.value(0).toDouble();
     obj.insert("logs_cmmd","erp_roles");
+    obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
-    obj.insert("tabs_guid",logs_guid);
     emit sendJson(obj);
 }
 
-void HumanPage::recvSocket(QUrl url)
+void HumanPage::updateSql()
 {
-    initData();
-    qDebug() << url;
-    //    QString cmd = url.query();
-    //    QString usr = url.userName();
-    //    if (usr != "Users")
-    //        return;
-    //    QByteArray byte = QByteArray::fromBase64(url.fragment().toUtf8());
-    //    if (cmd == "userinfo") {
-    //        qDebug() << "recv userinfo" << QJsonDocument::fromJson(byte).array();
-    //        initData();
-    //    } else if (cmd == "roleinfo") {
-    //        qDebug() << "recv roleinfo" << QJsonDocument::fromJson(byte).array();
-    //        initData();
-    //    } else {
-    //        qDebug() << "recv others" << url.toString();
-    //    }
+
+
+
 }
 
 void HumanPage::recvRolesJson(QJsonObject obj)
@@ -571,5 +572,6 @@ void HumanPage::recvUsersJson(QJsonObject obj)
 
 void HumanPage::showEvent(QShowEvent *e)
 {
+    updateSql();
     e->accept();
 }
