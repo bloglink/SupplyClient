@@ -44,7 +44,8 @@ void HumanPage::initUI()
     ubtnsLayout->addWidget(btn_user);
     ubtnsLayout->addStretch();
 
-    user_items << tr("编号") << tr("姓名") << tr("密码") << tr("角色") << tr("日期");
+    user_items << tr("编号") << tr("记录") << tr("操作") << tr("姓名")
+               << tr("密码") << tr("角色") << tr("日期");
     m_users = new StandardItemModel();
     QStringList user_header;
     user_header << tr("项目") << tr("参数");
@@ -63,6 +64,8 @@ void HumanPage::initUI()
     tab_iuser->setItemDelegateForRow(USER_ROLE, role_delegate);
     tab_iuser->setItemDelegateForRow(USER_DATE, new DateEditDelegate);
     tab_iuser->hideRow(USER_ID);
+    tab_iuser->hideRow(USER_GUID);
+    tab_iuser->hideRow(USER_SIGN);
 
     QPushButton *user_append = new QPushButton(this);
     user_append->setFlat(true);
@@ -229,6 +232,8 @@ void HumanPage::initSql()
     tab_users->horizontalHeader()->setSectionResizeMode(USER_DATE,QHeaderView::Stretch);
     tab_users->hideColumn(USER_PASS);
     tab_users->hideColumn(USER_ID);
+    tab_users->hideColumn(USER_GUID);
+    tab_users->hideColumn(USER_SIGN);
 
     sql_roles = new StandardSqlModel(this,db);
     sql_roles->setTable("erp_roles");
@@ -409,26 +414,12 @@ void HumanPage::updateRole()
     emit sendJson(obj);
 }
 
-void HumanPage::updateSql()
-{
-
-
-
-}
-
 void HumanPage::recvRolesJson(QJsonObject obj)
 {
     QSqlQuery query(db);
     qint64 logs_sign = obj.value("logs_sign").toDouble();
     qint64 logs_guid = obj.value("logs_guid").toDouble();
     qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    query.prepare("select count(*) from erp_roles_log where id=:id");
-    query.bindValue(":id",logs_guid);
-    query.exec();
-    query.next();
-    if (query.value(0).toInt() > 0)
-        return;
 
     switch (logs_sign) {
     case 0://查询
@@ -462,48 +453,20 @@ void HumanPage::recvUsersJson(QJsonObject obj)
     qint64 logs_guid = obj.value("logs_guid").toDouble();
     qint64 tabs_guid = obj.value("tabs_guid").toDouble();
 
-    query.prepare("select count(*) from erp_users_log where id=:id");
-    query.bindValue(":id",logs_guid);
-    query.exec();
-    query.next();
-    if (query.value(0).toInt() > 0)
-        return;
-    QString cmd;
-
     switch (logs_sign) {
     case 0://查询
-        logs_guid = tabs_guid;
-        if (logs_guid == 0xffffffff) {
-            qDebug() << "blank";
-            query.prepare("select * from erp_users_log");
-        } else {
-            query.prepare("select * from erp_users_log where id>:id");
-            query.bindValue(":id",logs_guid);
-        }
-        query.exec();
-        while (query.next()) {
-            QJsonObject sned_obj;
-            sned_obj.insert("sendto",obj.value("sender").toString());
-            sned_obj.insert("logs_cmmd","erp_users");
-            sned_obj.insert("logs_guid",query.value(0).toDouble());
-            sned_obj.insert("logs_sign",query.value(1).toDouble());
-            sned_obj.insert("tabs_guid",query.value(2).toDouble());
-            sned_obj.insert("user_name",query.value(3).toString());
-            sned_obj.insert("user_pass",query.value(4).toString());
-            sned_obj.insert("user_role",query.value(5).toString());
-            sned_obj.insert("user_date",query.value(6).toString());
-            emit sendJson(sned_obj);
-        }
-        return;
+        updateUser();
         break;
     case 1://增加
-        tabs_guid = logs_guid;
-        query.prepare("insert into erp_users values(?,?,?,?,?)");
+    case 3://修改
+        query.prepare("replace into erp_users values(?,?,?,?,?,?,?)");
         query.bindValue(0,tabs_guid);
-        query.bindValue(1,obj.value("user_name").toString());
-        query.bindValue(2,obj.value("user_pass").toString());
-        query.bindValue(3,obj.value("user_role").toString());
-        query.bindValue(4,obj.value("user_date").toString());
+        query.bindValue(1,logs_guid);
+        query.bindValue(2,logs_sign);
+        query.bindValue(3,obj.value("user_name").toString());
+        query.bindValue(4,obj.value("user_pass").toString());
+        query.bindValue(5,obj.value("user_role").toString());
+        query.bindValue(6,obj.value("user_date").toString());
         query.exec();
         break;
     case 2://删除
@@ -511,38 +474,15 @@ void HumanPage::recvUsersJson(QJsonObject obj)
         query.bindValue(":id",tabs_guid);
         query.exec();
         break;
-    case 3://修改
-        cmd += "update erp_users set ";
-        cmd += "user_name=:user_name,";
-        cmd += "user_pass=:user_pass,";
-        cmd += "user_role=:user_role,";
-        cmd += "user_date=:user_date ";
-        cmd += "where id=:tabs_guid";
-        query.prepare(cmd);
-        query.bindValue(":user_name",obj.value("user_name").toString());
-        query.bindValue(":user_pass",obj.value("user_pass").toString());
-        query.bindValue(":user_role",obj.value("user_role").toString());
-        query.bindValue(":user_date",obj.value("user_date").toString());
-        query.bindValue(":tabs_guid",tabs_guid);
-        query.exec();
-        break;
     default:
         break;
     }
-    query.prepare("insert into erp_users_log values(?,?,?,?,?,?,?)");
-    query.bindValue(0,logs_guid);
-    query.bindValue(1,logs_sign);
-    query.bindValue(2,tabs_guid);
-    query.bindValue(3,obj.value("user_name").toString());
-    query.bindValue(4,obj.value("user_pass").toString());
-    query.bindValue(5,obj.value("user_role").toString());
-    query.bindValue(6,obj.value("user_date").toString());
-    query.exec();
     sql_users->select();
 }
 
 void HumanPage::showEvent(QShowEvent *e)
 {
-    updateSql();
+    updateRole();
+    updateUser();
     e->accept();
 }

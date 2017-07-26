@@ -23,10 +23,12 @@
 #include "delegate.h"
 
 #define USER_ID 0
-#define USER_NAME 1
-#define USER_PASS 2
-#define USER_ROLE 3
-#define USER_DATE 4
+#define USER_GUID 1
+#define USER_SIGN 2
+#define USER_NAME 3
+#define USER_PASS 4
+#define USER_ROLE 5
+#define USER_DATE 6
 
 #define ROLE_ID 0
 #define ROLE_GUID 1
@@ -59,7 +61,6 @@ private slots:
     void deleteRole();
     void changeRole();
     void updateRole();
-    void updateSql();
     void recvRolesJson(QJsonObject obj);
     void recvUsersJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
