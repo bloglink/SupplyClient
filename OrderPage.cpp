@@ -19,7 +19,13 @@ void OrderPage::initUI()
     tab_order->setItemDelegate(new ReadOnlyDelegate);
     tab_order->horizontalHeader()->setHighlightSections(false);
     tab_order->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(tab_order,SIGNAL(clicked(QModelIndex)),this,SLOT(tabSync(QModelIndex)));
+    connect(tab_order,SIGNAL(clicked(QModelIndex)),this,SLOT(tabOrderSync(QModelIndex)));
+
+    tab_sends = new QTableView(this);
+    tab_sends->setItemDelegate(new ReadOnlyDelegate);
+    tab_sends->horizontalHeader()->setHighlightSections(false);
+    tab_sends->setSelectionBehavior(QAbstractItemView::SelectRows);
+    connect(tab_sends,SIGNAL(clicked(QModelIndex)),this,SLOT(tabSendsSync(QModelIndex)));
 
     QPushButton *order_update = new QPushButton(this);
     order_update->setFlat(true);
@@ -28,8 +34,14 @@ void OrderPage::initUI()
     order_update->setFocusPolicy(Qt::NoFocus);
     connect(order_update,SIGNAL(clicked(bool)),this,SLOT(updateOrder()));
 
+    QSplitter *pSpliter = new QSplitter(Qt::Vertical);
+    pSpliter->addWidget(tab_order);
+    pSpliter->addWidget(tab_sends);
+    pSpliter->setStretchFactor(0,8);
+    pSpliter->setStretchFactor(1,2);
+
     QGridLayout *sorderLayout = new QGridLayout;
-    sorderLayout->addWidget(tab_order,0,0,1,2);
+    sorderLayout->addWidget(pSpliter,0,0,1,2);
     sorderLayout->addWidget(order_update,1,1);
     sorderLayout->setColumnStretch(0,1);
 
@@ -41,8 +53,17 @@ void OrderPage::initUI()
     btn_order->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     connect(btn_order,SIGNAL(clicked(bool)),this,SLOT(showTabOrder()));
 
+    btn_sends = new QToolButton(this);
+    btn_sends->setIcon(QIcon(":/icons/left.png"));
+    btn_sends->setIconSize(QSize(30,30));
+    btn_sends->setFocusPolicy(Qt::NoFocus);
+    btn_sends->setText(tr("发\n货\n管\n理"));
+    btn_sends->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    connect(btn_sends,SIGNAL(clicked(bool)),this,SLOT(showTabSends()));
+
     QVBoxLayout *obtnsLayout = new QVBoxLayout;
     obtnsLayout->addWidget(btn_order);
+    obtnsLayout->addWidget(btn_sends);
     obtnsLayout->addStretch();
 
     order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
@@ -109,11 +130,62 @@ void OrderPage::initUI()
     orderWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     orderWidget->setLayout(iorderLayout);
     orderWidget->hide();
+    ///////////////////////////////////////////////////////////////////////////
+    sends_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号") << tr("评审单号")
+                << tr("运单单号") << tr("发货方式") << tr("运费") << tr("备注内容");
+    m_sends = new StandardItemModel();
+    QStringList sends_header;
+    sends_header << tr("项目") << tr("参数");
+    m_sends->setHorizontalHeaderLabels(sends_header);
+    for (int i=0; i < sends_items.size(); i++) {
+        m_sends->setItem(i,0,new QStandardItem(sends_items.at(i)));
+        m_sends->setItem(i,1,new QStandardItem(""));
+    }
+    tab_isend = new QTableView(this);
+    tab_isend->setModel(m_sends);
+    tab_isend->setColumnWidth(0,100);
+    tab_isend->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    tab_isend->hideRow(SEND_ID);
+    tab_isend->hideRow(SEND_GUID);
+    tab_isend->hideRow(SEND_SIGN);
+
+    QPushButton *sends_append = new QPushButton(this);
+    sends_append->setFlat(true);
+    sends_append->setMinimumSize(97,44);
+    sends_append->setText(tr("添加发货"));
+    sends_append->setFocusPolicy(Qt::NoFocus);
+    connect(sends_append,SIGNAL(clicked(bool)),this,SLOT(appendSends()));
+    QPushButton *sends_delete = new QPushButton(this);
+    sends_delete->setFlat(true);
+    sends_delete->setMinimumSize(97,44);
+    sends_delete->setText(tr("删除发货"));
+    sends_delete->setFocusPolicy(Qt::NoFocus);
+    connect(sends_delete,SIGNAL(clicked(bool)),this,SLOT(deleteSends()));
+    QPushButton *sends_change = new QPushButton(this);
+    sends_change->setFlat(true);
+    sends_change->setMinimumSize(97,44);
+    sends_change->setText(tr("修改发货"));
+    sends_change->setFocusPolicy(Qt::NoFocus);
+    connect(sends_change,SIGNAL(clicked(bool)),this,SLOT(changeSends()));
+
+    QGridLayout *isendsLayout = new QGridLayout;
+    isendsLayout->addWidget(tab_isend,0,0,1,4);
+    isendsLayout->addWidget(sends_append,1,1);
+    isendsLayout->addWidget(sends_delete,1,2);
+    isendsLayout->addWidget(sends_change,1,3);
+    isendsLayout->setColumnStretch(0,1);
+    isendsLayout->setMargin(0);
+
+    sendsWidget = new QWidget(this);
+    sendsWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    sendsWidget->setLayout(isendsLayout);
+    sendsWidget->hide();
 
     QHBoxLayout *orderlayout = new QHBoxLayout;
     orderlayout->addLayout(sorderLayout);
     orderlayout->addLayout(obtnsLayout);
     orderlayout->addWidget(orderWidget);
+    orderlayout->addWidget(sendsWidget);
     orderlayout->setStretch(0,1);
 
     QGroupBox *group = new QGroupBox(this);
@@ -148,6 +220,17 @@ void OrderPage::initSql()
     tab_order->hideColumn(ORDER_ID);
     tab_order->hideColumn(ORDER_GUID);
     tab_order->hideColumn(ORDER_SIGN);
+
+    sql_sends = new StandardSqlModel(this,db);
+    sql_sends->setTable("erp_sends");
+    sql_sends->select();
+    for (int i=0; i < sends_items.size(); i++)
+        sql_sends->setHeaderData(i, Qt::Horizontal, sends_items.at(i));
+    tab_sends->setModel(sql_sends);
+    tab_sends->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tab_sends->hideColumn(SEND_ID);
+    tab_sends->hideColumn(SEND_GUID);
+    tab_sends->hideColumn(SEND_SIGN);
 
     sql_custs = new StandardSqlModel(this,db);
     sql_custs->setTable("erp_custs");
@@ -191,6 +274,17 @@ void OrderPage::showTabOrder()
     m_order->item(ORDER_DATE,1)->setText(QDate::currentDate().toString("yyyy-MM-dd"));
 }
 
+void OrderPage::showTabSends()
+{
+    if (sendsWidget->isHidden()) {
+        sendsWidget->show();
+        btn_sends->setIcon(QIcon(":/icons/right.png"));
+    } else {
+        sendsWidget->hide();
+        btn_sends->setIcon(QIcon(":/icons/left.png"));
+    }
+}
+
 void OrderPage::autoNumber()
 {
     QString dat = QDate::currentDate().toString("yyyyMMdd");
@@ -232,6 +326,8 @@ void OrderPage::appendOrder()
 
 void OrderPage::deleteOrder()
 {
+    if (m_order->item(ORDER_ID,1)->text().isEmpty())
+        return;
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_order");
     obj.insert("logs_sign",2);
@@ -256,6 +352,8 @@ void OrderPage::deleteOrder()
 
 void OrderPage::changeOrder()
 {
+    if (m_order->item(ORDER_ID,1)->text().isEmpty())
+        return;
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_order");
     obj.insert("logs_sign",3);
@@ -276,6 +374,60 @@ void OrderPage::changeOrder()
     emit sendJson(obj);
 }
 
+void OrderPage::appendSends()
+{
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_sends");
+    obj.insert("logs_sign",1);
+    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
+    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
+    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
+    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
+    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
+    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_sends->rowCount(); i++)
+        m_sends->item(i,1)->setText("");
+}
+
+void OrderPage::deleteSends()
+{
+    if (m_sends->item(SEND_ID,1)->text().isEmpty())
+        return;
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_sends");
+    obj.insert("logs_sign",2);
+    obj.insert("tabs_guid",m_sends->item(SEND_ID,1)->text().toDouble());
+    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
+    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
+    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
+    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
+    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
+    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_sends->rowCount(); i++)
+        m_sends->item(i,1)->setText("");
+}
+
+void OrderPage::changeSends()
+{
+    if (m_sends->item(SEND_ID,1)->text().isEmpty())
+        return;
+    QJsonObject obj;
+    obj.insert("logs_cmmd","erp_sends");
+    obj.insert("logs_sign",3);
+    obj.insert("tabs_guid",m_sends->item(SEND_ID,1)->text().toDouble());
+    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
+    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
+    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
+    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
+    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
+    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    emit sendJson(obj);
+    for (int i=0; i < m_sends->rowCount(); i++)
+        m_sends->item(i,1)->setText("");
+}
+
 void OrderPage::updateOrder()
 {
     QSqlQuery query(db);
@@ -293,6 +445,25 @@ void OrderPage::updateOrder()
     emit sendJson(obj);
 
     sql_order->select();
+}
+
+void OrderPage::updateSends()
+{
+    QSqlQuery query(db);
+    qint64 logs_guid = 0;
+    QJsonObject obj;
+
+    query.prepare("select max(logs_guid) from erp_sends");
+    query.exec();
+    query.next();
+    logs_guid = query.value(0).toDouble();
+
+    obj.insert("logs_cmmd","erp_sends");
+    obj.insert("logs_guid",logs_guid);
+    obj.insert("logs_sign",0);
+    emit sendJson(obj);
+
+    sql_sends->select();
 }
 
 void OrderPage::updateCusts()
@@ -333,11 +504,19 @@ void OrderPage::updateSales()
     sql_sales->select();
 }
 
-void OrderPage::tabSync(QModelIndex index)
+void OrderPage::tabOrderSync(QModelIndex index)
 {
     int row = index.row();
     for (int i=0; i < m_order->rowCount(); i++) {
         m_order->item(i,1)->setText(sql_order->index(row,i).data().toString());
+    }
+}
+
+void OrderPage::tabSendsSync(QModelIndex index)
+{
+    int row = index.row();
+    for (int i=0; i < m_sends->rowCount(); i++) {
+        m_sends->item(i,1)->setText(sql_sends->index(row,i).data().toString());
     }
 }
 
@@ -385,9 +564,47 @@ void OrderPage::recvOrderJson(QJsonObject obj)
     sql_order->select();
 }
 
+void OrderPage::recvSendsJson(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    switch (logs_sign) {
+    case 0://查询
+        updateSends();
+        return;
+        break;
+    case 1://增加
+    case 3://修改
+        query.prepare("replace into erp_sends values(?,?,?,?,?,?,?,?,?)");
+        query.bindValue(ORDER_ID,tabs_guid);
+        query.bindValue(ORDER_GUID,logs_guid);
+        query.bindValue(ORDER_SIGN,logs_sign);
+        query.bindValue(SEND_NUMB,obj.value("send_numb").toString());
+        query.bindValue(SEND_VIEW,obj.value("send_view").toString());
+        query.bindValue(SEND_MODE,obj.value("send_mode").toString());
+        query.bindValue(SEND_CODE,obj.value("send_code").toString());
+        query.bindValue(SEND_PRCE,obj.value("send_prce").toString());
+        query.bindValue(SEND_MARK,obj.value("send_mark").toString());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_sends where id=:id");
+        query.bindValue(":id",tabs_guid);
+        query.exec();
+        break;
+    default:
+        break;
+    }
+    sql_sends->select();
+}
+
 void OrderPage::showEvent(QShowEvent *e)
 {
     updateOrder();
+    updateSends();
     updateCusts();
     updateSales();
     e->accept();

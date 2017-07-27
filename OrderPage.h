@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QGroupBox>
 #include <QDateEdit>
+#include <QSplitter>
 #include <QTableView>
 #include <QShowEvent>
 #include <QHeaderView>
@@ -41,6 +42,16 @@
 #define ORDER_LNUM 14
 #define ORDER_DNUM 15
 
+#define SEND_ID 0
+#define SEND_GUID 1
+#define SEND_SIGN 2
+#define SEND_NUMB 3
+#define SEND_VIEW 4
+#define SEND_MODE 5
+#define SEND_CODE 6
+#define SEND_PRCE 7
+#define SEND_MARK 8
+
 class OrderPage : public QWidget
 {
     Q_OBJECT
@@ -55,30 +66,48 @@ private slots:
     void initUI();
     void initSql();
     void showTabOrder();
+    void showTabSends();
     void autoNumber();
     void appendOrder();
     void deleteOrder();
     void changeOrder();
+    void appendSends();
+    void deleteSends();
+    void changeSends();
     void updateOrder();
+    void updateSends();
     void updateCusts();
     void updateSales();
-    void tabSync(QModelIndex index);
+    void tabOrderSync(QModelIndex index);
+    void tabSendsSync(QModelIndex index);
     void recvOrderJson(QJsonObject obj);
+    void recvSendsJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_order;
     StandardSqlModel *sql_order;
-    StandardSqlModel *sql_custs;
-    StandardSqlModel *sql_sales;
     QTableView *tab_order;
     QTableView *tab_iorder;
     QWidget *orderWidget;
     QToolButton *btn_order;
+    QStringList order_items;
+
+    StandardItemModel *m_sends;
+    StandardSqlModel *sql_sends;
+    QTableView *tab_sends;
+    QTableView *tab_isend;
+    QWidget *sendsWidget;
+    QToolButton *btn_sends;
+    QStringList sends_items;
+
+    StandardSqlModel *sql_custs;
+    StandardSqlModel *sql_sales;
+
     QSqlDatabase db;
     ComboBoxDelegate *sale_delegate;
     ComboBoxDelegate *area_delegate;
     ComboBoxDelegate *cust_delegate;
-    QStringList order_items;
+
 };
 
 #endif // ORDERPAGE_H

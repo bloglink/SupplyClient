@@ -35,6 +35,7 @@ signals:
     void salesJson(QJsonObject obj);
     void custsJson(QJsonObject obj);
     void orderJson(QJsonObject obj);
+    void sendsJson(QJsonObject obj);
     void prodsJson(QJsonObject obj);
     void sendJson(QJsonObject obj);
 public:

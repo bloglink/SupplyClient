@@ -6,7 +6,6 @@ ProdsPage::ProdsPage(QWidget *parent) : QWidget(parent)
     initSql();
 }
 
-
 ProdsPage::~ProdsPage()
 {
     db.close();
@@ -74,9 +73,11 @@ void ProdsPage::initUI()
     QVBoxLayout *pbtnsLayout = new QVBoxLayout;
     pbtnsLayout->addWidget(btn_prods);
     pbtnsLayout->addStretch();
-    prod_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
-               << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
-               << tr("订货数量") << tr("生产数量") << tr("生产单号") << tr("产品大类")
+
+    prod_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
+               << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
+               << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
+               << tr("生产数量") << tr("生产单号") << tr("产品大类")
                << tr("产品编号") << tr("产品名称") << tr("产品规格") << tr("仪表编号") << tr("入库标志");
     m_prod = new StandardItemModel();
     QStringList prod_header;
@@ -91,6 +92,8 @@ void ProdsPage::initUI()
     tab_iprod->setColumnWidth(0,100);
     tab_iprod->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_iprod->hideRow(PROD_ID);
+    tab_iprod->hideRow(PROD_GUID);
+    tab_iprod->hideRow(PROD_SIGN);
 
     QPushButton *prod_append = new QPushButton(this);
     prod_append->setFlat(true);
@@ -144,11 +147,12 @@ void ProdsPage::initSql()
     db.open();
 
     sql_plan = new StandardSqlModel(this,db);
-    sql_plan->setTable("erp_orders");
+    sql_plan->setTable("erp_order");
     QStringList order_items;
-    order_items << tr("编号") << tr("订单单号") << tr("录入日期") << tr("评审单号")
-                << tr("客户名称") << tr("销售经理") << tr("所属区域") << tr("发货日期")
-                << tr("订货数量") << tr("在产数量") << tr("入库数量") << tr("发货数量");;
+    order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
+                << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
+                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
+                << tr("在产数量") << tr("入库数量") << tr("未发数量") << tr("发货数量");
     for (int i=0; i < order_items.size(); i++)
         sql_plan->setHeaderData(i, Qt::Horizontal, order_items.at(i));
     tab_plan->setModel(sql_plan);
@@ -162,9 +166,12 @@ void ProdsPage::initSql()
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
     tab_plan->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
-    tab_plan->hideColumn(ORDER_STCK);
-    tab_plan->hideColumn(ORDER_DNUM);
     tab_plan->hideColumn(ORDER_ID);
+    tab_plan->hideColumn(ORDER_GUID);
+    tab_plan->hideColumn(ORDER_SIGN);
+    tab_plan->hideColumn(ORDER_STCK);
+    tab_plan->hideColumn(ORDER_LNUM);
+    tab_plan->hideColumn(ORDER_DNUM);
 
     sql_prod = new StandardSqlModel(this,db);
     sql_prod->setTable("erp_prods");

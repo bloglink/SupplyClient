@@ -24,22 +24,24 @@
 #include "OrderPage.h"
 
 #define PROD_ID 0
-#define PROD_NUMB 1
-#define PROD_DATE 2
-#define PROD_VIEW 3
-#define PROD_CUST 4
-#define PROD_SALE 5
-#define PROD_AREA 6
-#define PROD_DEAD 7
-#define PROD_NEED 8
-#define PROD_QUAN 9
-#define PROD_PNUM 10
-#define PROD_TYPE 11
-#define PROD_CODE 12
-#define PROD_NAME 13
-#define PROD_MODE 14
-#define PROD_MNUM 15
-#define PROD_STCK 16
+#define PROD_GUID 1
+#define PROD_SIGN 2
+#define PROD_NUMB 3
+#define PROD_DATE 4
+#define PROD_VIEW 5
+#define PROD_CUST 6
+#define PROD_SALE 7
+#define PROD_AREA 8
+#define PROD_DEAD 9
+#define PROD_NEED 10
+#define PROD_QUAN 11
+#define PROD_PNUM 12
+#define PROD_TYPE 13
+#define PROD_CODE 14
+#define PROD_NAME 15
+#define PROD_MODE 16
+#define PROD_MNUM 17
+#define PROD_STCK 18
 
 class ProdsPage : public QWidget
 {

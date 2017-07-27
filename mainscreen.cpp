@@ -153,12 +153,13 @@ void MainScreen::initUI()
     order = new OrderPage(this);
     connect(order,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
     connect(this,SIGNAL(orderJson(QJsonObject)),order,SLOT(recvOrderJson(QJsonObject)));
+    connect(this,SIGNAL(sendsJson(QJsonObject)),order,SLOT(recvSendsJson(QJsonObject)));
     stack->addWidget(order);
 
-//    prods = new ProdsPage(this);
-//    connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
-//    connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
-//    stack->addWidget(prods);
+    prods = new ProdsPage(this);
+    connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
+    connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
+    stack->addWidget(prods);
 
 //    purch = new PurchPage(this);
 //    connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
@@ -294,7 +295,6 @@ void MainScreen::initSql()
     cmd += "order_dnum text)";//发货数量
     query.exec(cmd);
 
-
     cmd = "create table if not exists erp_order_log(";
     cmd += "id integer primary key,";
     cmd += "logs_sign integer,";
@@ -312,6 +312,32 @@ void MainScreen::initSql()
     cmd += "order_stck text,";//入库数量
     cmd += "order_lnum text,";//未发数量
     cmd += "order_dnum text)";//发货数量
+    query.exec(cmd);
+
+    query.exec("drop table erp_sends");
+    query.exec("drop table erp_sends_log");
+
+    cmd = "create table if not exists erp_sends(";
+    cmd += "id integer primary key,";
+    cmd += "logs_guid interger,";
+    cmd += "logs_sign interger,";
+    cmd += "send_numb text,";//订单单号
+    cmd += "send_view text,";//评审单号
+    cmd += "send_mode text,";//发货方式
+    cmd += "send_code text,";//货运单号
+    cmd += "send_prce text,";//运费
+    cmd += "send_mark text)";//货运单号
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_sends_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "send_numb text,";//订单单号
+    cmd += "send_view text,";//评审单号
+    cmd += "send_mode text,";//发货方式
+    cmd += "send_code text,";//货运单号
+    cmd += "send_prce text)";//运费
     query.exec(cmd);
 
     query.exec("drop table erp_prods");
@@ -361,7 +387,7 @@ void MainScreen::initSql()
     cmd += "prod_stck text)";
     query.exec(cmd);
 
-    cmd = "create table if not exists erp_purchs(";
+    cmd = "create table if not exists erp_purch(";
     cmd += "id integer primary key,";
     cmd += "logs_guid interger,";
     cmd += "logs_sign interger,";
@@ -381,7 +407,7 @@ void MainScreen::initSql()
     cmd += "purch_mark text)";
     query.exec(cmd);
 
-    cmd = "create table if not exists erp_purchs_log(";
+    cmd = "create table if not exists erp_purch_log(";
     cmd += "id integer primary key,";
     cmd += "logs_sign integer,";
     cmd += "tabs_guid integer,";;
@@ -469,6 +495,8 @@ void MainScreen::recvNetJson(QJsonObject obj)
         emit custsJson(obj);
     if (cmd == "erp_order")
         emit orderJson(obj);
+    if (cmd == "erp_sends")
+        emit sendsJson(obj);
     if (cmd == "erp_prods")
         emit prodsJson(obj);
 }

@@ -138,7 +138,7 @@ public:
                       const QModelIndex &index) const
     {
         QDateEdit *dateEdit = static_cast<QDateEdit*>(editor);
-        QString value = dateEdit->date().toString("yyyyMMdd");
+        QString value = dateEdit->date().toString("yyyy-MM-dd");
         model->setData(index, value, Qt::EditRole);
     }
     void updateEditorGeometry(QWidget *editor,
