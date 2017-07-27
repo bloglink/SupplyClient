@@ -173,6 +173,13 @@ void LoginPage::login()
     obj.insert("host_addr",svr->currentText());
     obj.insert("host_port",prt->currentText());
     emit sendJson(obj);
+    QTimer *timer = new QTimer(this);
+    timer->singleShot(2000,this,SLOT(loginTimeOut()));
+}
+
+void LoginPage::loginTimeOut()
+{
+    QMessageBox::warning(this,"",tr("登录超时,服务器无回应"));
 }
 
 void LoginPage::recvLoginJson(QJsonObject obj)
@@ -181,7 +188,7 @@ void LoginPage::recvLoginJson(QJsonObject obj)
     if (logs_stat)
         this->accept();
     else
-        QMessageBox::warning(this,"",tr("帐号或密码错误"));        
+        QMessageBox::warning(this,"",tr("帐号或密码错误"));
 }
 
 /*********************************END OF FILE**********************************/

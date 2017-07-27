@@ -34,7 +34,7 @@ void MainScreen::initUI()
     this->setWindowFlags(Qt::FramelessWindowHint);
 
     QApplication::setOrganizationName("AIP");
-    QApplication::setApplicationName("QFramer");
+    QApplication::setApplicationName("供应链管理");
     QApplication::setWindowIcon(QIcon(":/icons/link.ico"));
     QSystemTrayIcon *trayicon = new QSystemTrayIcon(QIcon(QString(":/icons/link.ico")), this);
     trayicon->setToolTip(QString(qApp->applicationName()));

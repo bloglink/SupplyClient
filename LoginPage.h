@@ -40,6 +40,7 @@ private slots:
     void initData();
     void saveData();
     void login();
+    void loginTimeOut();
     void recvLoginJson(QJsonObject obj);
 private:
     QSqlDatabase db;
