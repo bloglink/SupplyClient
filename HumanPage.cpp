@@ -152,6 +152,7 @@ void HumanPage::initUI()
     tab_irole->setModel(m_roles);
     tab_irole->setColumnWidth(0,50);
     tab_irole->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    tab_irole->verticalHeader()->setVisible(false);
     tab_irole->hideRow(ROLE_ID);
     tab_irole->hideRow(ROLE_GUID);
     tab_irole->hideRow(ROLE_SIGN);
@@ -176,11 +177,10 @@ void HumanPage::initUI()
     connect(role_change,SIGNAL(clicked(bool)),this,SLOT(changeRole()));
 
     QGridLayout *iroleLayout = new QGridLayout;
-    iroleLayout->addWidget(tab_irole,0,0,1,4);
-    iroleLayout->addWidget(role_append,1,1);
-    iroleLayout->addWidget(role_delete,1,2);
-    iroleLayout->addWidget(role_change,1,3);
-    iroleLayout->setColumnStretch(0,1);
+    iroleLayout->addWidget(tab_irole,0,0,1,3);
+    iroleLayout->addWidget(role_append,1,0);
+    iroleLayout->addWidget(role_delete,1,1);
+    iroleLayout->addWidget(role_change,1,2);
     iroleLayout->setMargin(0);
 
     roleWidget = new QWidget(this);

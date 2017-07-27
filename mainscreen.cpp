@@ -191,8 +191,8 @@ void MainScreen::initSql()
     QSqlQuery query(db);
     QString cmd;
 
-    query.exec("drop table erp_roles");
-    query.exec("drop table erp_roles_log");
+//    query.exec("drop table erp_roles");
+//    query.exec("drop table erp_roles_log");
 
     cmd = "create table if not exists erp_roles(";//创建角色表
     cmd += "id integer primary key,";
@@ -210,8 +210,8 @@ void MainScreen::initSql()
     cmd += "role_mark text)";
     query.exec(cmd);
 
-    query.exec("drop table erp_users");
-    query.exec("drop table erp_users_log");
+//    query.exec("drop table erp_users");
+//    query.exec("drop table erp_users_log");
 
     cmd = "create table if not exists erp_users(";//创建用户表
     cmd += "id integer primary key,";
