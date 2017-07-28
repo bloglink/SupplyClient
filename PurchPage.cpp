@@ -129,20 +129,7 @@ void PurchPage::initSql()
         sql_purch->setHeaderData(i, Qt::Horizontal, purch_items.at(i));
     tab_purch->setModel(sql_purch);
     tab_purch->setColumnWidth(PROD_ID,50);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_NUMB,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_DATE,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_VIEW,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_CUST,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_SALE,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_AREA,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_DEAD,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_NEED,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_QUAN,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_PNUM,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_TYPE,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_CODE,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_NAME,QHeaderView::Stretch);
-    tab_purch->horizontalHeader()->setSectionResizeMode(PROD_MODE,QHeaderView::Stretch);
+    tab_purch->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 void PurchPage::showTabProd()
 {

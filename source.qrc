@@ -23,5 +23,6 @@
         <file>skins/gn_bu.css</file>
         <file>icons/left.png</file>
         <file>icons/right.png</file>
+        <file>icons/shop.png</file>
     </qresource>
 </RCC>

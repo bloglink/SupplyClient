@@ -8,7 +8,7 @@ QT       += core gui network xml sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = SupplyManagement
+TARGET = SupplyClient
 TEMPLATE = app
 
 
@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     PurchPage.cpp \
     LoginPage.cpp \
     UdpSocket.cpp \
-    Snowflake.cpp
+    Snowflake.cpp \
+    WorksPage.cpp
 
 HEADERS  += mainscreen.h \
     delegate.h \
@@ -34,7 +35,8 @@ HEADERS  += mainscreen.h \
     PurchPage.h \
     LoginPage.h \
     UdpSocket.h \
-    Snowflake.h
+    Snowflake.h \
+    WorksPage.h
 
 RESOURCES += \
     source.qrc

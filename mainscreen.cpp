@@ -83,12 +83,14 @@ void MainScreen::initUI()
     QToolButton *title_about = new QToolButton(this);
     QToolButton *title_sales = new QToolButton(this);
     QToolButton *title_power = new QToolButton(this);
+    QToolButton *title_works = new QToolButton(this);
     title_about->setObjectName("AboutPage");
     title_human->setObjectName("HumanPage");
     title_sales->setObjectName("SalesPage");
     title_order->setObjectName("OrderPage");
     title_prods->setObjectName("ProdsPage");
     title_purch->setObjectName("PurchPage");
+    title_works->setObjectName("WorksPage");
 
     initToolButton(title_order);
     initToolButton(title_prods);
@@ -97,6 +99,7 @@ void MainScreen::initUI()
     initToolButton(title_power);
     initToolButton(title_about);
     initToolButton(title_sales);
+    initToolButton(title_works);
 
     title_order->setIcon(QIcon(":/icons/note.png"));
     title_order->setText(tr("订单管理"));
@@ -112,10 +115,13 @@ void MainScreen::initUI()
     title_sales->setText(tr("客户档案"));
     title_about->setIcon(QIcon(":/icons/link.ico"));
     title_about->setText(tr("关于软件"));
+    title_works->setIcon(QIcon(":/icons/shop.png"));
+    title_works->setText(tr("出料管理"));
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(title_order);
     layout->addWidget(title_prods);
+    layout->addWidget(title_works);
     layout->addWidget(title_purch);
     layout->addWidget(title_human);
     layout->addWidget(title_power);
@@ -160,6 +166,11 @@ void MainScreen::initUI()
     connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
     connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
     stack->addWidget(prods);
+
+    works = new WorksPage(this);
+    connect(works,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
+    connect(this,SIGNAL(worksJson(QJsonObject)),works,SLOT(recvWorksJson(QJsonObject)));
+    stack->addWidget(works);
 
 //    purch = new PurchPage(this);
 //    connect(purch,SIGNAL(sendSocket(QUrl)),this,SIGNAL(sendSocket(QUrl)));
@@ -351,40 +362,59 @@ void MainScreen::initSql()
     cmd += "prod_date text,";//订单日期
     cmd += "prod_view text,";//评审编号
     cmd += "prod_cust text,";//客户名称
-    cmd += "prod_sale text,";//销售名称
-    cmd += "prod_area text,";//所属区域
     cmd += "prod_dead text,";//交货日期
-    cmd += "prod_need text,";//订货数量
     cmd += "prod_quan text,";//在产数量
     cmd += "prod_pnum text,";//生产单号
     cmd += "prod_type text,";//产品大类
     cmd += "prod_code text,";//产品编号
     cmd += "prod_name text,";//产品名称
     cmd += "prod_mode text,";//产品规格
-    cmd += "prod_mnum text,";//仪表编号
-    cmd += "prod_stck text)";//入库标志
+    cmd += "prod_mnum text)";//仪表编号
     query.exec(cmd);
 
     cmd = "create table if not exists erp_prods_log(";
     cmd += "id integer primary key,";
     cmd += "logs_sign integer,";
     cmd += "tabs_guid integer,";
-    cmd += "prod_numb text,";
-    cmd += "prod_date text,";
-    cmd += "prod_view text,";
-    cmd += "prod_cust text,";
-    cmd += "prod_sale text,";
-    cmd += "prod_area text,";
-    cmd += "prod_dead text,";
-    cmd += "prod_need text,";
-    cmd += "prod_quan text,";
-    cmd += "prod_pnum text,";
-    cmd += "prod_type text,";
-    cmd += "prod_code text,";
-    cmd += "prod_name text,";
-    cmd += "prod_mode text,";
-    cmd += "prod_mnum text,";
-    cmd += "prod_stck text)";
+    cmd += "prod_numb text,";//订单编号
+    cmd += "prod_date text,";//订单日期
+    cmd += "prod_view text,";//评审编号
+    cmd += "prod_cust text,";//客户名称
+    cmd += "prod_dead text,";//交货日期
+    cmd += "prod_quan text,";//在产数量
+    cmd += "prod_pnum text,";//联络单号
+    cmd += "prod_type text,";//产品大类
+    cmd += "prod_code text,";//产品编码
+    cmd += "prod_name text,";//产品名称
+    cmd += "prod_mode text,";//产品规格
+    cmd += "prod_mnum text)";//仪表编号
+    query.exec(cmd);
+
+    query.exec("drop table erp_bills");
+    query.exec("drop table erp_bills_log");
+
+    cmd = "create table if not exists erp_bills(";
+    cmd += "id integer primary key,";
+    cmd += "logs_guid interger,";
+    cmd += "logs_sign interger,";
+    cmd += "bill_numb text,";//物料编号
+    cmd += "bill_name text,";//物料名称
+    cmd += "bill_type text,";//物料规格
+    cmd += "bill_unit text,";//单位
+    cmd += "bill_quan text,";//数量
+    cmd += "bill_mark text)";//备注
+    query.exec(cmd);
+
+    cmd = "create table if not exists erp_bills_log(";
+    cmd += "id integer primary key,";
+    cmd += "logs_sign integer,";
+    cmd += "tabs_guid integer,";
+    cmd += "bill_numb text,";//物料编号
+    cmd += "bill_name text,";//物料名称
+    cmd += "bill_type text,";//物料规格
+    cmd += "bill_unit text,";//单位
+    cmd += "bill_quan text,";//数量
+    cmd += "bill_mark text)";//备注
     query.exec(cmd);
 
     cmd = "create table if not exists erp_purch(";

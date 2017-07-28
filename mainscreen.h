@@ -20,6 +20,7 @@
 #include "OrderPage.h"
 #include "ProdsPage.h"
 #include "PurchPage.h"
+#include "WorksPage.h"
 
 class MainScreen : public QMainWindow
 {
@@ -37,6 +38,7 @@ signals:
     void orderJson(QJsonObject obj);
     void sendsJson(QJsonObject obj);
     void prodsJson(QJsonObject obj);
+    void worksJson(QJsonObject obj);
     void sendJson(QJsonObject obj);
 public:
     int login();
@@ -68,6 +70,7 @@ private:
     OrderPage *order;
     ProdsPage *prods;
     PurchPage *purch;
+    WorksPage *works;
     QSqlDatabase db;
     bool isLogin;
     QHostAddress addr;
