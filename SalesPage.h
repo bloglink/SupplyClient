@@ -53,6 +53,7 @@ private slots:
     void showTabSale();
     void tabCustSync(QModelIndex index);
     void tabSaleSync(QModelIndex index);
+    void tabCustSyncExp(QStandardItem *item);
     void appendCust();
     void deleteCust();
     void changeCust();

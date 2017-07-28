@@ -45,7 +45,8 @@ void SalesPage::initUI()
     ubtnsLayout->addWidget(btn_custs);
     ubtnsLayout->addStretch();
 
-    cust_items << tr("编号") << tr("记录") << tr("操作") << tr("名称") << tr("销售") << tr("区域");
+    cust_items << tr("编号") << tr("记录") << tr("操作")
+               << tr("客户名称") << tr("销售姓名") << tr("所属区域");
     m_custs = new StandardItemModel();
     QStringList cust_header;
     cust_header << tr("项目") << tr("参数");
@@ -58,15 +59,16 @@ void SalesPage::initUI()
     sale_delegate = new ComboBoxDelegate(this);
     tab_icust = new QTableView(this);
     tab_icust->setModel(m_custs);
-    tab_icust->setColumnWidth(0,50);
+    tab_icust->verticalHeader()->setVisible(false);
+    tab_icust->setColumnWidth(0,100);
     tab_icust->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_icust->setItemDelegateForColumn(0,new ReadOnlyDelegate);
-    tab_icust->setItemDelegateForRow(CUST_ID, new ReadOnlyDelegate);
     tab_icust->setItemDelegateForRow(CUST_SALE, sale_delegate);
     tab_icust->setItemDelegateForRow(CUST_AREA, area_delegate);
     tab_icust->hideRow(CUST_ID);
     tab_icust->hideRow(CUST_GUID);
     tab_icust->hideRow(CUST_SIGN);
+    connect(m_custs,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(tabCustSyncExp(QStandardItem*)));
 
     QPushButton *cust_append = new QPushButton(this);
     cust_append->setFlat(true);
@@ -140,7 +142,7 @@ void SalesPage::initUI()
     sbtnsLayout->addWidget(btn_sales);
     sbtnsLayout->addStretch();
 
-    sale_items << tr("编号") << tr("记录") << tr("操作") << tr("姓名") << tr("区域");
+    sale_items << tr("编号") << tr("记录") << tr("操作") << tr("销售姓名") << tr("所属区域");
     m_sales = new StandardItemModel();
     QStringList sale_header;
     sale_header << tr("项目") << tr("参数");
@@ -151,7 +153,8 @@ void SalesPage::initUI()
     }
     tab_isale = new QTableView(this);
     tab_isale->setModel(m_sales);
-    tab_isale->setColumnWidth(0,50);
+    tab_isale->verticalHeader()->setVisible(false);
+    tab_isale->setColumnWidth(0,100);
     tab_isale->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_isale->hideRow(SALE_ID);
     tab_isale->hideRow(SALE_GUID);
@@ -226,7 +229,6 @@ void SalesPage::initSql()
     for (int i=0; i < cust_items.size(); i++)
         sql_custs->setHeaderData(i, Qt::Horizontal, cust_items.at(i));
     tab_custs->setModel(sql_custs);
-    tab_custs->setColumnWidth(CUST_ID,50);
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_NAME,QHeaderView::Stretch);
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_SALE,QHeaderView::Stretch);
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_AREA,QHeaderView::Stretch);
@@ -241,7 +243,6 @@ void SalesPage::initSql()
     for (int i=0; i < sale_items.size(); i++)
         sql_sales->setHeaderData(i, Qt::Horizontal, sale_items.at(i));
     tab_sales->setModel(sql_sales);
-    tab_sales->setColumnWidth(SALE_ID,50);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_NAME,QHeaderView::Stretch);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_AREA,QHeaderView::Stretch);
     tab_sales->hideColumn(SALE_ID);
@@ -302,8 +303,24 @@ void SalesPage::tabSaleSync(QModelIndex index)
     }
 }
 
+void SalesPage::tabCustSyncExp(QStandardItem *item)
+{
+    int row = item->row();
+    if (row == CUST_AREA) { //区域完成自动填充销售
+        QString name;
+        QString area = m_custs->item(CUST_AREA,1)->text();
+        for (int i=0; i < sql_sales->rowCount(); i++) {
+            if (area == sql_sales->data(sql_sales->index(i,SALE_AREA)).toString())
+                name = sql_sales->data(sql_sales->index(i,SALE_NAME)).toString();
+        }
+        m_custs->item(CUST_SALE,1)->setText(name);
+    }
+}
+
 void SalesPage::appendCust()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",1);
@@ -317,6 +334,8 @@ void SalesPage::appendCust()
 
 void SalesPage::deleteCust()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",2);
@@ -331,6 +350,8 @@ void SalesPage::deleteCust()
 
 void SalesPage::changeCust()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",3);
@@ -362,6 +383,8 @@ void SalesPage::updateCust()
 
 void SalesPage::appendSale()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",1);
@@ -374,6 +397,8 @@ void SalesPage::appendSale()
 
 void SalesPage::deleteSale()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",2);
@@ -387,6 +412,8 @@ void SalesPage::deleteSale()
 
 void SalesPage::changeSale()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",3);
