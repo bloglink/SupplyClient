@@ -32,7 +32,7 @@ void ProdsPage::initUI()
     prod_update->setMinimumSize(97,44);
     prod_update->setText(tr("刷新显示"));
     prod_update->setFocusPolicy(Qt::NoFocus);
-    connect(prod_update,SIGNAL(clicked(bool)),this,SLOT(updateProd()));
+    connect(prod_update,SIGNAL(clicked(bool)),this,SLOT(updateProds()));
 
     QPushButton *prod_match = new QPushButton(this);
     prod_match->setFlat(true);
@@ -77,7 +77,7 @@ void ProdsPage::initUI()
     prod_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
                << tr("订单日期") << tr("客户名称") << tr("评审单号") << tr("发货日期")
                << tr("生产数量") << tr("联络单号") << tr("产品大类") << tr("产品编号")
-               << tr("产品规格") << tr("仪表编码");
+               << tr("产品名称") << tr("产品规格") << tr("仪表编码");
 
     m_prod = new StandardItemModel();
     QStringList prod_header;
@@ -283,7 +283,6 @@ void ProdsPage::changeProd()
     obj.insert("prod_view",m_prod->item(PROD_VIEW,1)->text());
     obj.insert("prod_cust",m_prod->item(PROD_CUST,1)->text());
     obj.insert("prod_dead",m_prod->item(PROD_DEAD,1)->text());
-    obj.insert("prod_need",m_prod->item(PROD_NEED,1)->text());
     obj.insert("prod_quan",m_prod->item(PROD_QUAN,1)->text());
     obj.insert("prod_pnum",m_prod->item(PROD_PNUM,1)->text());
     obj.insert("prod_type",m_prod->item(PROD_TYPE,1)->text());
@@ -294,7 +293,7 @@ void ProdsPage::changeProd()
     emit sendJson(obj);
 }
 
-void ProdsPage::updateProd()
+void ProdsPage::updateProds()
 {
     QSqlQuery query(db);
     qint64 logs_guid = 0;
@@ -430,7 +429,7 @@ void ProdsPage::recvProdsJson(QJsonObject obj)
 
     switch (logs_sign) {
     case 0://查询
-        updateProd();
+        updateProds();
         return;
         break;
     case 1://增加
@@ -474,10 +473,15 @@ void ProdsPage::recvProdsJson(QJsonObject obj)
     sql_prod->select();
 }
 
+void ProdsPage::recvOrderJson(QJsonObject )
+{
+    sql_plan->select();
+}
+
 void ProdsPage::showEvent(QShowEvent *e)
 {
     updateOrder();
-    updateProd();
+    updateProds();
 
     e->accept();
 }

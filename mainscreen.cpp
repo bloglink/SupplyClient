@@ -165,6 +165,7 @@ void MainScreen::initUI()
     prods = new ProdsPage(this);
     connect(prods,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
     connect(this,SIGNAL(prodsJson(QJsonObject)),prods,SLOT(recvProdsJson(QJsonObject)));
+    connect(this,SIGNAL(orderJson(QJsonObject)),prods,SLOT(recvOrderJson(QJsonObject)));
     stack->addWidget(prods);
 
     works = new WorksPage(this);

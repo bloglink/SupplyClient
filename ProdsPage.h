@@ -58,13 +58,14 @@ private slots:
     void appendProd();
     void deleteProd();
     void changeProd();
-    void updateProd();
+    void updateProds();
     void updateOrder();
     void tabPlanSync(QModelIndex index);
     void tabProdSync(QModelIndex index);
     void matchProds();
     void matchCancel();
     void recvProdsJson(QJsonObject obj);
+    void recvOrderJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_prod;

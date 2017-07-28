@@ -19,7 +19,7 @@ void WorksPage::initUI()
     tab_prod->setItemDelegate(new ReadOnlyDelegate);
     tab_prod->horizontalHeader()->setHighlightSections(false);
     tab_prod->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(tab_prod,SIGNAL(clicked(QModelIndex)),this,SLOT(tabCustSync(QModelIndex)));
+//    connect(tab_prod,SIGNAL(clicked(QModelIndex)),this,SLOT(tabCustSync(QModelIndex)));
 
     QPushButton *prod_update = new QPushButton(this);
     prod_update->setFlat(true);
@@ -41,7 +41,7 @@ void WorksPage::initUI()
     tab_bills->setItemDelegate(new ReadOnlyDelegate);
     tab_bills->horizontalHeader()->setHighlightSections(false);
     tab_bills->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(tab_bills,SIGNAL(clicked(QModelIndex)),this,SLOT(tabSaleSync(QModelIndex)));
+//    connect(tab_bills,SIGNAL(clicked(QModelIndex)),this,SLOT(tabSaleSync(QModelIndex)));
 
     QPushButton *bill_update = new QPushButton(this);
     bill_update->setFlat(true);
@@ -156,10 +156,9 @@ void WorksPage::initSql()
     db.open();
 
     prod_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
-               << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
-               << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
-               << tr("生产数量") << tr("生产单号") << tr("产品大类")
-               << tr("产品编号") << tr("产品名称") << tr("产品规格") << tr("仪表编号") << tr("入库标志");
+               << tr("订单日期") << tr("客户名称") << tr("评审单号") << tr("发货日期")
+               << tr("生产数量") << tr("联络单号") << tr("产品大类") << tr("产品编号")
+               << tr("产品名称") << tr("产品规格") << tr("仪表编码");
 
     sql_prod = new StandardSqlModel(this,db);
     sql_prod->setTable("erp_prods");
@@ -170,16 +169,12 @@ void WorksPage::initSql()
     tab_prod->hideColumn(PROD_ID);
     tab_prod->hideColumn(PROD_GUID);
     tab_prod->hideColumn(PROD_SIGN);
-    tab_prod->hideColumn(PROD_SALE);
-    tab_prod->hideColumn(PROD_AREA);
     tab_prod->hideColumn(PROD_DEAD);
-    tab_prod->hideColumn(PROD_NEED);
     tab_prod->hideColumn(PROD_PNUM);
     tab_prod->hideColumn(PROD_TYPE);
     tab_prod->hideColumn(PROD_NAME);
     tab_prod->hideColumn(PROD_MODE);
     tab_prod->hideColumn(PROD_MNUM);
-    tab_prod->hideColumn(PROD_STCK);
 
     sql_bills = new StandardSqlModel(this,db);
     sql_bills->setTable("erp_bills");
