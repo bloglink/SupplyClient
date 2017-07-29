@@ -195,11 +195,185 @@ void MainScreen::initSql()
     if (!file.exists()) {
         file.open(QIODevice::ReadWrite);
         file.close();
+        qDebug() << "erp.db not exist";
     }
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("erp.db");
-    db.open();
+    if (!db.open())
+        qDebug() << "erp.db open fail";
 
+    createTabRoles();
+    createTabUsers();
+    createTabSales();
+    createTabCusts();
+    createTabOrder();
+    createTabSends();
+    createTabPlans();
+    createTabProds();
+    createTabPurch();
+
+//    QSqlQuery query(db);
+//    QString cmd;
+
+
+
+//    query.exec("drop table erp_sales");
+//    query.exec("drop table erp_sales_log");
+
+//    cmd = "create table if not exists erp_sales(";//创建销售表
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "sale_name text,";//销售名称
+//    cmd += "sale_area text)";//所属区域
+//    query.exec(cmd);
+
+//    query.exec("drop table erp_custs");
+//    query.exec("drop table erp_custs_log");
+
+//    cmd = "create table if not exists erp_custs(";//创建客户表
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "cust_name text,";//客户名称
+//    cmd += "cust_sale text,";//销售名称
+//    cmd += "cust_area text)";//所属区域
+//    query.exec(cmd);
+
+//    query.exec("drop table erp_order");
+//    query.exec("drop table erp_order_log");
+
+//    cmd = "create table if not exists erp_order(";//创建订单表
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "order_numb text,";//订单编号
+//    cmd += "order_date text,";//订单日期
+//    cmd += "order_area text,";//所属区域
+//    cmd += "order_sale text,";//销售经理
+//    cmd += "order_cust text,";//客户名称
+//    cmd += "order_view text,";//评审编号
+//    cmd += "order_quan text,";//订货数量
+//    cmd += "order_dead text,";//交货日期
+//    cmd += "order_mark text,";//备注内容
+//    cmd += "order_prod text,";//在产数量
+//    cmd += "order_stck text,";//入库数量
+//    cmd += "order_lnum text,";//未发数量
+//    cmd += "order_dnum text)";//发货数量
+//    query.exec(cmd);
+
+//    query.exec("drop table erp_sends");
+//    query.exec("drop table erp_sends_log");
+
+//    cmd = "create table if not exists erp_sends(";//创建发货表
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "send_numb text,";//订单单号
+//    cmd += "send_view text,";//评审单号
+//    cmd += "send_mode text,";//发货方式
+//    cmd += "send_code text,";//货运单号
+//    cmd += "send_prce text,";//运费
+//    cmd += "send_mark text)";//货运单号
+//    query.exec(cmd);
+
+//    query.exec("drop table erp_prod");
+//    query.exec("drop table erp_prods");
+//    query.exec("drop table erp_prods_log");
+
+//    cmd = "create table if not exists erp_prod(";//创建生产表
+//    cmd += "prod_uuid integer primary key,";//生产ID
+//    cmd += "prod_guid interger,";//操作ID
+//    cmd += "prod_sign interger,";//操作标识
+//    cmd += "prod_numb text,";//生产单号
+//    cmd += "prod_quan text,";//生产数量
+//    cmd += "prod_type text,";//产品大类
+//    cmd += "prod_code text,";//产品编号
+//    cmd += "prod_name text,";//产品名称
+//    cmd += "prod_mode text,";//产品规格
+//    cmd += "prod_mnum text)";//仪表编号
+
+//    cmd = "create table if not exists erp_prods(";//创建生产详细表
+//    cmd += "prods_uuid integer primary key,";//生产详细ID
+//    cmd += "prods_guid interger,";//操作ID
+//    cmd += "prods_sign interger,";//操作标识
+//    cmd += "prods_puid interger";//生产ID
+//    cmd += "prods_ouid interger";//订单ID
+//    cmd += "prods_mnum text)";//仪表编号
+//    query.exec(cmd);
+
+//    query.exec("drop table erp_bills");
+//    query.exec("drop table erp_bills_log");
+
+//    cmd = "create table if not exists erp_bills(";
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "bill_numb text,";//物料编号
+//    cmd += "bill_name text,";//物料名称
+//    cmd += "bill_type text,";//物料规格
+//    cmd += "bill_unit text,";//单位
+//    cmd += "bill_quan text,";//数量
+//    cmd += "bill_mark text)";//备注
+//    query.exec(cmd);
+
+//    cmd = "create table if not exists erp_bills_log(";
+//    cmd += "id integer primary key,";
+//    cmd += "logs_sign integer,";
+//    cmd += "tabs_guid integer,";
+//    cmd += "bill_numb text,";//物料编号
+//    cmd += "bill_name text,";//物料名称
+//    cmd += "bill_type text,";//物料规格
+//    cmd += "bill_unit text,";//单位
+//    cmd += "bill_quan text,";//数量
+//    cmd += "bill_mark text)";//备注
+//    query.exec(cmd);
+
+//    cmd = "create table if not exists erp_purch(";
+//    cmd += "id integer primary key,";
+//    cmd += "logs_guid interger,";
+//    cmd += "logs_sign interger,";
+//    cmd += "purch_numb text,";
+//    cmd += "purch_code text,";
+//    cmd += "purch_name text,";
+//    cmd += "purch_unit text,";
+//    cmd += "purch_lack text,";
+//    cmd += "purch_quan text,";
+//    cmd += "purch_date text,";
+//    cmd += "purch_bout text,";
+//    cmd += "purch_expt text,";
+//    cmd += "purch_real text,";
+//    cmd += "purch_come text,";
+//    cmd += "purch_oway text,";
+//    cmd += "purch_ofix text,";
+//    cmd += "purch_mark text)";
+//    query.exec(cmd);
+
+//    cmd = "create table if not exists erp_purch_log(";
+//    cmd += "id integer primary key,";
+//    cmd += "logs_sign integer,";
+//    cmd += "tabs_guid integer,";;
+//    cmd += "purch_numb text,";
+//    cmd += "purch_code text,";
+//    cmd += "purch_name text,";
+//    cmd += "purch_unit text,";
+//    cmd += "purch_lack text,";
+//    cmd += "purch_quan text,";
+//    cmd += "purch_date text,";
+//    cmd += "purch_bout text,";
+//    cmd += "purch_expt text,";
+//    cmd += "purch_real text,";
+//    cmd += "purch_come text,";
+//    cmd += "purch_oway text,";
+//    cmd += "purch_ofix text,";
+//    cmd += "purch_mark text)";
+//    query.exec(cmd);
+
+//    query.clear();
+}
+
+void MainScreen::createTabRoles()
+{
     QSqlQuery query(db);
     QString cmd;
 
@@ -212,7 +386,8 @@ void MainScreen::initSql()
     cmd += "role_sign interger,";//操作标识
     cmd += "role_name text,";//角色名称
     cmd += "role_mark text)";//角色备注
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_roles create fail";
 
     cmd = "create table if not exists erp_roles_log(";//创建角色日志表
     cmd += "role_guid integer primary key,";//操作ID
@@ -220,20 +395,29 @@ void MainScreen::initSql()
     cmd += "role_uuid integer,";//角色ID
     cmd += "role_name text,";//角色名称
     cmd += "role_mark text)";//角色备注
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_roles create fail";
+    query.clear();
+}
+
+void MainScreen::createTabUsers()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_users");
     query.exec("drop table erp_users_log");
 
     cmd = "create table if not exists erp_users(";//创建用户表
-    cmd += "user_uuid integer primary key,";
-    cmd += "user_guid interger,";
-    cmd += "user_sign interger,";
+    cmd += "user_uuid integer primary key,";//用户ID
+    cmd += "user_guid interger,";//操作ID
+    cmd += "user_sign interger,";//操作标识
     cmd += "user_name text,";//用户名称
     cmd += "user_pass text,";//用户密码
     cmd += "user_role interger,";//用户角色ID
     cmd += "user_date text)";//加入日期
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_users create fail";
 
     cmd = "create table if not exists erp_users_log(";//创建用户日志表
     cmd += "user_guid integer primary key,";
@@ -243,220 +427,199 @@ void MainScreen::initSql()
     cmd += "user_pass text,";
     cmd += "user_role interger,";//用户角色ID
     cmd += "user_date text)";
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_users create fail";
+
+    query.clear();
+}
+
+void MainScreen::createTabSales()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_sales");
     query.exec("drop table erp_sales_log");
 
     cmd = "create table if not exists erp_sales(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
+    cmd += "sale_uuid integer primary key,";
+    cmd += "sale_guid interger,";
+    cmd += "sale_sign interger,";
     cmd += "sale_name text,";//销售名称
     cmd += "sale_area text)";//所属区域
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_sales create fail";
 
     cmd = "create table if not exists erp_sales_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "sale_name text,";
-    cmd += "sale_area text)";
-    query.exec(cmd);
+    cmd += "sale_guid integer primary key,";
+    cmd += "sale_sign integer,";
+    cmd += "sale_uuid integer,";
+    cmd += "sale_name text,";//销售名称
+    cmd += "sale_area text)";//所属区域
+    if (!query.exec(cmd))
+        qDebug() << "erp_sales create fail";
+
+    query.clear();
+}
+
+void MainScreen::createTabCusts()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_custs");
     query.exec("drop table erp_custs_log");
 
     cmd = "create table if not exists erp_custs(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
+    cmd += "cust_uuid integer primary key,";
+    cmd += "cust_guid interger,";
+    cmd += "cust_sign interger,";
     cmd += "cust_name text,";//客户名称
-    cmd += "cust_sale text,";//销售名称
-    cmd += "cust_area text)";//所属区域
-    query.exec(cmd);
+    cmd += "cust_sale interger)";//销售ID
+    if (!query.exec(cmd))
+        qDebug() << "erp_custs create fail";
 
     cmd = "create table if not exists erp_custs_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
+    cmd += "cust_guid integer primary key,";
+    cmd += "cust_sign integer,";
+    cmd += "cust_uuid integer,";
     cmd += "cust_name text,";
-    cmd += "cust_sale text,";
-    cmd += "cust_area text)";
-    query.exec(cmd);
+    cmd += "cust_sale integer)";
+    if (!query.exec(cmd))
+        qDebug() << "erp_custs create fail";
+
+    query.clear();
+}
+
+void MainScreen::createTabOrder()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_order");
     query.exec("drop table erp_order_log");
 
     cmd = "create table if not exists erp_order(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
-    cmd += "order_numb text,";//订单编号
-    cmd += "order_date text,";//订单日期
-    cmd += "order_area text,";//所属区域
-    cmd += "order_sale text,";//销售经理
-    cmd += "order_cust text,";//客户名称
-    cmd += "order_view text,";//评审编号
-    cmd += "order_quan text,";//订货数量
-    cmd += "order_dead text,";//交货日期
-    cmd += "order_mark text,";//备注内容
-    cmd += "order_prod text,";//在产数量
-    cmd += "order_stck text,";//入库数量
-    cmd += "order_lnum text,";//未发数量
-    cmd += "order_dnum text)";//发货数量
-    query.exec(cmd);
+    cmd += "ordr_uuid integer primary key,";
+    cmd += "ordr_guid integer,";
+    cmd += "ordr_sign integer,";
+    cmd += "ordr_numb text,";//订单编号
+    cmd += "ordr_date text,";//订单日期
+    cmd += "ordr_area text,";//所属区域
+    cmd += "ordr_sale text,";//销售经理
+    cmd += "ordr_cust text,";//客户名称
+    cmd += "ordr_view text,";//评审编号
+    cmd += "ordr_quan text,";//订货数量
+    cmd += "ordr_dead text,";//交货日期
+    cmd += "ordr_mark text)";//备注内容
+    if (!query.exec(cmd))
+        qDebug() << "erp_order create fail";
 
     cmd = "create table if not exists erp_order_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "order_numb text,";//订单编号
-    cmd += "order_date text,";//订单日期
-    cmd += "order_area text,";//所属区域
-    cmd += "order_sale text,";//销售经理
-    cmd += "order_cust text,";//客户名称
-    cmd += "order_view text,";//评审编号
-    cmd += "order_quan text,";//订货数量
-    cmd += "order_dead text,";//交货日期
-    cmd += "order_mark text,";//备注内容
-    cmd += "order_prod text,";//在产数量
-    cmd += "order_stck text,";//入库数量
-    cmd += "order_lnum text,";//未发数量
-    cmd += "order_dnum text)";//发货数量
-    query.exec(cmd);
+    cmd += "ordr_guid integer primary key,";
+    cmd += "ordr_sign integer,";
+    cmd += "ordr_uuid integer,";
+    cmd += "ordr_numb text,";//订单编号
+    cmd += "ordr_date text,";//订单日期
+    cmd += "ordr_area text,";//所属区域
+    cmd += "ordr_sale text,";//销售经理
+    cmd += "ordr_cust text,";//客户名称
+    cmd += "ordr_view text,";//评审编号
+    cmd += "ordr_quan text,";//订货数量
+    cmd += "ordr_dead text,";//交货日期
+    cmd += "ordr_mark text)";//发货数量
+    if (!query.exec(cmd))
+        qDebug() << "erp_order create fail";
+    query.clear();
+}
+
+void MainScreen::createTabSends()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_sends");
     query.exec("drop table erp_sends_log");
 
     cmd = "create table if not exists erp_sends(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
+    cmd += "send_uuid integer primary key,";
+    cmd += "send_guid interger,";
+    cmd += "send_sign interger,";
     cmd += "send_numb text,";//订单单号
     cmd += "send_view text,";//评审单号
     cmd += "send_mode text,";//发货方式
     cmd += "send_code text,";//货运单号
     cmd += "send_prce text,";//运费
     cmd += "send_mark text)";//货运单号
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_sends create fail";
 
     cmd = "create table if not exists erp_sends_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
+    cmd += "send_guid integer primary key,";
+    cmd += "send_sign integer,";
+    cmd += "send_uuid integer,";
     cmd += "send_numb text,";//订单单号
     cmd += "send_view text,";//评审单号
     cmd += "send_mode text,";//发货方式
     cmd += "send_code text,";//货运单号
     cmd += "send_prce text)";//运费
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_sends create fail";
+}
+
+void MainScreen::createTabPlans()
+{
+    QSqlQuery query(db);
+    QString cmd;
+
+    query.exec("drop table erp_plans");
+
+    cmd = "create table if not exists erp_plans(";//创建生产表
+    cmd += "plan_uuid integer primary key,";//生产计划ID
+    cmd += "plan_guid integer,";//操作ID
+    cmd += "plan_sign integer,";//操作标识
+    cmd += "plan_numb text,";//生产单号
+    cmd += "plan_quan text,";//生产数量
+    cmd += "plan_type text,";//产品大类
+    cmd += "plan_code text,";//产品编号
+    cmd += "plan_name text,";//产品名称
+    cmd += "plan_mode text,";//产品规格
+    cmd += "plan_mnum text)";//仪表编号
+    if (!query.exec(cmd))
+        qDebug() << "erp_plans create fail";
+
+    cmd = "create table if not exists erp_prods(";//创建生产详细表
+    cmd += "prod_uuid integer primary key,";//生产详细ID
+    cmd += "prod_guid integer,";//操作ID
+    cmd += "prod_sign integer,";//操作标识
+    cmd += "prod_puid integer,";//生产计划ID
+    cmd += "prod_ouid integer,";//订单ID
+    cmd += "prod_mnum text)";//仪表编号
+    if (!query.exec(cmd))
+        qDebug() << "erp_prods create fail";
+}
+
+void MainScreen::createTabProds()
+{
+    QSqlQuery query(db);
+    QString cmd;
 
     query.exec("drop table erp_prods");
-    query.exec("drop table erp_prods_log");
 
-    cmd = "create table if not exists erp_prods(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
-    cmd += "prod_numb text,";//订单编号
-    cmd += "prod_date text,";//订单日期
-    cmd += "prod_view text,";//评审编号
-    cmd += "prod_cust text,";//客户名称
-    cmd += "prod_dead text,";//交货日期
-    cmd += "prod_quan text,";//在产数量
-    cmd += "prod_pnum text,";//生产单号
-    cmd += "prod_type text,";//产品大类
-    cmd += "prod_code text,";//产品编号
-    cmd += "prod_name text,";//产品名称
-    cmd += "prod_mode text,";//产品规格
+    cmd = "create table if not exists erp_prods(";//创建生产详细表
+    cmd += "prod_uuid integer primary key,";//生产详细ID
+    cmd += "prod_guid integer,";//操作ID
+    cmd += "prod_sign integer,";//操作标识
+    cmd += "prod_puid integer,";//生产计划ID
+    cmd += "prod_ouid integer,";//订单ID
     cmd += "prod_mnum text)";//仪表编号
-    query.exec(cmd);
+    if (!query.exec(cmd))
+        qDebug() << "erp_prods create fail";
+}
 
-    cmd = "create table if not exists erp_prods_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "prod_numb text,";//订单编号
-    cmd += "prod_date text,";//订单日期
-    cmd += "prod_view text,";//评审编号
-    cmd += "prod_cust text,";//客户名称
-    cmd += "prod_dead text,";//交货日期
-    cmd += "prod_quan text,";//在产数量
-    cmd += "prod_pnum text,";//联络单号
-    cmd += "prod_type text,";//产品大类
-    cmd += "prod_code text,";//产品编码
-    cmd += "prod_name text,";//产品名称
-    cmd += "prod_mode text,";//产品规格
-    cmd += "prod_mnum text)";//仪表编号
-    query.exec(cmd);
+void MainScreen::createTabPurch()
+{
 
-    query.exec("drop table erp_bills");
-    query.exec("drop table erp_bills_log");
-
-    cmd = "create table if not exists erp_bills(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
-    cmd += "bill_numb text,";//物料编号
-    cmd += "bill_name text,";//物料名称
-    cmd += "bill_type text,";//物料规格
-    cmd += "bill_unit text,";//单位
-    cmd += "bill_quan text,";//数量
-    cmd += "bill_mark text)";//备注
-    query.exec(cmd);
-
-    cmd = "create table if not exists erp_bills_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
-    cmd += "bill_numb text,";//物料编号
-    cmd += "bill_name text,";//物料名称
-    cmd += "bill_type text,";//物料规格
-    cmd += "bill_unit text,";//单位
-    cmd += "bill_quan text,";//数量
-    cmd += "bill_mark text)";//备注
-    query.exec(cmd);
-
-    cmd = "create table if not exists erp_purch(";
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
-    cmd += "purch_numb text,";
-    cmd += "purch_code text,";
-    cmd += "purch_name text,";
-    cmd += "purch_unit text,";
-    cmd += "purch_lack text,";
-    cmd += "purch_quan text,";
-    cmd += "purch_date text,";
-    cmd += "purch_bout text,";
-    cmd += "purch_expt text,";
-    cmd += "purch_real text,";
-    cmd += "purch_come text,";
-    cmd += "purch_oway text,";
-    cmd += "purch_ofix text,";
-    cmd += "purch_mark text)";
-    query.exec(cmd);
-
-    cmd = "create table if not exists erp_purch_log(";
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";;
-    cmd += "purch_numb text,";
-    cmd += "purch_code text,";
-    cmd += "purch_name text,";
-    cmd += "purch_unit text,";
-    cmd += "purch_lack text,";
-    cmd += "purch_quan text,";
-    cmd += "purch_date text,";
-    cmd += "purch_bout text,";
-    cmd += "purch_expt text,";
-    cmd += "purch_real text,";
-    cmd += "purch_come text,";
-    cmd += "purch_oway text,";
-    cmd += "purch_ofix text,";
-    cmd += "purch_mark text)";
-    query.exec(cmd);
 }
 
 void MainScreen::swithMaxNormal()

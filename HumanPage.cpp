@@ -376,7 +376,7 @@ void HumanPage::updateUser()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_users");
+    query.prepare("select max(user_guid) from erp_users");
     query.exec();
     query.next();
     logs_guid = query.value(0).toDouble();
@@ -385,8 +385,6 @@ void HumanPage::updateUser()
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
-
-//    sql_users->select();
 }
 
 void HumanPage::appendRole()
@@ -439,7 +437,7 @@ void HumanPage::updateRole()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_roles");
+    query.prepare("select max(role_guid) from erp_roles");
     query.exec();
     query.next();
     logs_guid = query.value(0).toDouble();

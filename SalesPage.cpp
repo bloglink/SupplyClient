@@ -65,7 +65,7 @@ void SalesPage::initUI()
     tab_icust->setItemDelegateForColumn(0,new ReadOnlyDelegate);
     tab_icust->setItemDelegateForRow(CUST_SALE, sale_delegate);
     tab_icust->setItemDelegateForRow(CUST_AREA, area_delegate);
-    tab_icust->hideRow(CUST_ID);
+    tab_icust->hideRow(CUST_UUID);
     tab_icust->hideRow(CUST_GUID);
     tab_icust->hideRow(CUST_SIGN);
     connect(m_custs,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(tabCustSyncExp(QStandardItem*)));
@@ -156,7 +156,7 @@ void SalesPage::initUI()
     tab_isale->verticalHeader()->setVisible(false);
     tab_isale->setColumnWidth(0,100);
     tab_isale->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    tab_isale->hideRow(SALE_ID);
+    tab_isale->hideRow(SALE_UUID);
     tab_isale->hideRow(SALE_GUID);
     tab_isale->hideRow(SALE_SIGN);
 
@@ -222,9 +222,11 @@ void SalesPage::initSql()
     db.setDatabaseName("erp.db");
     db.open();
 
-    sql_custs = new StandardSqlModel(this,db);
-    sql_custs->setTable("erp_custs");
-    sql_custs->select();
+    QString cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
+    cmd += "from erp_custs,erp_sales where cust_sale=sale_uuid";
+
+    sql_custs = new SqlQueryModel(this);
+    sql_custs->setQuery(cmd, db);
 
     for (int i=0; i < cust_items.size(); i++)
         sql_custs->setHeaderData(i, Qt::Horizontal, cust_items.at(i));
@@ -232,7 +234,7 @@ void SalesPage::initSql()
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_NAME,QHeaderView::Stretch);
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_SALE,QHeaderView::Stretch);
     tab_custs->horizontalHeader()->setSectionResizeMode(CUST_AREA,QHeaderView::Stretch);
-    tab_custs->hideColumn(CUST_ID);
+    tab_custs->hideColumn(CUST_UUID);
     tab_custs->hideColumn(CUST_GUID);
     tab_custs->hideColumn(CUST_SIGN);
 
@@ -245,15 +247,15 @@ void SalesPage::initSql()
     tab_sales->setModel(sql_sales);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_NAME,QHeaderView::Stretch);
     tab_sales->horizontalHeader()->setSectionResizeMode(SALE_AREA,QHeaderView::Stretch);
-    tab_sales->hideColumn(SALE_ID);
+    tab_sales->hideColumn(SALE_UUID);
     tab_sales->hideColumn(SALE_GUID);
     tab_sales->hideColumn(SALE_SIGN);
 }
 
 void SalesPage::initData()
 {
-    sql_custs->select();
-    sql_sales->select();
+    //    sql_custs->select();
+    //    sql_sales->select();
 }
 
 void SalesPage::showTabCust()
@@ -321,64 +323,97 @@ void SalesPage::appendCust()
 {
     this->setFocus(); //完成输入
 
+    qint64 uuid = 0;
+    QString area = m_custs->item(CUST_AREA,1)->text();
+    if (m_custs->item(CUST_NAME,1)->text().isEmpty()) {
+        QMessageBox::warning(this,"",tr("请输入姓名"));
+        return;
+    }
+    if (m_custs->item(CUST_AREA,1)->text().isEmpty()) {
+        QMessageBox::warning(this,"",tr("请输入区域"));
+        return;
+    }
+
+    for (int i=0; i < sql_sales->rowCount(); i++) {
+        if (area == sql_sales->data(sql_sales->index(i,SALE_AREA)).toString()) {
+            uuid = sql_sales->data(sql_sales->index(i,SALE_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",1);
     obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("cust_sale",uuid);
     emit sendJson(obj);
-    for (int i=0; i < m_custs->rowCount(); i++)
-        m_custs->item(i,1)->setText("");
+
+    updateCust();
 }
 
 void SalesPage::deleteCust()
 {
     this->setFocus(); //完成输入
 
+    qint64 uuid = 0;
+    QString area = m_custs->item(CUST_AREA,1)->text();
+    for (int i=0; i < sql_sales->rowCount(); i++) {
+        if (area == sql_sales->data(sql_sales->index(i,SALE_AREA)).toString()) {
+            uuid = sql_sales->data(sql_sales->index(i,SALE_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_custs->item(CUST_ID,1)->text().toDouble());
+    obj.insert("tabs_guid",m_custs->item(CUST_UUID,1)->text().toDouble());
     obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("cust_sale",uuid);
     emit sendJson(obj);
-    for (int i=0; i < m_custs->rowCount(); i++)
-        m_custs->item(i,1)->setText("");
+
+    updateCust();
 }
 
 void SalesPage::changeCust()
 {
     this->setFocus(); //完成输入
 
+    qint64 uuid = 0;
+    QString area = m_custs->item(CUST_AREA,1)->text();
+    for (int i=0; i < sql_sales->rowCount(); i++) {
+        if (area == sql_sales->data(sql_sales->index(i,SALE_AREA)).toString()) {
+            uuid = sql_sales->data(sql_sales->index(i,SALE_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_custs->item(CUST_ID,1)->text().toDouble());
+    obj.insert("tabs_guid",m_custs->item(CUST_UUID,1)->text().toDouble());
     obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("cust_sale",uuid);
     emit sendJson(obj);
+
+    updateCust();
 }
 
 void SalesPage::updateCust()
 {
     QSqlQuery query(db);
-    qint64 logs_guid = 0;
+    qint64 guid = 0;
     QJsonObject obj;
 
     query.prepare("select max(logs_guid) from erp_custs");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        guid = query.value(0).toDouble();
 
     obj.insert("logs_cmmd","erp_custs");
-    obj.insert("logs_guid",logs_guid);
+    obj.insert("logs_guid",guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
-
-    sql_custs->select();
 }
 
 void SalesPage::appendSale()
@@ -391,8 +426,6 @@ void SalesPage::appendSale()
     obj.insert("sale_name",m_sales->item(SALE_NAME,1)->text());
     obj.insert("sale_area",m_sales->item(SALE_AREA,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_sales->rowCount(); i++)
-        m_sales->item(i,1)->setText("");
 }
 
 void SalesPage::deleteSale()
@@ -402,12 +435,10 @@ void SalesPage::deleteSale()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_sales->item(SALE_ID,1)->text().toDouble());
+    obj.insert("tabs_guid",m_sales->item(SALE_UUID,1)->text().toDouble());
     obj.insert("sale_name",m_sales->item(SALE_NAME,1)->text());
     obj.insert("sale_area",m_sales->item(SALE_AREA,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_sales->rowCount(); i++)
-        m_sales->item(i,1)->setText("");
 }
 
 void SalesPage::changeSale()
@@ -417,7 +448,7 @@ void SalesPage::changeSale()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_sales->item(SALE_ID,1)->text().toDouble());
+    obj.insert("tabs_guid",m_sales->item(SALE_UUID,1)->text().toDouble());
     obj.insert("sale_name",m_sales->item(SALE_NAME,1)->text());
     obj.insert("sale_area",m_sales->item(SALE_AREA,1)->text());
     emit sendJson(obj);
@@ -426,16 +457,16 @@ void SalesPage::changeSale()
 void SalesPage::updateSale()
 {
     QSqlQuery query(db);
-    qint64 logs_guid = 0;
+    qint64 guid = 0;
     QJsonObject obj;
 
     query.prepare("select max(logs_guid) from erp_sales");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        guid = query.value(0).toDouble();
 
     obj.insert("logs_cmmd","erp_sales");
-    obj.insert("logs_guid",logs_guid);
+    obj.insert("logs_guid",guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
 
@@ -451,8 +482,6 @@ void SalesPage::recvSalesJson(QJsonObject obj)
 
     switch (logs_sign) {
     case 0://查询
-        updateSale();
-        return;
         break;
     case 1://增加
     case 3://修改
@@ -472,6 +501,9 @@ void SalesPage::recvSalesJson(QJsonObject obj)
         break;
     }
     sql_sales->select();
+    QString cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
+    cmd += "from erp_custs,erp_sales where cust_sale = sale_uuid";
+    sql_custs->setQuery(cmd);
 }
 
 void SalesPage::recvCustsJson(QJsonObject obj)
@@ -483,28 +515,27 @@ void SalesPage::recvCustsJson(QJsonObject obj)
 
     switch (logs_sign) {
     case 0://查询
-        updateCust();
-        return;
         break;
     case 1://增加
     case 3://修改
-        query.prepare("replace into erp_custs values(?,?,?,?,?,?)");
+        query.prepare("replace into erp_custs values(?,?,?,?,?)");
         query.bindValue(0,tabs_guid);
         query.bindValue(1,logs_guid);
         query.bindValue(2,logs_sign);
         query.bindValue(3,obj.value("cust_name").toString());
-        query.bindValue(4,obj.value("cust_sale").toString());
-        query.bindValue(5,obj.value("cust_area").toString());
+        query.bindValue(4,obj.value("cust_sale").toDouble());
         query.exec();
         break;
     case 2://删除
-        query.prepare("delete from erp_custs where id=:id");
-        query.bindValue(":id",tabs_guid);
+        query.prepare("delete from erp_custs where cust_uuid=:cust_uuid");
+        query.bindValue(":cust_uuid",tabs_guid);
         query.exec();
     default:
         break;
     }
-    sql_custs->select();
+    QString cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
+    cmd += "from erp_custs,erp_sales where cust_sale = sale_uuid";
+    sql_custs->setQuery(cmd);
 }
 
 void SalesPage::showEvent(QShowEvent *e)

@@ -14,6 +14,7 @@
 #include <QJsonDocument>
 #include <QSplitter>
 #include <QToolButton>
+#include <QMessageBox>
 
 #include <QSqlDatabase>
 #include <QSqlTableModel>
@@ -22,14 +23,14 @@
 
 #include "delegate.h"
 
-#define CUST_ID 0
+#define CUST_UUID 0
 #define CUST_GUID 1
 #define CUST_SIGN 2
 #define CUST_NAME 3
 #define CUST_SALE 4
 #define CUST_AREA 5
 
-#define SALE_ID 0
+#define SALE_UUID 0
 #define SALE_GUID 1
 #define SALE_SIGN 2
 #define SALE_NAME 3
@@ -68,7 +69,7 @@ private slots:
 private:
     StandardItemModel *m_custs;
     StandardItemModel *m_sales;
-    StandardSqlModel *sql_custs;
+    SqlQueryModel *sql_custs;
     StandardSqlModel *sql_sales;
     QTableView *tab_custs;
     QTableView *tab_icust;

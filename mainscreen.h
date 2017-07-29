@@ -46,6 +46,15 @@ private slots:
     void initUI();
     void initUdp(QJsonObject obj);
     void initSql();
+    void createTabRoles();
+    void createTabUsers();
+    void createTabSales();
+    void createTabCusts();
+    void createTabOrder();
+    void createTabSends();
+    void createTabPlans();
+    void createTabProds();
+    void createTabPurch();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);
     void readToolButton();
