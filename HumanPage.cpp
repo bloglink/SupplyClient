@@ -306,7 +306,7 @@ void HumanPage::appendUser()
 {
     this->setFocus(); //完成输入
 
-    qint64 role_uuid = 0;
+    qint64 uuid = 0;
     QString role = m_users->item(USER_ROLE,1)->text();
     if (m_users->item(USER_NAME,1)->text().isEmpty()) {
         QMessageBox::warning(this,"",tr("请输入姓名"));
@@ -319,7 +319,7 @@ void HumanPage::appendUser()
 
     for (int i=0; i < sql_roles->rowCount(); i++) {
         if (role == sql_roles->data(sql_roles->index(i,ROLE_NAME)).toString()) {
-            role_uuid = sql_roles->data(sql_roles->index(i,ROLE_ID)).toDouble();
+            uuid = sql_roles->data(sql_roles->index(i,ROLE_ID)).toDouble();
             break;
         }
     }
@@ -329,7 +329,7 @@ void HumanPage::appendUser()
     obj.insert("logs_sign",1);
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
     obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
-    obj.insert("user_role",role_uuid);
+    obj.insert("user_role",uuid);
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
 
@@ -340,13 +340,22 @@ void HumanPage::deleteUser()
 {
     this->setFocus(); //完成输入
 
+    qint64 uuid = 0;
+    QString role = m_users->item(USER_ROLE,1)->text();
+    for (int i=0; i < sql_roles->rowCount(); i++) {
+        if (role == sql_roles->data(sql_roles->index(i,ROLE_NAME)).toString()) {
+            uuid = sql_roles->data(sql_roles->index(i,ROLE_ID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_sign",2);
     obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
     obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
-    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_role",uuid);
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
 
@@ -357,13 +366,22 @@ void HumanPage::changeUser()
 {
     this->setFocus(); //完成输入
 
+    qint64 uuid = 0;
+    QString role = m_users->item(USER_ROLE,1)->text();
+    for (int i=0; i < sql_roles->rowCount(); i++) {
+        if (role == sql_roles->data(sql_roles->index(i,ROLE_NAME)).toString()) {
+            uuid = sql_roles->data(sql_roles->index(i,ROLE_ID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_sign",3);
     obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
     obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
-    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_role",uuid);
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
 
