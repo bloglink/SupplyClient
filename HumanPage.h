@@ -5,6 +5,7 @@
 #include <QLayout>
 #include <QWidget>
 #include <QGroupBox>
+#include <QMessageBox>
 #include <QTableView>
 #include <QShowEvent>
 #include <QHeaderView>
@@ -19,6 +20,7 @@
 #include <QSqlDatabase>
 #include <QSqlTableModel>
 #include <QAbstractItemView>
+#include <QSqlQueryModel>
 
 #include "delegate.h"
 
@@ -67,8 +69,8 @@ private slots:
 private:
     StandardItemModel *m_users;
     StandardItemModel *m_roles;
-    StandardSqlModel *sql_users;
-    StandardSqlModel *sql_roles;
+    SqlQueryModel *sql_users;
+    SqlQueryModel *sql_roles;
     QTableView *tab_users;
     QTableView *tab_iuser;
     QTableView *tab_roles;

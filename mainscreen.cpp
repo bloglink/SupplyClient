@@ -203,45 +203,45 @@ void MainScreen::initSql()
     QSqlQuery query(db);
     QString cmd;
 
-//    query.exec("drop table erp_roles");
-//    query.exec("drop table erp_roles_log");
+    query.exec("drop table erp_roles");
+    query.exec("drop table erp_roles_log");
 
     cmd = "create table if not exists erp_roles(";//创建角色表
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
+    cmd += "role_uuid integer primary key,";//角色ID
+    cmd += "role_guid interger,";//操作ID
+    cmd += "role_sign interger,";//操作标识
     cmd += "role_name text,";//角色名称
     cmd += "role_mark text)";//角色备注
     query.exec(cmd);
 
     cmd = "create table if not exists erp_roles_log(";//创建角色日志表
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";//操作标识
-    cmd += "tabs_guid integer,";//角色ID
-    cmd += "role_name text,";
-    cmd += "role_mark text)";
+    cmd += "role_guid integer primary key,";//操作ID
+    cmd += "role_sign integer,";//操作标识
+    cmd += "role_uuid integer,";//角色ID
+    cmd += "role_name text,";//角色名称
+    cmd += "role_mark text)";//角色备注
     query.exec(cmd);
 
-//    query.exec("drop table erp_users");
-//    query.exec("drop table erp_users_log");
+    query.exec("drop table erp_users");
+    query.exec("drop table erp_users_log");
 
     cmd = "create table if not exists erp_users(";//创建用户表
-    cmd += "id integer primary key,";
-    cmd += "logs_guid interger,";
-    cmd += "logs_sign interger,";
+    cmd += "user_uuid integer primary key,";
+    cmd += "user_guid interger,";
+    cmd += "user_sign interger,";
     cmd += "user_name text,";//用户名称
     cmd += "user_pass text,";//用户密码
-    cmd += "user_role text,";//用户角色
+    cmd += "user_role interger,";//用户角色ID
     cmd += "user_date text)";//加入日期
     query.exec(cmd);
 
     cmd = "create table if not exists erp_users_log(";//创建用户日志表
-    cmd += "id integer primary key,";
-    cmd += "logs_sign integer,";
-    cmd += "tabs_guid integer,";
+    cmd += "user_guid integer primary key,";
+    cmd += "user_sign integer,";
+    cmd += "user_uuid integer,";
     cmd += "user_name text,";
     cmd += "user_pass text,";
-    cmd += "user_role text,";
+    cmd += "user_role interger,";//用户角色ID
     cmd += "user_date text)";
     query.exec(cmd);
 

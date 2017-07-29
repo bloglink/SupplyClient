@@ -21,6 +21,7 @@
 #include <QDoubleSpinBox>
 #include <QCalendarWidget>
 #include <QSqlTableModel>
+#include <QSqlQueryModel>
 
 //编号列，只读委托
 class ReadOnlyDelegate : public QItemDelegate
@@ -62,6 +63,19 @@ public:
         if( Qt::TextAlignmentRole == role )
             return Qt::AlignCenter;
         return QSqlTableModel::data(index, role);
+    }
+};
+//代理类，把所有单元格中的字符居中显示
+class SqlQueryModel : public QSqlQueryModel
+{
+    Q_OBJECT
+public:
+    SqlQueryModel(QObject * parent = 0) : QSqlQueryModel(parent) { }
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
+    {
+        if( Qt::TextAlignmentRole == role )
+            return Qt::AlignCenter;
+        return QSqlQueryModel::data(index, role);
     }
 };
 

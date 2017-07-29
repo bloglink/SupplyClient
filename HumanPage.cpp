@@ -44,8 +44,8 @@ void HumanPage::initUI()
     ubtnsLayout->addWidget(btn_user);
     ubtnsLayout->addStretch();
 
-    user_items << tr("编号") << tr("记录") << tr("操作") << tr("姓名")
-               << tr("密码") << tr("角色") << tr("日期");
+    user_items << tr("编号") << tr("记录") << tr("操作") << tr("用户姓名")
+               << tr("用户密码") << tr("用户角色") << tr("加入日期");
     m_users = new StandardItemModel();
     QStringList user_header;
     user_header << tr("项目") << tr("参数");
@@ -57,10 +57,10 @@ void HumanPage::initUI()
     role_delegate = new ComboBoxDelegate(this);
     tab_iuser = new QTableView(this);
     tab_iuser->setModel(m_users);
-    tab_iuser->setColumnWidth(0,50);
+    tab_iuser->setColumnWidth(0,100);
+    tab_iuser->verticalHeader()->setVisible(false);
     tab_iuser->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_iuser->setItemDelegateForColumn(0,new ReadOnlyDelegate);
-    tab_iuser->setItemDelegateForRow(USER_ID, new ReadOnlyDelegate);
     tab_iuser->setItemDelegateForRow(USER_ROLE, role_delegate);
     tab_iuser->setItemDelegateForRow(USER_DATE, new DateEditDelegate);
     tab_iuser->hideRow(USER_ID);
@@ -139,7 +139,7 @@ void HumanPage::initUI()
     rbtnsLayout->addWidget(btn_role);
     rbtnsLayout->addStretch();
 
-    role_items << tr("编号") << tr("记录") << tr("操作") << tr("角色") << tr("备注");
+    role_items << tr("编号") << tr("记录") << tr("操作") << tr("角色名称") << tr("角色备注");
     m_roles = new StandardItemModel();
     QStringList role_header;
     role_header << tr("项目") << tr("参数");
@@ -150,7 +150,7 @@ void HumanPage::initUI()
     }
     tab_irole = new QTableView(this);
     tab_irole->setModel(m_roles);
-    tab_irole->setColumnWidth(0,50);
+    tab_irole->setColumnWidth(0,100);
     tab_irole->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_irole->verticalHeader()->setVisible(false);
     tab_irole->hideRow(ROLE_ID);
@@ -218,14 +218,15 @@ void HumanPage::initSql()
     db.setDatabaseName("erp.db");
     db.open();
 
-    sql_users = new StandardSqlModel(this,db);
-    sql_users->setTable("erp_users");
-    sql_users->select();
+    QString cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
+    cmd += "from erp_users,erp_roles where user_role = role_uuid";
+
+    sql_users = new SqlQueryModel(this);
+    sql_users->setQuery(cmd,db);
 
     for (int i=0; i < user_items.size(); i++)
         sql_users->setHeaderData(i, Qt::Horizontal, user_items.at(i));
     tab_users->setModel(sql_users);
-    tab_users->setColumnWidth(USER_ID,50);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_NAME,QHeaderView::Stretch);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_PASS,QHeaderView::Stretch);
     tab_users->horizontalHeader()->setSectionResizeMode(USER_ROLE,QHeaderView::Stretch);
@@ -235,9 +236,8 @@ void HumanPage::initSql()
     tab_users->hideColumn(USER_GUID);
     tab_users->hideColumn(USER_SIGN);
 
-    sql_roles = new StandardSqlModel(this,db);
-    sql_roles->setTable("erp_roles");
-    sql_roles->select();
+    sql_roles = new SqlQueryModel(this);
+    sql_roles->setQuery("select * from erp_roles",db);
 
     for (int i=0; i < role_items.size(); i++)
         sql_roles->setHeaderData(i, Qt::Horizontal, role_items.at(i));
@@ -252,8 +252,8 @@ void HumanPage::initSql()
 
 void HumanPage::initData()
 {
-    sql_users->select();
-    sql_roles->select();
+//    sql_users->select();
+//    sql_roles->select();
 }
 
 void HumanPage::showTabUser()
@@ -304,20 +304,42 @@ void HumanPage::tabRoleSync(QModelIndex index)
 
 void HumanPage::appendUser()
 {
+    this->setFocus(); //完成输入
+
+    qint64 role_uuid = 0;
+    QString role = m_users->item(USER_ROLE,1)->text();
+    if (m_users->item(USER_NAME,1)->text().isEmpty()) {
+        QMessageBox::warning(this,"",tr("请输入姓名"));
+        return;
+    }
+    if (m_users->item(USER_ROLE,1)->text().isEmpty()) {
+        QMessageBox::warning(this,"",tr("请输入角色"));
+        return;
+    }
+
+    for (int i=0; i < sql_roles->rowCount(); i++) {
+        if (role == sql_roles->data(sql_roles->index(i,ROLE_NAME)).toString()) {
+            role_uuid = sql_roles->data(sql_roles->index(i,ROLE_ID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_sign",1);
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
     obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
-    obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
+    obj.insert("user_role",role_uuid);
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_users->rowCount(); i++)
-        m_users->item(i,1)->setText("");
+
+    updateUser(); //更新显示
 }
 
 void HumanPage::deleteUser()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_sign",2);
@@ -327,12 +349,14 @@ void HumanPage::deleteUser()
     obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_users->rowCount(); i++)
-        m_users->item(i,1)->setText("");
+
+    updateUser(); //更新显示
 }
 
 void HumanPage::changeUser()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_users");
     obj.insert("logs_sign",3);
@@ -342,6 +366,8 @@ void HumanPage::changeUser()
     obj.insert("user_role",m_users->item(USER_ROLE,1)->text());
     obj.insert("user_date",m_users->item(USER_DATE,1)->text());
     emit sendJson(obj);
+
+    updateUser(); //更新显示
 }
 
 void HumanPage::updateUser()
@@ -360,23 +386,27 @@ void HumanPage::updateUser()
     obj.insert("logs_sign",0);
     emit sendJson(obj);
 
-    sql_users->select();
+//    sql_users->select();
 }
 
 void HumanPage::appendRole()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_roles");
     obj.insert("logs_sign",1);
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_roles->rowCount(); i++)
-        m_roles->item(i,1)->setText("");
+
+    updateRole(); //更新显示
 }
 
 void HumanPage::deleteRole()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_roles");
     obj.insert("logs_sign",2);
@@ -384,12 +414,14 @@ void HumanPage::deleteRole()
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_roles->rowCount(); i++)
-        m_roles->item(i,1)->setText("");
+
+    updateRole(); //更新显示
 }
 
 void HumanPage::changeRole()
 {
+    this->setFocus(); //完成输入
+
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_roles");
     obj.insert("logs_sign",3);
@@ -397,6 +429,8 @@ void HumanPage::changeRole()
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
     emit sendJson(obj);
+
+    updateRole(); //更新显示
 }
 
 void HumanPage::updateRole()
@@ -424,8 +458,6 @@ void HumanPage::recvRolesJson(QJsonObject obj)
 
     switch (logs_sign) {
     case 0://查询
-        updateRole();
-        return;
         break;
     case 1://增加
     case 3://修改
@@ -438,13 +470,17 @@ void HumanPage::recvRolesJson(QJsonObject obj)
         query.exec();
         break;
     case 2://删除
-        query.prepare("delete from erp_roles where id=:id");
-        query.bindValue(":id",tabs_guid);
+        query.prepare("delete from erp_roles where role_uuid=:role_uuid");
+        query.bindValue(":role_uuid",tabs_guid);
         query.exec();
     default:
         break;
     }
-    sql_roles->select();
+    sql_roles->setQuery("select * from erp_roles",db);
+    QString cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
+    cmd += "from erp_users,erp_roles where user_role = role_uuid";
+    sql_users->setQuery(cmd,db);
+    query.clear();
 }
 
 void HumanPage::recvUsersJson(QJsonObject obj)
@@ -452,11 +488,10 @@ void HumanPage::recvUsersJson(QJsonObject obj)
     QSqlQuery query(db);
     qint64 logs_sign = obj.value("logs_sign").toDouble();
     qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+    qint64 tabs_guid = obj.value("user_guid").toDouble();
 
     switch (logs_sign) {
     case 0://查询
-        updateUser();
         break;
     case 1://增加
     case 3://修改
@@ -466,19 +501,24 @@ void HumanPage::recvUsersJson(QJsonObject obj)
         query.bindValue(2,logs_sign);
         query.bindValue(3,obj.value("user_name").toString());
         query.bindValue(4,obj.value("user_pass").toString());
-        query.bindValue(5,obj.value("user_role").toString());
+        query.bindValue(5,obj.value("user_role").toDouble());
         query.bindValue(6,obj.value("user_date").toString());
         query.exec();
         break;
     case 2://删除
-        query.prepare("delete from erp_users where id=:id");
-        query.bindValue(":id",tabs_guid);
+        query.prepare("delete from erp_users where user_uuid=:user_uuid");
+        query.bindValue(":user_uuid",tabs_guid);
         query.exec();
         break;
     default:
         break;
     }
-    sql_users->select();
+
+    sql_roles->setQuery("select * from erp_roles",db);
+    QString cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
+    cmd += "from erp_users,erp_roles where user_role = role_uuid";
+    sql_users->setQuery(cmd,db);
+    query.clear();
 }
 
 void HumanPage::showEvent(QShowEvent *e)
