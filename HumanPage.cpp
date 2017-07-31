@@ -465,76 +465,15 @@ void HumanPage::updateRole()
     emit sendJson(obj);
 }
 
-void HumanPage::recvRolesJson(QJsonObject obj)
+void HumanPage::recvNetJson(QJsonObject obj)
 {
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_roles values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("role_name").toString());
-        query.bindValue(4,obj.value("role_mark").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_roles where role_uuid=:role_uuid");
-        query.bindValue(":role_uuid",tabs_guid);
-        query.exec();
-    default:
-        break;
-    }
+    QString cmd = obj.value("logs_cmmd").toString();
+    if (cmd != "erp_roles" && cmd != "erp_users")
+        return;
     sql_roles->setQuery("select * from erp_roles",db);
-    QString cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
+    cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
     cmd += "from erp_users,erp_roles where user_role = role_uuid";
     sql_users->setQuery(cmd,db);
-    query.clear();
-}
-
-void HumanPage::recvUsersJson(QJsonObject obj)
-{
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("user_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_users values(?,?,?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("user_name").toString());
-        query.bindValue(4,obj.value("user_pass").toString());
-        query.bindValue(5,obj.value("user_role").toDouble());
-        query.bindValue(6,obj.value("user_date").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_users where user_uuid=:user_uuid");
-        query.bindValue(":user_uuid",tabs_guid);
-        query.exec();
-        break;
-    default:
-        break;
-    }
-
-    sql_roles->setQuery("select * from erp_roles",db);
-    QString cmd = "select user_uuid,user_guid,user_sign,user_name,user_pass,role_name,user_date ";
-    cmd += "from erp_users,erp_roles where user_role = role_uuid";
-    sql_users->setQuery(cmd,db);
-    query.clear();
 }
 
 void HumanPage::showEvent(QShowEvent *e)

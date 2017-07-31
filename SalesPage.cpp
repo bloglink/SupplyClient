@@ -473,6 +473,11 @@ void SalesPage::updateSale()
     sql_sales->select();
 }
 
+void SalesPage::recvNetJson(QJsonObject obj)
+{
+
+}
+
 void SalesPage::recvSalesJson(QJsonObject obj)
 {
     QSqlQuery query(db);

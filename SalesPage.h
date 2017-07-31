@@ -63,6 +63,7 @@ private slots:
     void deleteSale();
     void changeSale();
     void updateSale();
+    void recvNetJson(QJsonObject obj);
     void recvSalesJson(QJsonObject obj);
     void recvCustsJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);

@@ -30,6 +30,7 @@ public:
     MainScreen(QWidget *parent = 0);
     ~MainScreen();
 signals:
+    void transmitJson(QJsonObject obj);
     void loginJson(QJsonObject obj);
     void rolesJson(QJsonObject obj);
     void usersJson(QJsonObject obj);
@@ -47,7 +48,9 @@ private slots:
     void initUdp(QJsonObject obj);
     void initSql();
     void createTabRoles();
+    void excuteCmdRoles(QJsonObject obj);
     void createTabUsers();
+    void excuteCmdUsers(QJsonObject obj);
     void createTabSales();
     void createTabCusts();
     void createTabOrder();

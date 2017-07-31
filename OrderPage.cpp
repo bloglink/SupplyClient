@@ -68,8 +68,7 @@ void OrderPage::initUI()
 
     order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
                 << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
-                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
-                << tr("在产数量") << tr("入库数量") << tr("未发数量") << tr("发货数量");
+                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容");
     m_order = new StandardItemModel();
     QStringList order_header;
     order_header << tr("项目") << tr("参数");

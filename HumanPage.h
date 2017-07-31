@@ -63,8 +63,7 @@ private slots:
     void deleteRole();
     void changeRole();
     void updateRole();
-    void recvRolesJson(QJsonObject obj);
-    void recvUsersJson(QJsonObject obj);
+    void recvNetJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_users;
