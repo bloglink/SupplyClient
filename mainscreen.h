@@ -31,6 +31,7 @@ public:
     ~MainScreen();
 signals:
     void transmitJson(QJsonObject obj);
+    void transmitShow(QString win);
     void loginJson(QJsonObject obj);
     void rolesJson(QJsonObject obj);
     void usersJson(QJsonObject obj);
@@ -56,7 +57,9 @@ private slots:
     void createTabCusts();
     void excuteCmdCusts(QJsonObject obj);
     void createTabOrder();
+    void excuteCmdOrder(QJsonObject obj);
     void createTabSends();
+    void excuteCmdSends(QJsonObject obj);
     void createTabPlans();
     void createTabProds();
     void createTabPurch();

@@ -32,7 +32,7 @@ void OrderPage::initUI()
     order_update->setMinimumSize(97,44);
     order_update->setText(tr("刷新显示"));
     order_update->setFocusPolicy(Qt::NoFocus);
-    connect(order_update,SIGNAL(clicked(bool)),this,SLOT(updateOrder()));
+    connect(order_update,SIGNAL(clicked(bool)),this,SLOT(initOrder()));
 
     QSplitter *pSpliter = new QSplitter(Qt::Vertical);
     pSpliter->addWidget(tab_order);
@@ -82,6 +82,7 @@ void OrderPage::initUI()
     cust_delegate = new ComboBoxDelegate;
     tab_iorder = new QTableView(this);
     tab_iorder->setModel(m_order);
+    tab_iorder->verticalHeader()->setVisible(false);
     tab_iorder->setColumnWidth(0,100);
     tab_iorder->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     tab_iorder->setItemDelegateForColumn(0,new ReadOnlyDelegate);
@@ -90,7 +91,7 @@ void OrderPage::initUI()
     tab_iorder->setItemDelegateForRow(ORDER_AREA,area_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_SALE,sale_delegate);
     tab_iorder->setItemDelegateForRow(ORDER_DEAD,new DateEditDelegate);
-    tab_iorder->hideRow(ORDER_ID);
+    tab_iorder->hideRow(ORDER_UUID);
     tab_iorder->hideRow(ORDER_GUID);
     tab_iorder->hideRow(ORDER_SIGN);
     tab_iorder->hideRow(ORDER_PROD);
@@ -130,8 +131,9 @@ void OrderPage::initUI()
     orderWidget->setLayout(iorderLayout);
     orderWidget->hide();
     ///////////////////////////////////////////////////////////////////////////
-    sends_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号") << tr("评审单号")
-                << tr("运单单号") << tr("发货方式") << tr("运费") << tr("备注内容");
+    sends_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号") << tr("发货日期")
+                << tr("客户名称") << tr("发货方式") << tr("货运单号") << tr("运费") << tr("发货数量") << tr("备注内容");
+
     m_sends = new StandardItemModel();
     QStringList sends_header;
     sends_header << tr("项目") << tr("参数");
@@ -142,11 +144,12 @@ void OrderPage::initUI()
     }
     tab_isend = new QTableView(this);
     tab_isend->setModel(m_sends);
+    tab_isend->verticalHeader()->setVisible(false);
     tab_isend->setColumnWidth(0,100);
     tab_isend->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    tab_isend->hideRow(SEND_ID);
-    tab_isend->hideRow(SEND_GUID);
-    tab_isend->hideRow(SEND_SIGN);
+    tab_isend->hideRow(SENDS_UUID);
+    tab_isend->hideRow(SENDS_GUID);
+    tab_isend->hideRow(SENDS_SIGN);
 
     QPushButton *sends_append = new QPushButton(this);
     sends_append->setFlat(true);
@@ -199,24 +202,18 @@ void OrderPage::initSql()
     db = QSqlDatabase::addDatabase("QSQLITE", "erp_order");
     db.setDatabaseName("erp.db");
     db.open();
-    sql_order = new StandardSqlModel(this,db);
-    sql_order->setTable("erp_order");
-    sql_order->select();
-
+    sql_order = new SqlQueryModel(this);
+    QString cmd = "select order_uuid,order_guid,order_sign,order_numb,order_date,";
+    cmd += "sales_area,sales_name,custs_name,";
+    cmd += "order_view,order_quan,order_dead,order_mark ";
+    cmd += "from erp_order,erp_custs,erp_sales ";
+    cmd += "where order_cust=custs_uuid and custs_sale=sales_uuid";
+    sql_order->setQuery(cmd,db);
     for (int i=0; i < order_items.size(); i++)
         sql_order->setHeaderData(i, Qt::Horizontal, order_items.at(i));
     tab_order->setModel(sql_order);
-    tab_order->setColumnWidth(ORDER_ID,50);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_NUMB,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_CUST,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_SALE,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_AREA,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_QUAN,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DEAD,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_PROD,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_STCK,QHeaderView::Stretch);
-    tab_order->horizontalHeader()->setSectionResizeMode(ORDER_DNUM,QHeaderView::Stretch);
-    tab_order->hideColumn(ORDER_ID);
+    tab_order->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tab_order->hideColumn(ORDER_UUID);
     tab_order->hideColumn(ORDER_GUID);
     tab_order->hideColumn(ORDER_SIGN);
 
@@ -227,9 +224,9 @@ void OrderPage::initSql()
         sql_sends->setHeaderData(i, Qt::Horizontal, sends_items.at(i));
     tab_sends->setModel(sql_sends);
     tab_sends->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tab_sends->hideColumn(SEND_ID);
-    tab_sends->hideColumn(SEND_GUID);
-    tab_sends->hideColumn(SEND_SIGN);
+    tab_sends->hideColumn(SENDS_UUID);
+    tab_sends->hideColumn(SENDS_GUID);
+    tab_sends->hideColumn(SENDS_SIGN);
 
     sql_custs = new StandardSqlModel(this,db);
     sql_custs->setTable("erp_custs");
@@ -252,17 +249,17 @@ void OrderPage::showTabOrder()
 
     QStringList sales_head;
     for (int i=0; i < sql_sales->rowCount(); i++)
-        sales_head.append(sql_sales->data(sql_sales->index(i,1)).toString());
+        sales_head.append(sql_sales->data(sql_sales->index(i,SALES_NAME)).toString());
     sale_delegate->setItemHeaders(sales_head);
 
     QStringList areas_head;
     for (int i=0; i < sql_sales->rowCount(); i++)
-        areas_head.append(sql_sales->data(sql_sales->index(i,2)).toString());
+        areas_head.append(sql_sales->data(sql_sales->index(i,SALES_AREA)).toString());
     area_delegate->setItemHeaders(areas_head);
 
     QStringList customs_head;
     for (int i=0; i < sql_custs->rowCount(); i++)
-        customs_head.append(sql_custs->data(sql_custs->index(i,1)).toString());
+        customs_head.append(sql_custs->data(sql_custs->index(i,CUSTS_NAME)).toString());
     cust_delegate->setItemHeaders(customs_head);
 
     for (int i=0; i < m_order->rowCount(); i++) {
@@ -282,6 +279,7 @@ void OrderPage::showTabSends()
         sendsWidget->hide();
         btn_sends->setIcon(QIcon(":/icons/left.png"));
     }
+    m_sends->item(SENDS_DATE,1)->setText(QDate::currentDate().toString("yyyy-MM-dd"));
 }
 
 void OrderPage::autoNumber()
@@ -302,129 +300,155 @@ void OrderPage::autoNumber()
 
 void OrderPage::appendOrder()
 {
+    this->setFocus();
+
+    sql_custs->select();
+    qint64 uuid = 0;
+    QString name = m_order->item(ORDER_CUST,1)->text();
+    for (int i=0; i < sql_custs->rowCount(); i++) {
+        if (name == sql_custs->data(sql_custs->index(i,CUSTS_NAME)).toString()) {
+            uuid = sql_custs->data(sql_custs->index(i,CUSTS_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_order");
-    obj.insert("logs_sign",1);
-    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
-    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
-    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
-    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
-    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
-    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
-    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
-    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
-    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
-    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
-    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
-    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
-    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    obj.insert("command","erp_order");
+    obj.insert("order_sign",1);
+    obj.insert("order_numb",m_order->item(0x03,1)->text());
+    obj.insert("order_date",m_order->item(0x04,1)->text());
+    obj.insert("order_cust",uuid);
+    obj.insert("order_view",m_order->item(0x08,1)->text());
+    obj.insert("order_dead",m_order->item(0x09,1)->text());
+    obj.insert("order_quan",m_order->item(0x0A,1)->text());
+    obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_order->rowCount(); i++)
-        m_order->item(i,1)->setText("");
+
+    updateOrder();
 }
 
 void OrderPage::deleteOrder()
 {
-    if (m_order->item(ORDER_ID,1)->text().isEmpty())
-        return;
+    this->setFocus();
+
+    sql_custs->select();
+    qint64 uuid = 0;
+    QString name = m_order->item(ORDER_CUST,1)->text();
+    for (int i=0; i < sql_custs->rowCount(); i++) {
+        if (name == sql_custs->data(sql_custs->index(i,CUSTS_NAME)).toString()) {
+            uuid = sql_custs->data(sql_custs->index(i,CUSTS_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_order");
-    obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_order->item(ORDER_ID,1)->text().toDouble());
-    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
-    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
-    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
-    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
-    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
-    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
-    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
-    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
-    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
-    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
-    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
-    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
-    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    obj.insert("command","erp_order");
+    obj.insert("order_sign",2);
+    obj.insert("order_uuid",m_order->item(0x00,1)->text().toDouble());
+    obj.insert("order_numb",m_order->item(0x03,1)->text());
+    obj.insert("order_date",m_order->item(0x04,1)->text());
+    obj.insert("order_cust",uuid);
+    obj.insert("order_view",m_order->item(0x08,1)->text());
+    obj.insert("order_dead",m_order->item(0x09,1)->text());
+    obj.insert("order_quan",m_order->item(0x0A,1)->text());
+    obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_order->rowCount(); i++)
-        m_order->item(i,1)->setText("");
+
+    updateOrder();
 }
 
 void OrderPage::changeOrder()
 {
-    if (m_order->item(ORDER_ID,1)->text().isEmpty())
-        return;
+    this->setFocus();
+
+    sql_custs->select();
+    qint64 uuid = 0;
+    QString name = m_order->item(ORDER_CUST,1)->text();
+    for (int i=0; i < sql_custs->rowCount(); i++) {
+        if (name == sql_custs->data(sql_custs->index(i,CUSTS_NAME)).toString()) {
+            uuid = sql_custs->data(sql_custs->index(i,CUSTS_UUID)).toDouble();
+            break;
+        }
+    }
+
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_order");
-    obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_order->item(ORDER_ID,1)->text().toDouble());
-    obj.insert("order_numb",m_order->item(ORDER_NUMB,1)->text());
-    obj.insert("order_date",m_order->item(ORDER_DATE,1)->text());
-    obj.insert("order_view",m_order->item(ORDER_VIEW,1)->text());
-    obj.insert("order_cust",m_order->item(ORDER_CUST,1)->text());
-    obj.insert("order_sale",m_order->item(ORDER_SALE,1)->text());
-    obj.insert("order_area",m_order->item(ORDER_AREA,1)->text());
-    obj.insert("order_dead",m_order->item(ORDER_DEAD,1)->text());
-    obj.insert("order_quan",m_order->item(ORDER_QUAN,1)->text());
-    obj.insert("order_mark",m_order->item(ORDER_MARK,1)->text());
-    obj.insert("order_prod",m_order->item(ORDER_PROD,1)->text());
-    obj.insert("order_stck",m_order->item(ORDER_STCK,1)->text());
-    obj.insert("order_lnum",m_order->item(ORDER_LNUM,1)->text());
-    obj.insert("order_dnum",m_order->item(ORDER_DNUM,1)->text());
+    obj.insert("command","erp_order");
+    obj.insert("order_sign",3);
+    obj.insert("order_uuid",m_order->item(0x00,1)->text().toDouble());
+    obj.insert("order_numb",m_order->item(0x03,1)->text());
+    obj.insert("order_date",m_order->item(0x04,1)->text());
+    obj.insert("order_cust",uuid);
+    obj.insert("order_view",m_order->item(0x08,1)->text());
+    obj.insert("order_dead",m_order->item(0x09,1)->text());
+    obj.insert("order_quan",m_order->item(0x0A,1)->text());
+    obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
+
+    updateOrder();
 }
 
 void OrderPage::appendSends()
 {
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_sends");
-    obj.insert("logs_sign",1);
-    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
-    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
-    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
-    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
-    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
-    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    obj.insert("command","erp_sends");
+    obj.insert("sends_sign",1);
+    obj.insert("sends_numb",m_sends->item(0x03,1)->text());
+    obj.insert("sends_date",m_sends->item(0x04,1)->text());
+    obj.insert("sends_cust",m_sends->item(0x05,1)->text());
+    obj.insert("sends_mode",m_sends->item(0x06,1)->text());
+    obj.insert("sends_code",m_sends->item(0x07,1)->text());
+    obj.insert("sends_prce",m_sends->item(0x08,1)->text());
+    obj.insert("sends_quan",m_sends->item(0x09,1)->text());
+    obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_sends->rowCount(); i++)
-        m_sends->item(i,1)->setText("");
+
+    updateSends();
 }
 
 void OrderPage::deleteSends()
 {
-    if (m_sends->item(SEND_ID,1)->text().isEmpty())
-        return;
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_sends");
-    obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_sends->item(SEND_ID,1)->text().toDouble());
-    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
-    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
-    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
-    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
-    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
-    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    obj.insert("command","erp_sends");
+    obj.insert("sends_sign",2);
+    obj.insert("sends_uuid",m_sends->item(0x00,1)->text().toDouble());
+    obj.insert("sends_numb",m_sends->item(0x03,1)->text());
+    obj.insert("sends_date",m_sends->item(0x04,1)->text());
+    obj.insert("sends_cust",m_sends->item(0x05,1)->text());
+    obj.insert("sends_mode",m_sends->item(0x06,1)->text());
+    obj.insert("sends_code",m_sends->item(0x07,1)->text());
+    obj.insert("sends_prce",m_sends->item(0x08,1)->text());
+    obj.insert("sends_quan",m_sends->item(0x09,1)->text());
+    obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_sends->rowCount(); i++)
-        m_sends->item(i,1)->setText("");
+
+    updateSends();
 }
 
 void OrderPage::changeSends()
 {
-    if (m_sends->item(SEND_ID,1)->text().isEmpty())
-        return;
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_sends");
-    obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_sends->item(SEND_ID,1)->text().toDouble());
-    obj.insert("send_numb",m_sends->item(SEND_NUMB,1)->text());
-    obj.insert("send_view",m_sends->item(SEND_VIEW,1)->text());
-    obj.insert("send_mode",m_sends->item(SEND_MODE,1)->text());
-    obj.insert("send_code",m_sends->item(SEND_CODE,1)->text());
-    obj.insert("send_prce",m_sends->item(SEND_PRCE,1)->text());
-    obj.insert("send_mark",m_sends->item(SEND_MARK,1)->text());
+    obj.insert("command","erp_sends");
+    obj.insert("sends_sign",3);
+    obj.insert("sends_uuid",m_sends->item(0x00,1)->text().toDouble());
+    obj.insert("sends_numb",m_sends->item(0x03,1)->text());
+    obj.insert("sends_date",m_sends->item(0x04,1)->text());
+    obj.insert("sends_cust",m_sends->item(0x05,1)->text());
+    obj.insert("sends_mode",m_sends->item(0x06,1)->text());
+    obj.insert("sends_code",m_sends->item(0x07,1)->text());
+    obj.insert("sends_prce",m_sends->item(0x08,1)->text());
+    obj.insert("sends_quan",m_sends->item(0x09,1)->text());
+    obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
-    for (int i=0; i < m_sends->rowCount(); i++)
-        m_sends->item(i,1)->setText("");
+
+    updateSends();
+}
+
+void OrderPage::initOrder()
+{
+    updateSends();
+    updateCusts();
+    updateSales();
+    updateOrder();
 }
 
 void OrderPage::updateOrder()
@@ -433,17 +457,15 @@ void OrderPage::updateOrder()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_order");
+    query.prepare("select max(order_guid) from erp_order");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_order");
-    obj.insert("logs_guid",logs_guid);
-    obj.insert("logs_sign",0);
+    obj.insert("command","erp_order");
+    obj.insert("order_guid",logs_guid);
+    obj.insert("order_sign",0);
     emit sendJson(obj);
-
-    sql_order->select();
 }
 
 void OrderPage::updateSends()
@@ -452,14 +474,14 @@ void OrderPage::updateSends()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_sends");
+    query.prepare("select max(sends_guid) from erp_sends");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_sends");
-    obj.insert("logs_guid",logs_guid);
-    obj.insert("logs_sign",0);
+    obj.insert("command","erp_sends");
+    obj.insert("sends_guid",logs_guid);
+    obj.insert("sends_sign",0);
     emit sendJson(obj);
 
     sql_sends->select();
@@ -471,12 +493,12 @@ void OrderPage::updateCusts()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_custs");
+    query.prepare("select max(custs_guid) from erp_custs");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_custs");
+    obj.insert("command","erp_custs");
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
@@ -487,17 +509,17 @@ void OrderPage::updateCusts()
 void OrderPage::updateSales()
 {
     QSqlQuery query(db);
-    qint64 logs_guid = 0;
+    qint64 guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_sales");
+    query.prepare("select max(sales_guid) from erp_sales");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_sales");
-    obj.insert("logs_guid",logs_guid);
-    obj.insert("logs_sign",0);
+    obj.insert("command","erp_sales");
+    obj.insert("sales_guid",guid);
+    obj.insert("sales_sign",0);
     emit sendJson(obj);
 
     sql_sales->select();
@@ -509,6 +531,8 @@ void OrderPage::tabOrderSync(QModelIndex index)
     for (int i=0; i < m_order->rowCount(); i++) {
         m_order->item(i,1)->setText(sql_order->index(row,i).data().toString());
     }
+    m_sends->item(SENDS_NUMB,1)->setText(sql_order->index(row,ORDER_NUMB).data().toString());
+    m_sends->item(SENDS_CUST,1)->setText(sql_order->index(row,ORDER_CUST).data().toString());
 }
 
 void OrderPage::tabSendsSync(QModelIndex index)
@@ -519,92 +543,31 @@ void OrderPage::tabSendsSync(QModelIndex index)
     }
 }
 
-void OrderPage::recvOrderJson(QJsonObject obj)
+void OrderPage::recvNetJson(QJsonObject obj)
 {
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        updateOrder();
-        return;
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_order values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-        query.bindValue(ORDER_ID,tabs_guid);
-        query.bindValue(ORDER_GUID,logs_guid);
-        query.bindValue(ORDER_SIGN,logs_sign);
-        query.bindValue(ORDER_NUMB,obj.value("order_numb").toString());
-        query.bindValue(ORDER_DATE,obj.value("order_date").toString());
-        query.bindValue(ORDER_VIEW,obj.value("order_view").toString());
-        query.bindValue(ORDER_CUST,obj.value("order_cust").toString());
-        query.bindValue(ORDER_SALE,obj.value("order_sale").toString());
-        query.bindValue(ORDER_AREA,obj.value("order_area").toString());
-        query.bindValue(ORDER_DEAD,obj.value("order_dead").toString());
-        query.bindValue(ORDER_QUAN,obj.value("order_quan").toString());
-        query.bindValue(ORDER_MARK,obj.value("order_mark").toString());
-        query.bindValue(ORDER_PROD,obj.value("order_prod").toString());
-        query.bindValue(ORDER_STCK,obj.value("order_stck").toString());
-        query.bindValue(ORDER_LNUM,obj.value("order_lnum").toString());
-        query.bindValue(ORDER_DNUM,obj.value("order_dnum").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_order where id=:id");
-        query.bindValue(":id",tabs_guid);
-        query.exec();
-        break;
-    default:
-        break;
+    QString cmd = obj.value("command").toString();
+    if (cmd == "erp_order") {
+        QString cmd = "select order_uuid,order_guid,order_sign,order_numb,order_date,";
+        cmd += "sales_area,sales_name,custs_name,";
+        cmd += "order_view,order_quan,order_dead,order_mark ";
+        cmd += "from erp_order,erp_custs,erp_sales ";
+        cmd += "where order_cust=custs_uuid and custs_sale=sales_uuid";
+        sql_order->setQuery(cmd,db);
     }
-    sql_order->select();
+    if (cmd == "erp_sends")
+        sql_sends->select();
+    if (cmd == "erp_custs")
+        sql_custs->select();
+    if (cmd == "erp_sales")
+        sql_sales->select();
 }
 
-void OrderPage::recvSendsJson(QJsonObject obj)
+void OrderPage::recvAppShow(QString win)
 {
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        updateSends();
+    if (win != this->objectName())
         return;
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_sends values(?,?,?,?,?,?,?,?,?)");
-        query.bindValue(ORDER_ID,tabs_guid);
-        query.bindValue(ORDER_GUID,logs_guid);
-        query.bindValue(ORDER_SIGN,logs_sign);
-        query.bindValue(SEND_NUMB,obj.value("send_numb").toString());
-        query.bindValue(SEND_VIEW,obj.value("send_view").toString());
-        query.bindValue(SEND_MODE,obj.value("send_mode").toString());
-        query.bindValue(SEND_CODE,obj.value("send_code").toString());
-        query.bindValue(SEND_PRCE,obj.value("send_prce").toString());
-        query.bindValue(SEND_MARK,obj.value("send_mark").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_sends where id=:id");
-        query.bindValue(":id",tabs_guid);
-        query.exec();
-        break;
-    default:
-        break;
-    }
-    sql_sends->select();
-}
-
-void OrderPage::showEvent(QShowEvent *e)
-{
-    updateOrder();
     updateSends();
     updateCusts();
     updateSales();
-    e->accept();
+    updateOrder();
 }

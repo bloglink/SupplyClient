@@ -50,7 +50,6 @@ signals:
 private slots:
     void initUI();
     void initSql();
-    void initData();
     void showTabUser();
     void showTabRole();
     void tabUserSync(QModelIndex index);

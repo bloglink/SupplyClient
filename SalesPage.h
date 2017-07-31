@@ -23,18 +23,18 @@
 
 #include "delegate.h"
 
-#define CUST_UUID 0
-#define CUST_GUID 1
-#define CUST_SIGN 2
-#define CUST_NAME 3
-#define CUST_SALE 4
-#define CUST_AREA 5
+#define CUSTS_UUID 0
+#define CUSTS_GUID 1
+#define CUSTS_SIGN 2
+#define CUSTS_NAME 3
+#define CUSTS_SALE 4
+#define CUSTS_AREA 5
 
-#define SALE_UUID 0
-#define SALE_GUID 1
-#define SALE_SIGN 2
-#define SALE_NAME 3
-#define SALE_AREA 4
+#define SALES_UUID 0
+#define SALES_GUID 1
+#define SALES_SIGN 2
+#define SALES_NAME 3
+#define SALES_AREA 4
 
 class SalesPage : public QWidget
 {
@@ -55,16 +55,16 @@ private slots:
     void tabCustSync(QModelIndex index);
     void tabSaleSync(QModelIndex index);
     void tabCustSyncExp(QStandardItem *item);
-    void appendCust();
-    void deleteCust();
-    void changeCust();
-    void updateCust();
-    void appendSale();
-    void deleteSale();
-    void changeSale();
-    void updateSale();
+    void appendCusts();
+    void deleteCusts();
+    void changeCusts();
+    void updateCusts();
+    void appendSales();
+    void deleteSales();
+    void changeSales();
+    void updateSales();
     void recvNetJson(QJsonObject obj);
-    virtual void showEvent(QShowEvent *e);
+    void recvAppShow(QString win);
 private:
     StandardItemModel *m_custs;
     StandardItemModel *m_sales;

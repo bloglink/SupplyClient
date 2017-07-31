@@ -89,9 +89,9 @@ void WorksPage::initUI()
     tab_ibill->setModel(m_bills);
     tab_ibill->setColumnWidth(0,100);
     tab_ibill->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    tab_ibill->hideRow(SALE_UUID);
-    tab_ibill->hideRow(SALE_GUID);
-    tab_ibill->hideRow(SALE_SIGN);
+    tab_ibill->hideRow(SALES_UUID);
+    tab_ibill->hideRow(SALES_GUID);
+    tab_ibill->hideRow(SALES_SIGN);
 
     QPushButton *sale_append = new QPushButton(this);
     sale_append->setFlat(true);
@@ -181,11 +181,11 @@ void WorksPage::initSql()
     for (int i=0; i < bill_items.size(); i++)
         sql_bills->setHeaderData(i, Qt::Horizontal, bill_items.at(i));
     tab_bills->setModel(sql_bills);
-    tab_bills->setColumnWidth(SALE_UUID,50);
+    tab_bills->setColumnWidth(SALES_UUID,50);
     tab_bills->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tab_bills->hideColumn(SALE_UUID);
-    tab_bills->hideColumn(SALE_GUID);
-    tab_bills->hideColumn(SALE_SIGN);
+    tab_bills->hideColumn(SALES_UUID);
+    tab_bills->hideColumn(SALES_GUID);
+    tab_bills->hideColumn(SALES_SIGN);
 }
 
 void WorksPage::initData()
@@ -205,12 +205,12 @@ void WorksPage::showTabCust()
     }
     QStringList sales_head;
     for (int i=0; i < sql_bills->rowCount(); i++)
-        sales_head.append(sql_bills->data(sql_bills->index(i,SALE_NAME)).toString());
+        sales_head.append(sql_bills->data(sql_bills->index(i,SALES_NAME)).toString());
     sale_delegate->setItemHeaders(sales_head);
 
     QStringList areas_head;
     for (int i=0; i < sql_bills->rowCount(); i++)
-        areas_head.append(sql_bills->data(sql_bills->index(i,SALE_AREA)).toString());
+        areas_head.append(sql_bills->data(sql_bills->index(i,SALES_AREA)).toString());
     area_delegate->setItemHeaders(areas_head);
 }
 
@@ -246,9 +246,9 @@ void WorksPage::appendCust()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",1);
-    obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("cust_name",m_custs->item(CUSTS_NAME,1)->text());
+    obj.insert("cust_sale",m_custs->item(CUSTS_SALE,1)->text());
+    obj.insert("cust_area",m_custs->item(CUSTS_AREA,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_custs->rowCount(); i++)
         m_custs->item(i,1)->setText("");
@@ -259,10 +259,10 @@ void WorksPage::deleteCust()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_custs->item(CUST_UUID,1)->text().toDouble());
-    obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("tabs_guid",m_custs->item(CUSTS_UUID,1)->text().toDouble());
+    obj.insert("cust_name",m_custs->item(CUSTS_NAME,1)->text());
+    obj.insert("cust_sale",m_custs->item(CUSTS_SALE,1)->text());
+    obj.insert("cust_area",m_custs->item(CUSTS_AREA,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_custs->rowCount(); i++)
         m_custs->item(i,1)->setText("");
@@ -273,10 +273,10 @@ void WorksPage::changeCust()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_custs");
     obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_custs->item(CUST_UUID,1)->text().toDouble());
-    obj.insert("cust_name",m_custs->item(CUST_NAME,1)->text());
-    obj.insert("cust_sale",m_custs->item(CUST_SALE,1)->text());
-    obj.insert("cust_area",m_custs->item(CUST_AREA,1)->text());
+    obj.insert("tabs_guid",m_custs->item(CUSTS_UUID,1)->text().toDouble());
+    obj.insert("cust_name",m_custs->item(CUSTS_NAME,1)->text());
+    obj.insert("cust_sale",m_custs->item(CUSTS_SALE,1)->text());
+    obj.insert("cust_area",m_custs->item(CUSTS_AREA,1)->text());
     emit sendJson(obj);
 }
 
@@ -304,8 +304,8 @@ void WorksPage::appendSale()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",1);
-    obj.insert("sale_name",m_bills->item(SALE_NAME,1)->text());
-    obj.insert("sale_area",m_bills->item(SALE_AREA,1)->text());
+    obj.insert("sale_name",m_bills->item(SALES_NAME,1)->text());
+    obj.insert("sale_area",m_bills->item(SALES_AREA,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_bills->rowCount(); i++)
         m_bills->item(i,1)->setText("");
@@ -316,9 +316,9 @@ void WorksPage::deleteSale()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",2);
-    obj.insert("tabs_guid",m_bills->item(SALE_UUID,1)->text().toDouble());
-    obj.insert("sale_name",m_bills->item(SALE_NAME,1)->text());
-    obj.insert("sale_area",m_bills->item(SALE_AREA,1)->text());
+    obj.insert("tabs_guid",m_bills->item(SALES_UUID,1)->text().toDouble());
+    obj.insert("sale_name",m_bills->item(SALES_NAME,1)->text());
+    obj.insert("sale_area",m_bills->item(SALES_AREA,1)->text());
     emit sendJson(obj);
     for (int i=0; i < m_bills->rowCount(); i++)
         m_bills->item(i,1)->setText("");
@@ -329,9 +329,9 @@ void WorksPage::changeSale()
     QJsonObject obj;
     obj.insert("logs_cmmd","erp_sales");
     obj.insert("logs_sign",3);
-    obj.insert("tabs_guid",m_bills->item(SALE_UUID,1)->text().toDouble());
-    obj.insert("sale_name",m_bills->item(SALE_NAME,1)->text());
-    obj.insert("sale_area",m_bills->item(SALE_AREA,1)->text());
+    obj.insert("tabs_guid",m_bills->item(SALES_UUID,1)->text().toDouble());
+    obj.insert("sale_name",m_bills->item(SALES_NAME,1)->text());
+    obj.insert("sale_area",m_bills->item(SALES_AREA,1)->text());
     emit sendJson(obj);
 }
 

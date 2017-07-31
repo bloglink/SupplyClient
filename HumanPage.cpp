@@ -250,12 +250,6 @@ void HumanPage::initSql()
     tab_roles->hideColumn(ROLE_SIGN);
 }
 
-void HumanPage::initData()
-{
-//    sql_users->select();
-//    sql_roles->select();
-}
-
 void HumanPage::showTabUser()
 {
     if (userWidget->isHidden()) {
@@ -325,7 +319,7 @@ void HumanPage::appendUser()
     }
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_users");
+    obj.insert("command","erp_users");
     obj.insert("logs_sign",1);
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
     obj.insert("user_pass",m_users->item(USER_PASS,1)->text());
@@ -350,7 +344,7 @@ void HumanPage::deleteUser()
     }
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_users");
+    obj.insert("command","erp_users");
     obj.insert("logs_sign",2);
     obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
@@ -376,7 +370,7 @@ void HumanPage::changeUser()
     }
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_users");
+    obj.insert("command","erp_users");
     obj.insert("logs_sign",3);
     obj.insert("tabs_guid",m_users->item(USER_ID,1)->text().toDouble());
     obj.insert("user_name",m_users->item(USER_NAME,1)->text());
@@ -396,10 +390,10 @@ void HumanPage::updateUser()
 
     query.prepare("select max(user_guid) from erp_users");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_users");
+    obj.insert("command","erp_users");
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
@@ -410,7 +404,7 @@ void HumanPage::appendRole()
     this->setFocus(); //完成输入
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("command","erp_roles");
     obj.insert("logs_sign",1);
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
     obj.insert("role_mark",m_roles->item(ROLE_MARK,1)->text());
@@ -424,7 +418,7 @@ void HumanPage::deleteRole()
     this->setFocus(); //完成输入
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("command","erp_roles");
     obj.insert("logs_sign",2);
     obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
@@ -439,7 +433,7 @@ void HumanPage::changeRole()
     this->setFocus(); //完成输入
 
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_roles");
+    obj.insert("command","erp_roles");
     obj.insert("logs_sign",3);
     obj.insert("tabs_guid",m_roles->item(ROLE_ID,1)->text().toDouble());
     obj.insert("role_name",m_roles->item(ROLE_NAME,1)->text());
@@ -457,9 +451,10 @@ void HumanPage::updateRole()
 
     query.prepare("select max(role_guid) from erp_roles");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
-    obj.insert("logs_cmmd","erp_roles");
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+
+    obj.insert("command","erp_roles");
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
@@ -467,7 +462,7 @@ void HumanPage::updateRole()
 
 void HumanPage::recvNetJson(QJsonObject obj)
 {
-    QString cmd = obj.value("logs_cmmd").toString();
+    QString cmd = obj.value("command").toString();
     if (cmd != "erp_roles" && cmd != "erp_users")
         return;
     sql_roles->setQuery("select * from erp_roles",db);

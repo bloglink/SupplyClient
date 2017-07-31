@@ -152,12 +152,13 @@ void MainScreen::initUI()
     sales = new SalesPage(this);
     connect(sales,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
     connect(this,SIGNAL(transmitJson(QJsonObject)),sales,SLOT(recvNetJson(QJsonObject)));
+    connect(this,SIGNAL(transmitShow(QString)),sales,SLOT(recvAppShow(QString)));
     stack->addWidget(sales);
 
     order = new OrderPage(this);
     connect(order,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
-    connect(this,SIGNAL(orderJson(QJsonObject)),order,SLOT(recvOrderJson(QJsonObject)));
-    connect(this,SIGNAL(sendsJson(QJsonObject)),order,SLOT(recvSendsJson(QJsonObject)));
+    connect(this,SIGNAL(transmitJson(QJsonObject)),order,SLOT(recvNetJson(QJsonObject)));
+    connect(this,SIGNAL(transmitShow(QString)),order,SLOT(recvAppShow(QString)));
     stack->addWidget(order);
 
     prods = new ProdsPage(this);
@@ -372,7 +373,7 @@ void MainScreen::initSql()
 
 void MainScreen::recvNetJson(QJsonObject obj)
 {
-    QString cmd = obj.value("logs_cmmd").toString();
+    QString cmd = obj.value("command").toString();
     if (cmd == "erp_login")
         emit loginJson(obj);
     if (cmd == "erp_roles")
@@ -384,9 +385,9 @@ void MainScreen::recvNetJson(QJsonObject obj)
     if (cmd == "erp_custs")
         excuteCmdCusts(obj);
     if (cmd == "erp_order")
-        emit orderJson(obj);
+        excuteCmdOrder(obj);
     if (cmd == "erp_sends")
-        emit sendsJson(obj);
+        excuteCmdSends(obj);
     if (cmd == "erp_prods")
         emit prodsJson(obj);
 
@@ -525,20 +526,20 @@ void MainScreen::createTabSales()
     query.exec("drop table erp_sales_log");
 
     cmd = "create table if not exists erp_sales(";
-    cmd += "sale_uuid integer primary key,";
-    cmd += "sale_guid interger,";
-    cmd += "sale_sign interger,";
-    cmd += "sale_name text,";//销售名称
-    cmd += "sale_area text)";//所属区域
+    cmd += "sales_uuid integer primary key,";
+    cmd += "sales_guid interger,";
+    cmd += "sales_sign interger,";
+    cmd += "sales_name text,";//销售名称
+    cmd += "sales_area text)";//所属区域
     if (!query.exec(cmd))
         qDebug() << "erp_sales create fail";
 
     cmd = "create table if not exists erp_sales_log(";
-    cmd += "sale_guid integer primary key,";
-    cmd += "sale_sign integer,";
-    cmd += "sale_uuid integer,";
-    cmd += "sale_name text,";//销售名称
-    cmd += "sale_area text)";//所属区域
+    cmd += "sales_guid integer primary key,";
+    cmd += "sales_sign integer,";
+    cmd += "sales_uuid integer,";
+    cmd += "sales_name text,";//销售名称
+    cmd += "sales_area text)";//所属区域
     if (!query.exec(cmd))
         qDebug() << "erp_sales create fail";
 
@@ -548,26 +549,26 @@ void MainScreen::createTabSales()
 void MainScreen::excuteCmdSales(QJsonObject obj)
 {
     QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+    qint64 sales_sign = obj.value("sales_sign").toDouble();
+    qint64 sales_guid = obj.value("sales_guid").toDouble();
+    qint64 sales_uuid = obj.value("sales_uuid").toDouble();
 
-    switch (logs_sign) {
+    switch (sales_sign) {
     case 0://查询
         break;
     case 1://增加
     case 3://修改
         query.prepare("replace into erp_sales values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("sale_name").toString());
-        query.bindValue(4,obj.value("sale_area").toString());
+        query.bindValue(0,sales_uuid);
+        query.bindValue(1,sales_guid);
+        query.bindValue(2,sales_sign);
+        query.bindValue(3,obj.value("sales_name").toString());
+        query.bindValue(4,obj.value("sales_area").toString());
         query.exec();
         break;
     case 2://删除
-        query.prepare("delete from erp_sales where id=:id");
-        query.bindValue(":id",tabs_guid);
+        query.prepare("delete from erp_sales where sales_uuid=:sales_uuid");
+        query.bindValue(":sales_uuid",sales_uuid);
         query.exec();
     default:
         break;
@@ -584,20 +585,20 @@ void MainScreen::createTabCusts()
     query.exec("drop table erp_custs_log");
 
     cmd = "create table if not exists erp_custs(";
-    cmd += "cust_uuid integer primary key,";
-    cmd += "cust_guid interger,";
-    cmd += "cust_sign interger,";
-    cmd += "cust_name text,";//客户名称
-    cmd += "cust_sale interger)";//销售ID
+    cmd += "custs_uuid integer primary key,";
+    cmd += "custs_guid integer,";
+    cmd += "custs_sign integer,";
+    cmd += "custs_name text,";//客户名称
+    cmd += "custs_sale integer)";//销售ID
     if (!query.exec(cmd))
         qDebug() << "erp_custs create fail";
 
     cmd = "create table if not exists erp_custs_log(";
-    cmd += "cust_guid integer primary key,";
-    cmd += "cust_sign integer,";
-    cmd += "cust_uuid integer,";
-    cmd += "cust_name text,";
-    cmd += "cust_sale integer)";
+    cmd += "custs_guid integer primary key,";
+    cmd += "custs_sign integer,";
+    cmd += "custs_uuid integer,";
+    cmd += "custs_name text,";
+    cmd += "custs_sale integer)";
     if (!query.exec(cmd))
         qDebug() << "erp_custs create fail";
 
@@ -607,26 +608,26 @@ void MainScreen::createTabCusts()
 void MainScreen::excuteCmdCusts(QJsonObject obj)
 {
     QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+    qint64 custs_sign = obj.value("custs_sign").toDouble();
+    qint64 custs_guid = obj.value("custs_guid").toDouble();
+    qint64 custs_uuid = obj.value("custs_uuid").toDouble();
 
-    switch (logs_sign) {
+    switch (custs_sign) {
     case 0://查询
         break;
     case 1://增加
     case 3://修改
         query.prepare("replace into erp_custs values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("cust_name").toString());
-        query.bindValue(4,obj.value("cust_sale").toDouble());
+        query.bindValue(0,custs_uuid);
+        query.bindValue(1,custs_guid);
+        query.bindValue(2,custs_sign);
+        query.bindValue(3,obj.value("custs_name").toString());
+        query.bindValue(4,obj.value("custs_sale").toDouble());
         query.exec();
         break;
     case 2://删除
-        query.prepare("delete from erp_custs where cust_uuid=:cust_uuid");
-        query.bindValue(":cust_uuid",tabs_guid);
+        query.prepare("delete from erp_custs where custs_uuid=:custs_uuid");
+        query.bindValue(":custs_uuid",custs_uuid);
         query.exec();
     default:
         break;
@@ -643,36 +644,70 @@ void MainScreen::createTabOrder()
     query.exec("drop table erp_order_log");
 
     cmd = "create table if not exists erp_order(";
-    cmd += "ordr_uuid integer primary key,";
-    cmd += "ordr_guid integer,";
-    cmd += "ordr_sign integer,";
-    cmd += "ordr_numb text,";//订单编号
-    cmd += "ordr_date text,";//订单日期
-    cmd += "ordr_area text,";//所属区域
-    cmd += "ordr_sale text,";//销售经理
-    cmd += "ordr_cust text,";//客户名称
-    cmd += "ordr_view text,";//评审编号
-    cmd += "ordr_quan text,";//订货数量
-    cmd += "ordr_dead text,";//交货日期
-    cmd += "ordr_mark text)";//备注内容
+    cmd += "order_uuid integer primary key,";
+    cmd += "order_guid integer,";
+    cmd += "order_sign integer,";
+    cmd += "order_numb text,";//订单编号
+    cmd += "order_date text,";//订单日期
+    cmd += "order_cust integer,";//客户信息
+    cmd += "order_view text,";//评审编号
+    cmd += "order_quan text,";//订货数量
+    cmd += "order_dead text,";//交货日期
+    cmd += "order_mark text)";//备注内容
     if (!query.exec(cmd))
         qDebug() << "erp_order create fail";
 
     cmd = "create table if not exists erp_order_log(";
-    cmd += "ordr_guid integer primary key,";
-    cmd += "ordr_sign integer,";
-    cmd += "ordr_uuid integer,";
-    cmd += "ordr_numb text,";//订单编号
-    cmd += "ordr_date text,";//订单日期
-    cmd += "ordr_area text,";//所属区域
-    cmd += "ordr_sale text,";//销售经理
-    cmd += "ordr_cust text,";//客户名称
-    cmd += "ordr_view text,";//评审编号
-    cmd += "ordr_quan text,";//订货数量
-    cmd += "ordr_dead text,";//交货日期
-    cmd += "ordr_mark text)";//发货数量
+    cmd += "order_guid integer primary key,";
+    cmd += "order_sign integer,";
+    cmd += "order_uuid integer,";
+    cmd += "order_numb text,";//订单编号
+    cmd += "order_date text,";//订单日期
+    cmd += "order_area integer,";//客户信息
+    cmd += "order_view text,";//评审编号
+    cmd += "order_quan text,";//订货数量
+    cmd += "order_dead text,";//交货日期
+    cmd += "order_mark text)";//备注内容
     if (!query.exec(cmd))
         qDebug() << "erp_order create fail";
+    query.clear();
+}
+
+void MainScreen::excuteCmdOrder(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 order_sign = obj.value("order_sign").toDouble();
+    qint64 order_guid = obj.value("order_guid").toDouble();
+    qint64 order_uuid = obj.value("order_uuid").toDouble();
+
+    switch (order_sign) {
+    case 0://查询
+        break;
+    case 1://增加
+    case 3://修改
+        query.prepare("replace into erp_order values(?,?,?,?,?,?,?,?,?,?)");
+        query.bindValue(0x00,order_uuid);
+        query.bindValue(0x01,order_guid);
+        query.bindValue(0x02,order_sign);
+        query.bindValue(0x03,obj.value("order_numb").toString());
+        query.bindValue(0x04,obj.value("order_date").toString());
+        query.bindValue(0x05,obj.value("order_cust").toDouble());
+        query.bindValue(0x06,obj.value("order_view").toString());
+        query.bindValue(0x07,obj.value("order_dead").toString());
+        query.bindValue(0x08,obj.value("order_quan").toString());
+        query.bindValue(0x09,obj.value("order_mark").toString());
+        if (!query.exec())
+            qDebug() << "replace erp_order fail";
+        break;
+    case 2://删除
+        query.prepare("delete from erp_order where order_uuid=:order_uuid");
+        query.bindValue(":order_uuid",order_uuid);
+        if (!query.exec())
+            qDebug() << "delete erp_order fail";
+        break;
+    default:
+        break;
+    }
     query.clear();
 }
 
@@ -685,29 +720,75 @@ void MainScreen::createTabSends()
     query.exec("drop table erp_sends_log");
 
     cmd = "create table if not exists erp_sends(";
-    cmd += "send_uuid integer primary key,";
-    cmd += "send_guid interger,";
-    cmd += "send_sign interger,";
-    cmd += "send_numb text,";//订单单号
-    cmd += "send_view text,";//评审单号
-    cmd += "send_mode text,";//发货方式
-    cmd += "send_code text,";//货运单号
-    cmd += "send_prce text,";//运费
-    cmd += "send_mark text)";//货运单号
+    cmd += "sends_uuid integer primary key,";
+    cmd += "sends_guid integer,";
+    cmd += "sends_sign integer,";
+    cmd += "sends_numb text,";//订单单号
+    cmd += "sends_date text,";//发货日期
+    cmd += "sends_cust text,";//客户名称
+    cmd += "sends_mode text,";//发货方式
+    cmd += "sends_code text,";//货运单号
+    cmd += "sends_prce text,";//运费
+    cmd += "sends_quan text,";//发货数量
+    cmd += "sends_mark text)";//货运单号
     if (!query.exec(cmd))
         qDebug() << "erp_sends create fail";
 
     cmd = "create table if not exists erp_sends_log(";
-    cmd += "send_guid integer primary key,";
-    cmd += "send_sign integer,";
-    cmd += "send_uuid integer,";
-    cmd += "send_numb text,";//订单单号
-    cmd += "send_view text,";//评审单号
-    cmd += "send_mode text,";//发货方式
-    cmd += "send_code text,";//货运单号
-    cmd += "send_prce text)";//运费
+    cmd += "sends_guid integer primary key,";
+    cmd += "sends_sign integer,";
+    cmd += "sends_uuid integer,";
+    cmd += "sends_numb text,";//订单单号
+    cmd += "sends_date text,";//发货日期
+    cmd += "sends_cust text,";//客户名称
+    cmd += "sends_mode text,";//发货方式
+    cmd += "sends_code text,";//货运单号
+    cmd += "sends_prce text,";//运费
+    cmd += "sends_quan text,";//发货数量
+    cmd += "sends_mark text)";//货运单号
     if (!query.exec(cmd))
         qDebug() << "erp_sends create fail";
+
+    query.clear();
+}
+
+void MainScreen::excuteCmdSends(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 sends_sign = obj.value("sends_sign").toDouble();
+    qint64 sends_guid = obj.value("sends_guid").toDouble();
+    qint64 sends_uuid = obj.value("sends_uuid").toDouble();
+
+    switch (sends_sign) {
+    case 0://查询
+        break;
+    case 1://增加
+    case 3://修改
+        query.prepare("replace into erp_sends values(?,?,?,?,?,?,?,?,?,?,?)");
+        query.bindValue(0x00,sends_uuid);
+        query.bindValue(0x01,sends_guid);
+        query.bindValue(0x02,sends_sign);
+        query.bindValue(0x03,obj.value("sends_numb").toString());
+        query.bindValue(0x04,obj.value("sends_date").toString());
+        query.bindValue(0x05,obj.value("sends_cust").toString());
+        query.bindValue(0x06,obj.value("sends_mode").toString());
+        query.bindValue(0x07,obj.value("sends_code").toString());
+        query.bindValue(0x08,obj.value("sends_prce").toString());
+        query.bindValue(0x09,obj.value("sends_quan").toString());
+        query.bindValue(0x0A,obj.value("sends_mark").toString());
+        if (!query.exec())
+            qDebug() << "replace erp_sends fail";
+        break;
+    case 2://删除
+        query.prepare("delete from erp_sends where sends_uuid=:sends_uuid");
+        query.bindValue(":sends_uuid",sends_uuid);
+        if (!query.exec())
+            qDebug() << "delete erp_sends fail";
+        break;
+    default:
+        break;
+    }
+    query.clear();
 }
 
 void MainScreen::createTabPlans()
@@ -792,6 +873,7 @@ void MainScreen::stackChange(QByteArray win)
         if (stack->widget(i)->objectName() == win) {
             if (preindex == i)
                 break;
+            emit transmitShow(win);
             stack->setCurrentIndex(i);
             cloudAntimation();
             preindex = i;

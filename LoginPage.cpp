@@ -167,7 +167,7 @@ void LoginPage::login()
 {
     saveData();
     QJsonObject obj;
-    obj.insert("logs_cmmd","erp_login");
+    obj.insert("command","erp_login");
     obj.insert("user_name",usr->currentText());
     obj.insert("user_pass",pwd->text());
     obj.insert("host_addr",svr->currentText());

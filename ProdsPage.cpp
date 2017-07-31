@@ -158,7 +158,7 @@ void ProdsPage::initSql()
         sql_plan->setHeaderData(i, Qt::Horizontal, order_items.at(i));
     tab_order->setModel(sql_plan);
     tab_order->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tab_order->hideColumn(ORDER_ID);
+    tab_order->hideColumn(ORDER_UUID);
     tab_order->hideColumn(ORDER_GUID);
     tab_order->hideColumn(ORDER_SIGN);
     tab_order->hideColumn(ORDER_AREA);
