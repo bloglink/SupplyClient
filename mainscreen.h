@@ -70,6 +70,7 @@ private slots:
     void animationHide();
     void animationClose();
     void recvNetJson(QJsonObject obj);
+    void recvSqlupdate(QString sql);
 
     virtual void cloudAntimation();
     virtual void mousePressEvent(QMouseEvent *e);

@@ -168,8 +168,8 @@ void LoginPage::login()
     saveData();
     QJsonObject obj;
     obj.insert("command","erp_login");
-    obj.insert("user_name",usr->currentText());
-    obj.insert("user_pass",pwd->text());
+    obj.insert("users_name",usr->currentText());
+    obj.insert("users_pass",pwd->text());
     obj.insert("host_addr",svr->currentText());
     obj.insert("host_port",prt->currentText());
     emit sendJson(obj);

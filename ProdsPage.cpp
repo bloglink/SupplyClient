@@ -146,28 +146,26 @@ void ProdsPage::initSql()
     db.setDatabaseName("erp.db");
     db.open();
 
-    sql_plan = new StandardSqlModel(this,db);
-    sql_plan->setTable("erp_order");
-    QStringList order_items;
-    order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
-                << tr("下单日期") << tr("所属区域") << tr("业务经理") << tr("客户名称")
-                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容")
-                << tr("在产数量") << tr("入库数量") << tr("未发数量") << tr("发货数量");
+    sql_order = new SqlQueryModel(this);
+    QString cmd = "select order_uuid,order_guid,order_sign,order_numb,order_date,";
+    cmd += "sales_area,sales_name,custs_name,";
+    cmd += "order_view,order_quan,order_dead,order_mark ";
+    cmd += "from erp_order,erp_custs,erp_sales ";
+    cmd += "where order_cust=custs_uuid and custs_sale=sales_uuid";
+    sql_order->setQuery(cmd,db);
 
+    order_items << tr("编号") << tr("记录") << tr("操作") << tr("订单单号")
+                << tr("下单日期") << tr("客户名称")
+                << tr("评审单号") << tr("订货数量") << tr("发货日期") << tr("备注内容");
     for (int i=0; i < order_items.size(); i++)
-        sql_plan->setHeaderData(i, Qt::Horizontal, order_items.at(i));
-    tab_order->setModel(sql_plan);
+        sql_order->setHeaderData(i, Qt::Horizontal, order_items.at(i));
+    tab_order->setModel(sql_order);
     tab_order->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     tab_order->hideColumn(ORDER_UUID);
     tab_order->hideColumn(ORDER_GUID);
     tab_order->hideColumn(ORDER_SIGN);
-    tab_order->hideColumn(ORDER_AREA);
-    tab_order->hideColumn(ORDER_SALE);
-    tab_order->hideColumn(ORDER_STCK);
-    tab_order->hideColumn(ORDER_LNUM);
-    tab_order->hideColumn(ORDER_DNUM);
 
-    QString cmd = "select prods_uuid,prods_guid,prods_sign,";
+    cmd = "select prods_uuid,prods_guid,prods_sign,";
     cmd += "order_numb,order_date,order_cust,order_view,order_dead";
     cmd += "prod_pnum,prod_type,prod_code,prod_name,prod_mode,prod_mnum ";
     cmd += "from erp_prod,erp_prods,erp_orders";
@@ -201,8 +199,8 @@ void ProdsPage::autoNumber()
 {
     QString dat = QDate::currentDate().toString("yyyyMMdd");
     int max = 0;
-    for (int i=0; i < sql_plan->rowCount(); i++) {
-        QString number = sql_plan->index(i,ORDER_NUMB).data().toString();
+    for (int i=0; i < sql_order->rowCount(); i++) {
+        QString number = sql_order->index(i,ORDER_NUMB).data().toString();
         if (number.contains(dat)) {
             int num = number.remove(dat).toInt();
             if (max < num)
@@ -215,12 +213,12 @@ void ProdsPage::autoNumber()
 
 void ProdsPage::initData()
 {
-    sql_plan->select();
-    for (int i=0; i < sql_plan->rowCount(); i++) {
-        int quan = sql_plan->index(i,ORDER_QUAN).data().toInt();
-        int prod = sql_plan->index(i,ORDER_PROD).data().toInt();
-        int stck = sql_plan->index(i,ORDER_STCK).data().toInt();
-        int dnum = sql_plan->index(i,ORDER_DNUM).data().toInt();
+//    sql_order->select();
+    for (int i=0; i < sql_order->rowCount(); i++) {
+        int quan = sql_order->index(i,ORDER_QUAN).data().toInt();
+        int prod = sql_order->index(i,ORDER_PROD).data().toInt();
+        int stck = sql_order->index(i,ORDER_STCK).data().toInt();
+        int dnum = sql_order->index(i,ORDER_DNUM).data().toInt();
         if (quan == prod+stck+dnum)
             tab_order->hideRow(i);
         else
@@ -302,17 +300,49 @@ void ProdsPage::updateOrder()
     qint64 logs_guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_order");
+    query.prepare("select max(order_guid) from erp_order");
     query.exec();
-    query.next();
-    logs_guid = query.value(0).toDouble();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
 
-    obj.insert("logs_cmmd","erp_order");
+    obj.insert("command","erp_order");
+    obj.insert("order_guid",logs_guid);
+    obj.insert("order_sign",0);
+    emit sendJson(obj);
+}
+
+void ProdsPage::updateCusts()
+{
+    QSqlQuery query(db);
+    qint64 logs_guid = 0;
+    QJsonObject obj;
+
+    query.prepare("select max(custs_guid) from erp_custs");
+    query.exec();
+    if (query.next())
+        logs_guid = query.value(0).toDouble();
+
+    obj.insert("command","erp_custs");
     obj.insert("logs_guid",logs_guid);
     obj.insert("logs_sign",0);
     emit sendJson(obj);
+}
 
-    sql_plan->select();
+void ProdsPage::updateSales()
+{
+    QSqlQuery query(db);
+    qint64 guid = 0;
+    QJsonObject obj;
+
+    query.prepare("select max(sales_guid) from erp_sales");
+    query.exec();
+    if (query.next())
+        guid = query.value(0).toDouble();
+
+    obj.insert("command","erp_sales");
+    obj.insert("sales_guid",guid);
+    obj.insert("sales_sign",0);
+    emit sendJson(obj);
 }
 
 void ProdsPage::tabPlanSync(QModelIndex index)
@@ -400,63 +430,26 @@ void ProdsPage::matchCancel()
 //    initData();
 }
 
-void ProdsPage::recvProdsJson(QJsonObject obj)
+void ProdsPage::recvNetJson(QJsonObject obj)
 {
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-//        updateProds();
-        return;
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_prods values(?,?,?,?,?,?,?,?,?,?)");
-        query.bindValue(PROD_UUID,tabs_guid);
-        query.bindValue(PROD_GUID,logs_guid);
-        query.bindValue(PROD_SIGN,logs_sign);
-        query.bindValue(PROD_NUMB,obj.value("prod_numb").toString());
-        query.bindValue(PROD_QUAN,obj.value("prod_quan").toString());
-        query.bindValue(PROD_TYPE,obj.value("prod_type").toString());
-        query.bindValue(PROD_CODE,obj.value("prod_code").toString());
-        query.bindValue(PROD_NAME,obj.value("prod_name").toString());
-        query.bindValue(PROD_MODE,obj.value("prod_mode").toString());
-        query.bindValue(PROD_MNUM,obj.value("prod_mnum").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_prods where prod_uuid=:prod_uuid");
-        query.bindValue(":prod_uuid",tabs_guid);
-        query.exec();
-    default:
-        break;
+    QString cmd = obj.value("command").toString();
+    if (cmd == "erp_order") {
+        QString cmd = "select order_uuid,order_guid,order_sign,order_numb,order_date,";
+        cmd += "custs_name,";
+        cmd += "order_view,order_quan,order_dead,order_mark ";
+        cmd += "from erp_order,erp_custs,erp_sales ";
+        cmd += "where order_cust=custs_uuid and custs_sale=sales_uuid";
+        sql_order->setQuery(cmd,db);
     }
-//    sql_plan->select();
-//    for (int i=0; i < sql_plan->rowCount(); i++) {
-//        int quan = sql_plan->index(i,ORDER_QUAN).data().toInt();
-//        int prod = sql_plan->index(i,ORDER_PROD).data().toInt();
-//        int stck = sql_plan->index(i,ORDER_STCK).data().toInt();
-//        int dnum = sql_plan->index(i,ORDER_DNUM).data().toInt();
-//        if (quan == prod+stck+dnum)
-//            tab_order->hideRow(i);
-//        else
-//            tab_order->showRow(i);
-//    }
-//    sql_prod->select();
 }
 
-void ProdsPage::recvOrderJson(QJsonObject )
+void ProdsPage::recvAppShow(QString win)
 {
-    sql_plan->select();
-}
-
-void ProdsPage::showEvent(QShowEvent *e)
-{
+    if (win != this->objectName())
+        return;
+    updateCusts();
+    updateSales();
     updateOrder();
-    updateProds();
-
-    e->accept();
+//    updateProds();
 }
+

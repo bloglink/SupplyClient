@@ -47,23 +47,23 @@ public:
 
 signals:
     void sendJson(QJsonObject obj);
+    void updateSql(QString sql);
 private slots:
     void initUI();
     void initSql();
+
+    void appendUsers();
+    void deleteUsers();
+    void changeUsers();
+    void appendRoles();
+    void deleteRoles();
+    void changeRoles();
     void showTabUser();
     void showTabRole();
     void tabUserSync(QModelIndex index);
     void tabRoleSync(QModelIndex index);
-    void appendUser();
-    void deleteUser();
-    void changeUser();
-    void updateUser();
-    void appendRole();
-    void deleteRole();
-    void changeRole();
-    void updateRole();
     void recvNetJson(QJsonObject obj);
-    virtual void showEvent(QShowEvent *e);
+    void recvAppShow(QString win);
 private:
     StandardItemModel *m_users;
     StandardItemModel *m_roles;

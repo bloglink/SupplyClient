@@ -56,16 +56,17 @@ private slots:
     void changeProd();
     void updateProds();
     void updateOrder();
+    void updateCusts();
+    void updateSales();
     void tabPlanSync(QModelIndex index);
     void tabProdSync(QModelIndex index);
     void matchProds();
     void matchCancel();
-    void recvProdsJson(QJsonObject obj);
-    void recvOrderJson(QJsonObject obj);
-    virtual void showEvent(QShowEvent *e);
+    void recvNetJson(QJsonObject obj);
+    void recvAppShow(QString win);
 private:
     StandardItemModel *m_prod;
-    StandardSqlModel *sql_plan;
+    SqlQueryModel *sql_order;
     SqlQueryModel *sql_prod;
     QTableView *tab_order;
     QTableView *tab_prod;
@@ -77,6 +78,7 @@ private:
     ComboBoxDelegate *area_delegate;
     ComboBoxDelegate *cust_delegate;
     QStringList prod_items;
+    QStringList order_items;
 };
 
 #endif // PRODSPAGE_H
