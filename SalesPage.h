@@ -64,8 +64,6 @@ private slots:
     void changeSale();
     void updateSale();
     void recvNetJson(QJsonObject obj);
-    void recvSalesJson(QJsonObject obj);
-    void recvCustsJson(QJsonObject obj);
     virtual void showEvent(QShowEvent *e);
 private:
     StandardItemModel *m_custs;

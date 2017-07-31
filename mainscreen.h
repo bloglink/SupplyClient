@@ -52,7 +52,9 @@ private slots:
     void createTabUsers();
     void excuteCmdUsers(QJsonObject obj);
     void createTabSales();
+    void excuteCmdSales(QJsonObject obj);
     void createTabCusts();
+    void excuteCmdCusts(QJsonObject obj);
     void createTabOrder();
     void createTabSends();
     void createTabPlans();

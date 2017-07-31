@@ -151,8 +151,7 @@ void MainScreen::initUI()
 
     sales = new SalesPage(this);
     connect(sales,SIGNAL(sendJson(QJsonObject)),this,SIGNAL(sendJson(QJsonObject)));
-    connect(this,SIGNAL(salesJson(QJsonObject)),sales,SLOT(recvSalesJson(QJsonObject)));
-    connect(this,SIGNAL(custsJson(QJsonObject)),sales,SLOT(recvCustsJson(QJsonObject)));
+    connect(this,SIGNAL(transmitJson(QJsonObject)),sales,SLOT(recvNetJson(QJsonObject)));
     stack->addWidget(sales);
 
     order = new OrderPage(this);
@@ -381,9 +380,9 @@ void MainScreen::recvNetJson(QJsonObject obj)
     if (cmd == "erp_users")
         excuteCmdUsers(obj);
     if (cmd == "erp_sales")
-        emit salesJson(obj);
+        excuteCmdSales(obj);
     if (cmd == "erp_custs")
-        emit custsJson(obj);
+        excuteCmdCusts(obj);
     if (cmd == "erp_order")
         emit orderJson(obj);
     if (cmd == "erp_sends")
@@ -546,6 +545,36 @@ void MainScreen::createTabSales()
     query.clear();
 }
 
+void MainScreen::excuteCmdSales(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    switch (logs_sign) {
+    case 0://查询
+        break;
+    case 1://增加
+    case 3://修改
+        query.prepare("replace into erp_sales values(?,?,?,?,?)");
+        query.bindValue(0,tabs_guid);
+        query.bindValue(1,logs_guid);
+        query.bindValue(2,logs_sign);
+        query.bindValue(3,obj.value("sale_name").toString());
+        query.bindValue(4,obj.value("sale_area").toString());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_sales where id=:id");
+        query.bindValue(":id",tabs_guid);
+        query.exec();
+    default:
+        break;
+    }
+    query.clear();
+}
+
 void MainScreen::createTabCusts()
 {
     QSqlQuery query(db);
@@ -572,6 +601,36 @@ void MainScreen::createTabCusts()
     if (!query.exec(cmd))
         qDebug() << "erp_custs create fail";
 
+    query.clear();
+}
+
+void MainScreen::excuteCmdCusts(QJsonObject obj)
+{
+    QSqlQuery query(db);
+    qint64 logs_sign = obj.value("logs_sign").toDouble();
+    qint64 logs_guid = obj.value("logs_guid").toDouble();
+    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
+
+    switch (logs_sign) {
+    case 0://查询
+        break;
+    case 1://增加
+    case 3://修改
+        query.prepare("replace into erp_custs values(?,?,?,?,?)");
+        query.bindValue(0,tabs_guid);
+        query.bindValue(1,logs_guid);
+        query.bindValue(2,logs_sign);
+        query.bindValue(3,obj.value("cust_name").toString());
+        query.bindValue(4,obj.value("cust_sale").toDouble());
+        query.exec();
+        break;
+    case 2://删除
+        query.prepare("delete from erp_custs where cust_uuid=:cust_uuid");
+        query.bindValue(":cust_uuid",tabs_guid);
+        query.exec();
+    default:
+        break;
+    }
     query.clear();
 }
 

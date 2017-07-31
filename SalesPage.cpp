@@ -405,7 +405,7 @@ void SalesPage::updateCust()
     qint64 guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_custs");
+    query.prepare("select max(cust_guid) from erp_custs");
     query.exec();
     if (query.next())
         guid = query.value(0).toDouble();
@@ -460,7 +460,7 @@ void SalesPage::updateSale()
     qint64 guid = 0;
     QJsonObject obj;
 
-    query.prepare("select max(logs_guid) from erp_sales");
+    query.prepare("select max(sale_guid) from erp_sales");
     query.exec();
     if (query.next())
         guid = query.value(0).toDouble();
@@ -475,70 +475,13 @@ void SalesPage::updateSale()
 
 void SalesPage::recvNetJson(QJsonObject obj)
 {
+    QString cmd = obj.value("logs_cmmd").toString();
+    if (cmd != "erp_custs" && cmd != "erp_sales")
+        return;
 
-}
-
-void SalesPage::recvSalesJson(QJsonObject obj)
-{
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_sales values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("sale_name").toString());
-        query.bindValue(4,obj.value("sale_area").toString());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_sales where id=:id");
-        query.bindValue(":id",tabs_guid);
-        query.exec();
-    default:
-        break;
-    }
     sql_sales->select();
-    QString cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
-    cmd += "from erp_custs,erp_sales where cust_sale = sale_uuid";
-    sql_custs->setQuery(cmd);
-}
 
-void SalesPage::recvCustsJson(QJsonObject obj)
-{
-    QSqlQuery query(db);
-    qint64 logs_sign = obj.value("logs_sign").toDouble();
-    qint64 logs_guid = obj.value("logs_guid").toDouble();
-    qint64 tabs_guid = obj.value("tabs_guid").toDouble();
-
-    switch (logs_sign) {
-    case 0://查询
-        break;
-    case 1://增加
-    case 3://修改
-        query.prepare("replace into erp_custs values(?,?,?,?,?)");
-        query.bindValue(0,tabs_guid);
-        query.bindValue(1,logs_guid);
-        query.bindValue(2,logs_sign);
-        query.bindValue(3,obj.value("cust_name").toString());
-        query.bindValue(4,obj.value("cust_sale").toDouble());
-        query.exec();
-        break;
-    case 2://删除
-        query.prepare("delete from erp_custs where cust_uuid=:cust_uuid");
-        query.bindValue(":cust_uuid",tabs_guid);
-        query.exec();
-    default:
-        break;
-    }
-    QString cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
+    cmd = "select cust_uuid,cust_guid,cust_sign,cust_name,sale_name,sale_area ";
     cmd += "from erp_custs,erp_sales where cust_sale = sale_uuid";
     sql_custs->setQuery(cmd);
 }
