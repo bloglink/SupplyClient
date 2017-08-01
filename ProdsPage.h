@@ -25,16 +25,16 @@
 
 #include "OrderPage.h"
 
-#define PROD_UUID 0x00 //生产ID
-#define PROD_GUID 0x01 //操作ID
-#define PROD_SIGN 0x02 //操作标识
-#define PROD_NUMB 0x03 //生产单号
-#define PROD_QUAN 0x04 //生产数量
-#define PROD_TYPE 0x05 //产品大类
-#define PROD_CODE 0x06 //产品编号
-#define PROD_NAME 0x07 //产品名称
-#define PROD_MODE 0x08 //产品规格
-#define PROD_MNUM 0x09 //仪表编号
+#define PRODS_UUID 0x00 //生产ID
+#define PRODS_GUID 0x01 //操作ID
+#define PRODS_SIGN 0x02 //操作标识
+#define PRODS_NUMB 0x03 //生产单号
+#define PRODS_QUAN 0x04 //生产数量
+#define PRODS_TYPE 0x05 //产品大类
+#define PRODS_CODE 0x06 //产品编号
+#define PRODS_NAME 0x07 //产品名称
+#define PRODS_MODE 0x08 //产品规格
+#define PRODS_MNUM 0x09 //仪表编号
 
 
 class ProdsPage : public QWidget
@@ -62,12 +62,15 @@ private slots:
     void matchCancel();
     void recvNetJson(QJsonObject obj);
     void recvAppShow(QString win);
+    void updateOrder();
+    void updateProds();
 private:
     StandardItemModel *m_prod;
     SqlQueryModel *sql_order;
-    SqlQueryModel *sql_prod;
+    SqlQueryModel *sql_prods;
+    SqlQueryModel *sql_query;
     QTableView *tab_order;
-    QTableView *tab_prod;
+    QTableView *tab_prods;
     QTableView *tab_iprod;
     QWidget *prodWidget;
     QToolButton *btn_prods;

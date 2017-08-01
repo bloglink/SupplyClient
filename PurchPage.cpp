@@ -128,7 +128,7 @@ void PurchPage::initSql()
     for (int i=0; i < purch_items.size(); i++)
         sql_purch->setHeaderData(i, Qt::Horizontal, purch_items.at(i));
     tab_purch->setModel(sql_purch);
-    tab_purch->setColumnWidth(PROD_UUID,50);
+    tab_purch->setColumnWidth(PRODS_UUID,50);
     tab_purch->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 void PurchPage::showTabProd()

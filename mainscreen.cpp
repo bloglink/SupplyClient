@@ -459,7 +459,6 @@ void MainScreen::recvSqlupdate(QString sql)
         obj.insert("command","erp_sends");
         obj.insert("sends_guid",guid);
         obj.insert("sends_sign",0);
-        emit sendJson(obj);
     }
     if (sql == "erp_plans") {
         query.prepare("select max(plans_guid) from erp_plans");
@@ -469,7 +468,6 @@ void MainScreen::recvSqlupdate(QString sql)
         obj.insert("command","erp_plans");
         obj.insert("plans_guid",guid);
         obj.insert("plans_sign",0);
-        emit sendJson(obj);
     }
     if (sql == "erp_prods") {
         query.prepare("select max(prods_guid) from erp_prods");

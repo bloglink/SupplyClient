@@ -166,13 +166,13 @@ void WorksPage::initSql()
         sql_prod->setHeaderData(i, Qt::Horizontal, prod_items.at(i));
     tab_prod->setModel(sql_prod);
     tab_prod->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tab_prod->hideColumn(PROD_UUID);
-    tab_prod->hideColumn(PROD_GUID);
-    tab_prod->hideColumn(PROD_SIGN);
-    tab_prod->hideColumn(PROD_TYPE);
-    tab_prod->hideColumn(PROD_NAME);
-    tab_prod->hideColumn(PROD_MODE);
-    tab_prod->hideColumn(PROD_MNUM);
+    tab_prod->hideColumn(PRODS_UUID);
+    tab_prod->hideColumn(PRODS_GUID);
+    tab_prod->hideColumn(PRODS_SIGN);
+    tab_prod->hideColumn(PRODS_TYPE);
+    tab_prod->hideColumn(PRODS_NAME);
+    tab_prod->hideColumn(PRODS_MODE);
+    tab_prod->hideColumn(PRODS_MNUM);
 
     sql_bills = new StandardSqlModel(this,db);
     sql_bills->setTable("erp_bills");
