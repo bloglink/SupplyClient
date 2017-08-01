@@ -32,7 +32,7 @@ void OrderPage::initUI()
     order_update->setMinimumSize(97,44);
     order_update->setText(tr("刷新显示"));
     order_update->setFocusPolicy(Qt::NoFocus);
-    connect(order_update,SIGNAL(clicked(bool)),this,SLOT(initOrder()));
+//    connect(order_update,SIGNAL(clicked(bool)),this,SLOT(initOrder()));
 
     QSplitter *pSpliter = new QSplitter(Qt::Vertical);
     pSpliter->addWidget(tab_order);
@@ -324,7 +324,7 @@ void OrderPage::appendOrder()
     obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
 
-    updateOrder();
+    emit updateSql("erp_order");
 }
 
 void OrderPage::deleteOrder()
@@ -354,7 +354,7 @@ void OrderPage::deleteOrder()
     obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
 
-    updateOrder();
+    emit updateSql("erp_order");
 }
 
 void OrderPage::changeOrder()
@@ -384,7 +384,7 @@ void OrderPage::changeOrder()
     obj.insert("order_mark",m_order->item(0x0B,1)->text());
     emit sendJson(obj);
 
-    updateOrder();
+    emit updateSql("erp_order");
 }
 
 void OrderPage::appendSends()
@@ -402,7 +402,7 @@ void OrderPage::appendSends()
     obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
 
-    updateSends();
+    emit updateSql("erp_sends");
 }
 
 void OrderPage::deleteSends()
@@ -421,7 +421,7 @@ void OrderPage::deleteSends()
     obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
 
-    updateSends();
+    emit updateSql("erp_sends");
 }
 
 void OrderPage::changeSends()
@@ -440,89 +440,7 @@ void OrderPage::changeSends()
     obj.insert("sends_mark",m_sends->item(0x0A,1)->text());
     emit sendJson(obj);
 
-    updateSends();
-}
-
-void OrderPage::initOrder()
-{
-    updateSends();
-    updateCusts();
-    updateSales();
-    updateOrder();
-}
-
-void OrderPage::updateOrder()
-{
-    QSqlQuery query(db);
-    qint64 logs_guid = 0;
-    QJsonObject obj;
-
-    query.prepare("select max(order_guid) from erp_order");
-    query.exec();
-    if (query.next())
-        logs_guid = query.value(0).toDouble();
-
-    obj.insert("command","erp_order");
-    obj.insert("order_guid",logs_guid);
-    obj.insert("order_sign",0);
-    emit sendJson(obj);
-}
-
-void OrderPage::updateSends()
-{
-    QSqlQuery query(db);
-    qint64 logs_guid = 0;
-    QJsonObject obj;
-
-    query.prepare("select max(sends_guid) from erp_sends");
-    query.exec();
-    if (query.next())
-        logs_guid = query.value(0).toDouble();
-
-    obj.insert("command","erp_sends");
-    obj.insert("sends_guid",logs_guid);
-    obj.insert("sends_sign",0);
-    emit sendJson(obj);
-
-    sql_sends->select();
-}
-
-void OrderPage::updateCusts()
-{
-    QSqlQuery query(db);
-    qint64 logs_guid = 0;
-    QJsonObject obj;
-
-    query.prepare("select max(custs_guid) from erp_custs");
-    query.exec();
-    if (query.next())
-        logs_guid = query.value(0).toDouble();
-
-    obj.insert("command","erp_custs");
-    obj.insert("logs_guid",logs_guid);
-    obj.insert("logs_sign",0);
-    emit sendJson(obj);
-
-    sql_custs->select();
-}
-
-void OrderPage::updateSales()
-{
-    QSqlQuery query(db);
-    qint64 guid = 0;
-    QJsonObject obj;
-
-    query.prepare("select max(sales_guid) from erp_sales");
-    query.exec();
-    if (query.next())
-        guid = query.value(0).toDouble();
-
-    obj.insert("command","erp_sales");
-    obj.insert("sales_guid",guid);
-    obj.insert("sales_sign",0);
-    emit sendJson(obj);
-
-    sql_sales->select();
+    emit updateSql("erp_sends");
 }
 
 void OrderPage::tabOrderSync(QModelIndex index)
@@ -566,8 +484,8 @@ void OrderPage::recvAppShow(QString win)
 {
     if (win != this->objectName())
         return;
-    updateSends();
-    updateCusts();
-    updateSales();
-    updateOrder();
+    emit updateSql("erp_sends");
+    emit updateSql("erp_custs");
+    emit updateSql("erp_sales");
+    emit updateSql("erp_order");
 }

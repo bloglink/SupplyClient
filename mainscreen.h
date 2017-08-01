@@ -61,7 +61,9 @@ private slots:
     void createTabSends();
     void excuteCmdSends(QJsonObject obj);
     void createTabPlans();
+    void excuteCmdPlans(QJsonObject obj);
     void createTabProds();
+    void excuteCmdProds(QJsonObject obj);
     void createTabPurch();
     void swithMaxNormal();
     void initToolButton(QToolButton *btn);

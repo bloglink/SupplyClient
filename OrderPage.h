@@ -65,6 +65,7 @@ public:
 
 signals:
     void sendJson(QJsonObject obj);
+    void updateSql(QString sql);
 private slots:
     void initUI();
     void initSql();
@@ -77,12 +78,6 @@ private slots:
     void appendSends();
     void deleteSends();
     void changeSends();
-
-    void initOrder();
-    void updateOrder();
-    void updateSends();
-    void updateCusts();
-    void updateSales();
     void tabOrderSync(QModelIndex index);
     void tabSendsSync(QModelIndex index);
     void recvNetJson(QJsonObject obj);

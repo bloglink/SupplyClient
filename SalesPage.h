@@ -44,12 +44,11 @@ public:
     ~SalesPage();
 
 signals:
-    void sendSocket(QUrl url);
     void sendJson(QJsonObject obj);
+    void updateSql(QString sql);
 private slots:
     void initUI();
     void initSql();
-    void initData();
     void showTabCust();
     void showTabSale();
     void tabCustSync(QModelIndex index);
@@ -58,7 +57,6 @@ private slots:
     void appendCusts();
     void deleteCusts();
     void changeCusts();
-    void updateCusts();
     void appendSales();
     void deleteSales();
     void changeSales();

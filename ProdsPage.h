@@ -17,6 +17,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include <QSqlError>
+
 #include <QSplitter>
 
 #include "delegate.h"
@@ -43,7 +45,7 @@ public:
     ~ProdsPage();
 
 signals:
-    void sendSocket(QUrl url);
+    void updateSql(QString sql);
     void sendJson(QJsonObject obj);
 private slots:
     void initUI();
@@ -51,13 +53,9 @@ private slots:
     void initData();
     void showTabProd();
     void autoNumber();
-    void appendProd();
-    void deleteProd();
-    void changeProd();
-    void updateProds();
-    void updateOrder();
-    void updateCusts();
-    void updateSales();
+    void appendPlans();
+    void deletePlans();
+    void changePlans();
     void tabPlanSync(QModelIndex index);
     void tabProdSync(QModelIndex index);
     void matchProds();
